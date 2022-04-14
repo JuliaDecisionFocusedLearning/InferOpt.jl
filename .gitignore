@@ -3,3 +3,9 @@
 *.jl.mem
 /Manifest.toml
 /docs/build/
+
+*.tar.gz
+*.zip
+*.csv
+*.json
+*.npy
