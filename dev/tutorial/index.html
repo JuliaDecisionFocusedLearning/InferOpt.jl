@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tutorial · InferOpt.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://axelparmentier.github.io/InferOpt.jl/tutorial/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">InferOpt.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Tutorial</a><ul class="internal"><li><a class="tocitem" href="#Context"><span>Context</span></a></li><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Learning"><span>Learning</span></a></li><li><a class="tocitem" href="#Results"><span>Results</span></a></li></ul></li><li><a class="tocitem" href="../math/">Mathematical background</a></li><li><a class="tocitem" href="../algorithms/">Algorithms</a></li><li><a class="tocitem" href="../implementation/">Implementation</a></li><li><a class="tocitem" href="../api/">API reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Tutorial</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tutorial</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/axelparmentier/InferOpt.jl/blob/main/test/tutorial.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Tutorial"><a class="docs-heading-anchor" href="#Tutorial">Tutorial</a><a id="Tutorial-1"></a><a class="docs-heading-anchor-permalink" href="#Tutorial" title="Permalink"></a></h1><h2 id="Context"><a class="docs-heading-anchor" href="#Context">Context</a><a id="Context-1"></a><a class="docs-heading-anchor-permalink" href="#Context" title="Permalink"></a></h2><p>Let us imagine that we observe the itineraries chosen by a public transport user in several different networks, and that we want to recover their preferences (a.k.a. utility function).</p><p>More precisely, each point in our dataset consists in:</p><ul><li>a graph <code>g</code> &amp; two vertices <code>i</code> and <code>j</code></li><li>a shortest path from <code>i</code> to <code>j</code> in <code>g</code>, computed with user-defined edge costs</li></ul><p>Assume we know the features that the user combines to define edge costs, but we don&#39;t know the respective weights of these features.</p><p>We will use <code>InferOpt.jl</code> to learn these weights, so that we may propose relevant paths to the user in the future.</p><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><p>We start by importing the relevant packages</p><pre><code class="language-julia hljs">using Flux
+using Graphs
+using InferOpt
+using LinearAlgebra
+using ProgressMeter
+using Random
+using StatsBase: mean, sample
+using SparseArrays
+using Test
+
+Random.seed!(63);</code></pre><p>We first define an encoder, which takes a graph <code>g</code> as input and computes an embedding matrix <code>x</code>.</p><pre><code class="language-julia hljs">dim = 5
+
+function encoder(g::AbstractGraph)
+    x = rand(dim, ne(g))
+    return x
+end;</code></pre><p>Now we define our maximizer, which solves the shortest path problem on <code>g</code> with edge costs <code>-θ</code>. The minus sign is important since <code>InferOpt.jl</code> deals with linear maximization problems, while the shortest path is a linear minimization problem.</p><pre><code class="language-julia hljs">function maximizer(θ; g, i, j)
+    # Build the cost matrix
+    Ic = [src(e) for e in edges(g)]
+    Jc = [dst(e) for e in edges(g)]
+    Vc = [-θ[k] for (k, e) in enumerate(edges(g))]
+    c = Symmetric(sparse(Ic, Jc, Vc, ne(g), ne(g)))
+    # Compute the shortest path from i to j
+    path = a_star(g, i, j, c)
+    # Encode it as a binary vector
+    Iy = Int[k for (k, e) in enumerate(edges(g)) if (e in path) || reverse(e) in path]
+    Vy = ones(Int, length(Iy))
+    y = sparsevec(Iy, Vy, ne(g))
+    return y
+end;</code></pre><p>To generate instances, we sample from a family of connected graphs and select the source and destination at random. We then perform the following steps:</p><ol><li>extract the features with our <code>encoder</code></li><li>deduce edge costs with the <code>true_model</code> of the user&#39;s preferences</li><li>compute the shortest path with our <code>maximizer</code></li></ol><pre><code class="language-julia hljs">function build_instance(connected_graph_generator, true_model)
+    g = connected_graph_generator()
+    i, j = sample(1:nv(g), 2; replace=false)
+    x = encoder(g)
+    θ = true_model(x)
+    y = maximizer(θ; g=g, i=i, j=j)
+    return (x, y, (g=g, i=i, j=j))
+end;</code></pre><h2 id="Learning"><a class="docs-heading-anchor" href="#Learning">Learning</a><a id="Learning-1"></a><a class="docs-heading-anchor-permalink" href="#Learning" title="Permalink"></a></h2><p>Now we put everything together, starting with the true user model for edge costs. We use a linear combination of the features, composed with the sigmoid activation and a negative absolute value. This last step is used to obtain negative values in <code>θ</code>, which will correspond to positive edge costs in <code>-θ</code>.</p><pre><code class="language-julia hljs">true_model = Chain(Dense(dim, 1), z -&gt; -abs.(z), vec);</code></pre><p>We generate 200 grid graphs of size 10*10.</p><pre><code class="language-julia hljs">connected_graph_generator() = grid((10, 10))
+training_data = [build_instance(connected_graph_generator, true_model) for _ in 1:200];</code></pre><p>We create a trainable model with the same structure as the true model but another set of randomly-initialized weights.</p><pre><code class="language-julia hljs">initial_model = Chain(Dense(dim, 1), z -&gt; -abs.(z), vec);</code></pre><p>Here is the crucial part where <code>InferOpt.jl</code> intervenes: the choice of a clever loss function that enables us to</p><ul><li>differentiate through the shortest path maximizer, even though it is a discrete operation</li><li>evaluate the quality of our model based on the paths that it recommends</li></ul><pre><code class="language-julia hljs">loss = FenchelYoungLoss(Perturbed(maximizer; ε=1.0, M=2));</code></pre><p>Finally, we choose a standard gradient optimizer</p><pre><code class="language-julia hljs">opt = ADAM();</code></pre><p>We can now train our model for 100 epochs</p><pre><code class="language-julia hljs">model = deepcopy(initial_model)
+par = Flux.params(model)
+
+for epoch in 1:100
+    for sample in training_data
+        x, y, kwargs = sample
+        gs = gradient(par) do
+            loss(model(x), y; kwargs...)
+        end
+        Flux.update!(opt, par, gs)
+    end
+end;</code></pre><h2 id="Results"><a class="docs-heading-anchor" href="#Results">Results</a><a id="Results-1"></a><a class="docs-heading-anchor-permalink" href="#Results" title="Permalink"></a></h2><p>First, we compare the learned weights with their true (hidden) values</p><pre><code class="language-julia hljs">w = model[1].weight
+true_w = true_model[1].weight
+vcat(w / norm(w), true_w / norm(true_w))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2×5 Matrix{Float32}:
+ -0.66461   -0.406014  0.275261  -0.291492  0.482401
+ -0.644896  -0.438758  0.278112  -0.275873  0.488005</code></pre><p>We are already quite close to recovering the exact user weights. But in reality, it doesn&#39;t matter as much as our ability to provide accurate path predictions.</p><p>To evaluate it, we use the Hamming distance on the space of (binary-encoded) paths.</p><pre><code class="language-julia hljs">function hamming_distance(y, ȳ)
+    return sum(y[i] != ȳ[i] for i in eachindex(y))
+end;</code></pre><p>Let us now compare our predictions with the actual paths on the training set</p><pre><code class="language-julia hljs">Ȳ = [y for (x, y, kwargs) in training_data];
+Y = [maximizer(model(x); kwargs...) for (x, y, kwargs) in training_data];
+
+train_error = mean(hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y, Ȳ))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.011055555555555556</code></pre><p>Not too bad, at least compared with our initial model.</p><pre><code class="language-julia hljs">Y0 = [maximizer(initial_model(x); kwargs...) for (x, y, kwargs) in training_data];
+
+train_error_initial_model = mean(
+    hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y0, Ȳ)
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.06744444444444431</code></pre><p>But we should check on a test set, just to be sure.</p><pre><code class="language-julia hljs">test_data = [build_instance(connected_graph_generator, true_model) for _ in 1:1000];
+
+Ȳ_test = [y for (x, y, kwargs) in test_data];
+Y_test = [maximizer(model(x); kwargs...) for (x, y, kwargs) in test_data];
+
+test_error = mean(hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y_test, Ȳ_test))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.010899999999999974</code></pre><p>Again, we compare to the initial model</p><pre><code class="language-julia hljs">Y_test0 = [maximizer(initial_model(x); kwargs...) for (x, y, kwargs) in test_data];
+
+test_error_initial_model = mean(
+    hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y_test0, Ȳ_test)
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.061655555555555915</code></pre><p>This is definitely a success. We just add a few tests for Continuous Integration purposes:</p><pre><code class="language-julia hljs">@test train_error &lt; train_error_initial_model / 3</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Test Passed
+  Expression: train_error &lt; train_error_initial_model / 3
+   Evaluated: 0.011055555555555556 &lt; 0.022481481481481436</code></pre><pre><code class="language-julia hljs">@test test_error &lt; test_error_initial_model / 3</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Test Passed
+  Expression: test_error &lt; test_error_initial_model / 3
+   Evaluated: 0.010899999999999974 &lt; 0.02055185185185197</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../math/">Mathematical background »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Friday 15 April 2022 15:54">Friday 15 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
