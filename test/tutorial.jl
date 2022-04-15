@@ -51,7 +51,7 @@ function maximizer(θ; g, i, j)
     Ic = [src(e) for e in edges(g)]
     Jc = [dst(e) for e in edges(g)]
     Vc = [-θ[k] for (k, e) in enumerate(edges(g))]
-    c = Symmetric(sparse(Ic, Jc, Vc, ne(g), ne(g)))
+    c = Symmetric(sparse(Ic, Jc, Vc, nv(g), nv(g)))
     ## Compute the shortest path from i to j
     path = a_star(g, i, j, c)
     ## Encode it as a binary vector

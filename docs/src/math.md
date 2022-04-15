@@ -16,7 +16,7 @@ For each instance ``x \in \mathcal{X}``, we want to predict an output ``z \in \m
 The cost may also depend on ``x``, but we omit this dependency for notational simplicity:
 
 ```math
-\max_{z \in \mathcal{Z}(x)} c(z)
+\min_{z \in \mathcal{Z}(x)} c(z)
 ```
 
 In many real-world applications, the set of feasible predictions is combinatorially large: well-known examples include rankings, paths, flows, etc.
