@@ -24,6 +24,17 @@ function (perturbed::Perturbed)(θ::AbstractVector; kwargs...)
     return y_mean
 end
 
+function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
+    @unpack maximizer, ε, M = perturbed
+    d = length(θ)
+    perturbed_thetas = [θ + ε * randn(d) for _ in 1:M]
+    y_samples = [maximizer(θ_perturbed; kwargs...) for θ_perturbed in perturbed_thetas]
+    F_θ_sample = [θ_perturbed' * y for (θ_perturbed, y) in zip(perturbed_thetas, y_samples)]
+    y_mean = mean(y_samples)
+    Fθ_mean = mean(F_θ_sample)  # useful for computing Fenchel-Young loss
+    return y_mean, Fθ_mean
+end
+
 function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractVector; kwargs...)
     @unpack maximizer, ε, M = perturbed
     d = length(θ)
