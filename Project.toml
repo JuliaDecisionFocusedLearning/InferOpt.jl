@@ -13,6 +13,7 @@ UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
 SimpleTraits = "0.9"
+UnPack = "1"
 julia = "1.7"
 
 [extras]
