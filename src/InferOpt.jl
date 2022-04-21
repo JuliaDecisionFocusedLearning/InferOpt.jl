@@ -1,6 +1,8 @@
 module InferOpt
 
 using ChainRulesCore
+using Folds
+using LinearAlgebra
 using Random
 using SimpleTraits
 using SparseArrays
@@ -18,10 +20,12 @@ include("structured_svm.jl")
 export one_hot_argmax, softmax, sparsemax
 export shannon_entropy, half_square_norm
 export Interpolation
+export IsRegularizedPrediction
 export Perturbed, PerturbedCost
 export FenchelYoungLoss
 export SPOPlusLoss
 export ZeroOneLoss, GeneralStructuredLoss
+export IsStructuredLossFunction
 export StructuredSVMLoss
 
 end
