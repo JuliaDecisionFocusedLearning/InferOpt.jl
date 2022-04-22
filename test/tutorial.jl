@@ -95,7 +95,7 @@ training_data = [build_instance(connected_graph_generator, true_model) for _ in 
 
 # We create a trainable model with the same structure as the true model but another set of randomly-initialized weights.
 
-initial_model = Chain(Dense(dim, 1), z -> -abs.(z), vec);
+initial_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
 
 #=
 Here is the crucial part where `InferOpt.jl` intervenes: the choice of a clever loss function that enables us to
