@@ -16,17 +16,17 @@ end
 
 Perturbed(maximizer; ε=1.0, M=2) = Perturbed(maximizer, ε, M)
 
-function (perturbed::Perturbed)(θ::AbstractVector; kwargs...)
+function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
     @unpack maximizer, ε, M = perturbed
-    d = length(θ)
+    d = size(θ)
     y_samples = Folds.map(m -> maximizer(θ + ε * randn(d); kwargs...), 1:M)
     y_mean = mean(y_samples)
     return y_mean
 end
 
-function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
+function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractArray; kwargs...)
     @unpack maximizer, ε, M = perturbed
-    d = length(θ)
+    d = size(θ)
     perturbed_θs = [θ + ε * randn(d) for _ in 1:M]
     y_samples = Folds.map(θ_perturbed -> maximizer(θ_perturbed; kwargs...), perturbed_θs)
     F_θ_sample = [dot(θ_perturbed, y) for (θ_perturbed, y) in zip(perturbed_θs, y_samples)]
@@ -35,9 +35,9 @@ function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
     return y_mean, Fθ_mean
 end
 
-function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractVector; kwargs...)
+function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractArray; kwargs...)
     @unpack maximizer, ε, M = perturbed
-    d = length(θ)
+    d = size(θ)
 
     Z_samples = [randn(d) for m in 1:M]
     y_samples = [maximizer(θ + ε * Z; kwargs...) for Z in Z_samples]
@@ -76,7 +76,7 @@ end
 
 PerturbedCost(maximizer, cost; ε=1.0, M=2) = PerturbedCost(maximizer, cost, ε, M)
 
-function (perturbed_cost::PerturbedCost)(θ::AbstractVector; kwargs...)
+function (perturbed_cost::PerturbedCost)(θ::AbstractArray; kwargs...)
     @unpack maximizer, cost, ε, M = perturbed_cost
     d = length(θ)
     y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
@@ -84,7 +84,7 @@ function (perturbed_cost::PerturbedCost)(θ::AbstractVector; kwargs...)
     return mean(costs)
 end
 
-function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractVector; kwargs...)
+function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractArray; kwargs...)
     @unpack maximizer, cost, ε, M = perturbed_cost
     d = length(θ)
 

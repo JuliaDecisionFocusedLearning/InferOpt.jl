@@ -34,14 +34,14 @@ function shannon_entropy(p::AbstractVector{R}) where {R<:Real}
     return H
 end
 
-negative_shannon_entropy(p::AbstractVector{R}) where {R<:Real} = -shannon_entropy(p)
+negative_shannon_entropy(p::AbstractVector{<:Real}) = -shannon_entropy(p)
 
 """
     half_square_norm(x)
 
 Compute the squared Euclidean norm of `x` and divide it by 2.
 """
-function half_square_norm(x::AbstractVector{R}) where {R<:Real}
+function half_square_norm(x::AbstractArray{<:Real})
     return 0.5 * sum(abs2, x)
 end
 
@@ -52,7 +52,7 @@ Compute the Euclidean projection `p` of `z` on the probability simplex (also cal
 
 See <https://arxiv.org/abs/1602.02068>.
 """
-function simplex_projection_and_support(z::AbstractVector)
+function simplex_projection_and_support(z::AbstractVector{<:Real})
     d = length(z)
     z_sorted = sort(z; rev=true)
     z_sorted_cumsum = cumsum(z_sorted)
