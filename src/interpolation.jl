@@ -19,7 +19,7 @@ function (interpolation::Interpolation)(θ::AbstractVector; kwargs...)
 end
 
 function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractVector; kwargs...)
-    @unpack maximizer, λ = interpolation
+    (; maximizer, λ) = interpolation
     y = maximizer(θ; kwargs...)
     function interpolation_pullback(dy)
         y_λ = maximizer(θ + λ * dy; kwargs...)

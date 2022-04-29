@@ -17,7 +17,7 @@ end
 Perturbed(maximizer; ε=1., M=2) = Perturbed(maximizer, ε, M)
 
 function (perturbed::Perturbed)(θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
+    (; maximizer, ε, M) = perturbed
     d = length(θ)
     y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
     y_mean = mean(y_samples)
@@ -25,7 +25,7 @@ function (perturbed::Perturbed)(θ::AbstractVector; kwargs...)
 end
 
 function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
+    (; maximizer, ε, M) = perturbed
     d = length(θ)
     perturbed_thetas = [θ + ε * randn(d) for _ in 1:M]
     y_samples = [maximizer(θ_perturbed; kwargs...) for θ_perturbed in perturbed_thetas]
@@ -36,7 +36,7 @@ function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
 end
 
 function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
+    (; maximizer, ε, M) = perturbed
     d = length(θ)
 
     Z_samples = [randn(d) for m in 1:M]
@@ -77,7 +77,7 @@ end
 PerturbedCost(maximizer, cost; ε=1., M=2) = PerturbedCost(maximizer, cost, ε, M)
 
 function (perturbed_cost::PerturbedCost)(θ::AbstractVector; kwargs...)
-    @unpack maximizer, cost, ε, M = perturbed_cost
+    (; maximizer, cost, ε, M) = perturbed_cost
     d = length(θ)
     y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
     costs = [cost(y; kwargs...) for y in y_samples]
@@ -85,7 +85,7 @@ function (perturbed_cost::PerturbedCost)(θ::AbstractVector; kwargs...)
 end
 
 function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractVector; kwargs...)
-    @unpack maximizer, cost, ε, M = perturbed_cost
+    (; maximizer, cost, ε, M) = perturbed_cost
     d = length(θ)
 
     Z_samples = [randn(d) for m in 1:M]
