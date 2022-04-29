@@ -3,7 +3,11 @@
 mape(x1, x2) = 100 * mean(abs.((x1 .- x2) ./ x1))
 normalized_mape(x1, x2) = mape(x1 / norm(x1), x2 / norm(x2))
 
-function ranking(θ::AbstractVector; rev::Bool=false)
+function argmax_optimizer(θ::AbstractVector; instance::AbstractVector=Float64[])
+    return one_hot_argmax(θ)
+end
+
+function ranking(θ::AbstractVector; rev::Bool=false, instance::AbstractVector=Float64[])
     return invperm(sortperm(θ; rev=rev))
 end
 
