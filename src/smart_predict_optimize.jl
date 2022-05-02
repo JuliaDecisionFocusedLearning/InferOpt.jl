@@ -17,7 +17,7 @@ SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, α)
 ## Forward pass
 
 function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray)
-    @unpack maximizer, α = spol
+    (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
     l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
     return l
@@ -33,7 +33,7 @@ end
 function compute_loss_and_gradient(
     spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray
 )
-    @unpack maximizer, α = spol
+    (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
     l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
     return l, α * (y_α - y_true)
