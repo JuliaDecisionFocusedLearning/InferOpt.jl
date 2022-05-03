@@ -3,7 +3,7 @@
 N = 1000
 dim_x = 10
 dim_y = 8
-σ = 0.0
+σ = 0.01
 epochs = 200
 
 ## True model
@@ -78,7 +78,7 @@ for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
         elseif target == "(θ,y)"
             data = zip(X_train, thetas_train, Y_train)
             data_test = zip(X_test, thetas_test, Y_test)
-        else
+        elseif target == "none"
             data = zip(X_train)
             data_test = zip(X_test)
         end
@@ -103,8 +103,10 @@ for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
 
             if target == "none"
                 flux_loss = flux_loss_no_target
-                V_train = [loss.cost(y; instance=x) for (x, y) in zip(X_train, Y_train)]
-                V_test = [loss.cost(y; instance=x) for (x, y) in zip(X_test, Y_test)]
+                Y_train_true = generate_predictions(true_model, true_optimizer[setting], X_train)
+                Y_test_true = generate_predictions(true_model, true_optimizer[setting], X_test)
+                V_train = [loss.cost(y; instance=x) for (x, y) in zip(X_train, Y_train_true)]
+                V_test = [loss.cost(y; instance=x) for (x, y) in zip(X_test, Y_test_true)]
             elseif target == "(θ,y)"
                 flux_loss = flux_loss_double_target
             else  # target == "θ" || target == "y"
