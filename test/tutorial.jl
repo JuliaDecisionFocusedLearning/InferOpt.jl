@@ -86,7 +86,7 @@ We use a linear combination of the features, composed with the sigmoid activatio
 This last step is used to obtain negative values in `θ`, which will correspond to positive edge costs in `-θ`.
 =#
 
-true_model = Chain(Dense(dim, 1), z -> -abs.(z), vec);
+true_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
 
 # We generate 200 grid graphs of size 10*10.
 
@@ -95,7 +95,7 @@ training_data = [build_instance(connected_graph_generator, true_model) for _ in 
 
 # We create a trainable model with the same structure as the true model but another set of randomly-initialized weights.
 
-initial_model = Chain(Dense(dim, 1), z -> -abs.(z), vec);
+initial_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
 
 #=
 Here is the crucial part where `InferOpt.jl` intervenes: the choice of a clever loss function that enables us to
@@ -109,12 +109,12 @@ loss = FenchelYoungLoss(Perturbed(maximizer; ε=1.0, M=2));
 
 opt = ADAM();
 
-# We can now train our model for 100 epochs
+# We can now train our model for 200 epochs
 
 model = deepcopy(initial_model)
 par = Flux.params(model)
 
-for epoch in 1:100
+for epoch in 1:200
     for sample in training_data
         x, y, kwargs = sample
         gs = gradient(par) do

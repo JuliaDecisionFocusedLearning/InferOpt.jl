@@ -56,7 +56,7 @@ function maximizer(θ; g, i, j)
     Ic = [src(e) for e in edges(g)]
     Jc = [dst(e) for e in edges(g)]
     Vc = [-θ[k] for (k, e) in enumerate(edges(g))]
-    c = Symmetric(sparse(Ic, Jc, Vc, ne(g), ne(g)))
+    c = Symmetric(sparse(Ic, Jc, Vc, nv(g), nv(g)))
     # Compute the shortest path from i to j
     path = a_star(g, i, j, c)
     # Encode it as a binary vector
@@ -93,7 +93,7 @@ We use a linear combination of the features, composed with the sigmoid activatio
 This last step is used to obtain negative values in `θ`, which will correspond to positive edge costs in `-θ`.
 
 ````@example tutorial
-true_model = Chain(Dense(dim, 1), z -> -abs.(z), vec);
+true_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
 nothing #hide
 ````
 
@@ -108,7 +108,7 @@ nothing #hide
 We create a trainable model with the same structure as the true model but another set of randomly-initialized weights.
 
 ````@example tutorial
-initial_model = Chain(Dense(dim, 1), z -> -abs.(z), vec);
+initial_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
 nothing #hide
 ````
 
@@ -128,13 +128,13 @@ opt = ADAM();
 nothing #hide
 ````
 
-We can now train our model for 100 epochs
+We can now train our model for 200 epochs
 
 ````@example tutorial
 model = deepcopy(initial_model)
 par = Flux.params(model)
 
-for epoch in 1:100
+for epoch in 1:200
     for sample in training_data
         x, y, kwargs = sample
         gs = gradient(par) do
@@ -211,11 +211,11 @@ test_error_initial_model = mean(
 This is definitely a success. We just add a few tests for Continuous Integration purposes:
 
 ````@example tutorial
-@test train_error < train_error_initial_model / 3
+@test train_error < train_error_initial_model / 2
 ````
 
 ````@example tutorial
-@test test_error < test_error_initial_model / 3
+@test test_error < test_error_initial_model / 2
 ````
 
 ---

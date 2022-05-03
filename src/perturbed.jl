@@ -14,37 +14,37 @@ struct Perturbed{F}
     M::Int
 end
 
-Perturbed(maximizer; ε=1., M=2) = Perturbed(maximizer, ε, M)
+Perturbed(maximizer; ε=1.0, M=2) = Perturbed(maximizer, ε, M)
 
-function (perturbed::Perturbed)(θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
-    d = length(θ)
-    y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
+function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
+    (; maximizer, ε, M) = perturbed
+    d = size(θ)
+    y_samples = Folds.map(m -> maximizer(θ + ε * randn(d); kwargs...), 1:M)
     y_mean = mean(y_samples)
     return y_mean
 end
 
-function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
-    d = length(θ)
-    perturbed_thetas = [θ + ε * randn(d) for _ in 1:M]
-    y_samples = [maximizer(θ_perturbed; kwargs...) for θ_perturbed in perturbed_thetas]
-    F_θ_sample = [θ_perturbed' * y for (θ_perturbed, y) in zip(perturbed_thetas, y_samples)]
+function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractArray; kwargs...)
+    (; maximizer, ε, M) = perturbed
+    d = size(θ)
+    perturbed_θs = [θ + ε * randn(d) for _ in 1:M]
+    y_samples = Folds.map(θ_perturbed -> maximizer(θ_perturbed; kwargs...), perturbed_θs)
+    F_θ_sample = [dot(θ_perturbed, y) for (θ_perturbed, y) in zip(perturbed_θs, y_samples)]
     y_mean = mean(y_samples)
     Fθ_mean = mean(F_θ_sample)  # useful for computing Fenchel-Young loss
     return y_mean, Fθ_mean
 end
 
-function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractVector; kwargs...)
-    @unpack maximizer, ε, M = perturbed
-    d = length(θ)
+function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractArray; kwargs...)
+    (; maximizer, ε, M) = perturbed
+    d = size(θ)
 
     Z_samples = [randn(d) for m in 1:M]
     y_samples = [maximizer(θ + ε * Z; kwargs...) for Z in Z_samples]
     y_mean = mean(y_samples)
 
     function perturbed_pullback(dy)
-        vjp = (1 / ε) * mean((dy'y_samples[m]) * Z_samples[m] for m in 1:M)
+        vjp = (1 / ε) * mean(dot(dy, y_samples[m]) * Z_samples[m] for m in 1:M)
         return NoTangent(), vjp
     end
 
@@ -74,18 +74,18 @@ struct PerturbedCost{F,C}
     M::Int
 end
 
-PerturbedCost(maximizer, cost; ε=1., M=2) = PerturbedCost(maximizer, cost, ε, M)
+PerturbedCost(maximizer, cost; ε=1.0, M=2) = PerturbedCost(maximizer, cost, ε, M)
 
-function (perturbed_cost::PerturbedCost)(θ::AbstractVector; kwargs...)
-    @unpack maximizer, cost, ε, M = perturbed_cost
+function (perturbed_cost::PerturbedCost)(θ::AbstractArray; kwargs...)
+    (; maximizer, cost, ε, M) = perturbed_cost
     d = length(θ)
     y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
     costs = [cost(y; kwargs...) for y in y_samples]
     return mean(costs)
 end
 
-function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractVector; kwargs...)
-    @unpack maximizer, cost, ε, M = perturbed_cost
+function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractArray; kwargs...)
+    (; maximizer, cost, ε, M) = perturbed_cost
     d = length(θ)
 
     Z_samples = [randn(d) for m in 1:M]

@@ -12,14 +12,14 @@ struct Interpolation{F}
     λ::Float64
 end
 
-Interpolation(maximizer; λ=1.) = Interpolation(maximizer, λ)
+Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, λ)
 
-function (interpolation::Interpolation)(θ::AbstractVector; kwargs...)
+function (interpolation::Interpolation)(θ::AbstractArray; kwargs...)
     return interpolation.maximizer(θ; kwargs...)
 end
 
-function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractVector; kwargs...)
-    @unpack maximizer, λ = interpolation
+function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractArray; kwargs...)
+    (; maximizer, λ) = interpolation
     y = maximizer(θ; kwargs...)
     function interpolation_pullback(dy)
         y_λ = maximizer(θ + λ * dy; kwargs...)

@@ -16,31 +16,31 @@ SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, α)
 
 ## Forward pass
 
-function (spol::SPOPlusLoss)(
-    θ::AbstractVector, θ_true::AbstractVector, y_true::AbstractVector
-)
-    @unpack maximizer, α = spol
+function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray)
+    (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
-    l = (α * θ - θ_true)'y_α + (θ_true - α * θ)'y_true
+    l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
     return l
 end
 
-function (spol::SPOPlusLoss)(θ::AbstractVector, θ_true::AbstractVector)
+function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray)
     y_true = spol.maximizer(θ_true)
     return spol(θ, θ_true, y_true)
 end
 
 ## Backward pass
 
-function compute_loss_and_gradient(spol::SPOPlusLoss, θ::AbstractVector, θ_true::AbstractVector, y_true::AbstractVector)
-    @unpack maximizer, α = spol
+function compute_loss_and_gradient(
+    spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray
+)
+    (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
-    l = (α * θ - θ_true)'y_α + (θ_true - α * θ)'y_true
+    l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
     return l, α * (y_α - y_true)
 end
 
 function ChainRulesCore.rrule(
-    spol::SPOPlusLoss, θ::AbstractVector, θ_true::AbstractVector, y_true::AbstractVector
+    spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray
 )
     l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent(), NoTangent()

@@ -62,7 +62,7 @@ pipelines = Dict(
 
 for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
     @testset verbose = true "Setting: $setting - Target: $target" begin
-        @unpack X, thetas, Y = generate_dataset(
+        (; X, thetas, Y) = generate_dataset(
             true_model, true_optimizer[setting]; N=N, dim_x=dim_x, dim_y=dim_y, σ=σ
         )
         X_train, X_test = train_test_split(X)

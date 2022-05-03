@@ -20,3 +20,5 @@ To install this package, open a Julia Pkg REPL and run the following command:
 ```julia
 pkg> add https://github.com/axelparmentier/InferOpt.jl
 ```
+
+> This package is in a very early development stage, so use it at your own risk!
