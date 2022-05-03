@@ -16,7 +16,7 @@ using Zygote
 
 Random.seed!(63)
 
-const SHOW_PLOTS = false
+const SHOW_PLOTS = true
 
 include("utils.jl")
 
@@ -25,9 +25,6 @@ include("utils.jl")
 @testset verbose = true "InferOpt.jl" begin
     @testset verbose = true "Simple optimizers" begin
         include("simple_optimizers.jl")
-    end
-    @testset "Perturbed cost" begin
-        include("simple_optimizers_experience.jl")
     end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")

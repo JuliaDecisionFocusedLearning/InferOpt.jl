@@ -44,18 +44,26 @@ function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     return X_train, X_test
 end
 
-function plot_results(training_losses, test_accuracies, parameter_errors)
-    println(lineplot(training_losses; xlabel="Epoch", ylabel="Training loss"))
+function plot_results(training_losses, test_losses, test_accuracies, parameter_errors)
+    println(lineplot(training_losses; xlabel="Epoch", title="Training loss"))
+    println(lineplot(test_losses; xlabel="Epoch", title="Test loss"))
     println(
-        lineplot(test_accuracies; xlabel="Epoch", ylabel="Test accuracy", ylim=(0, 100))
+        lineplot(test_accuracies; xlabel="Epoch", title="Test accuracy", ylim=(0, 1))
     )
     println(
         lineplot(
             parameter_errors;
             xlabel="Epoch",
-            ylabel="Parameter error",
+            title="Parameter error",
             ylim=(0, maximum(parameter_errors)),
         ),
     )
+    return nothing
+end
+
+function plot_results(training_losses, test_losses, test_accuracies, parameter_errors, training_objective_gap, test_objective_gap)
+    plot_results(training_losses, test_losses, test_accuracies, parameter_errors)
+    println(lineplot(training_objective_gap; xlabel="Epoch", title="Train objective gap"))
+    println(lineplot(test_objective_gap; xlabel="Epoch", title="Test objective gap"))
     return nothing
 end
