@@ -16,7 +16,7 @@ using Zygote
 
 Random.seed!(63)
 
-const SHOW_PLOTS = true
+const SHOW_PLOTS = false
 
 include("utils.jl")
 
