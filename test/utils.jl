@@ -25,9 +25,11 @@ function generate_dataset(
     model, optimizer; N::Integer, dim_x::Integer, dim_y::Integer, σ::Real
 )
     X = [randn(dim_x) for n in 1:N]
-    thetas = [model(X[n]) + σ * randn(dim_y) for n in 1:N]
-    Y = [optimizer(θ) for θ in thetas]
-    return (X=X, thetas=thetas, Y=Y)
+    thetas = [model(x) for x in X]
+    noiseless_Y = [optimizer(θ) for θ in thetas]
+    noisy_thetas = [θ + σ * randn(dim_y) for θ in thetas]
+    noisy_Y = [optimizer(θ) for θ in noisy_thetas]
+    return (X=X, thetas=thetas, noisy_Y=noisy_Y, noiseless_Y=noiseless_Y)
 end
 
 function generate_predictions(model, optimizer, X)

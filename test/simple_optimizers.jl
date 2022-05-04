@@ -62,12 +62,14 @@ pipelines = Dict(
 
 for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
     @testset verbose = true "Setting: $setting - Target: $target" begin
-        (; X, thetas, Y) = generate_dataset(
+        (; X, thetas, noisy_Y, noiseless_Y) = generate_dataset(
             true_model, true_optimizer[setting]; N=N, dim_x=dim_x, dim_y=dim_y, σ=σ
         )
         X_train, X_test = train_test_split(X)
         thetas_train, thetas_test = train_test_split(thetas)
-        Y_train, Y_test = train_test_split(Y)
+        # Use a noisy Y_train, and a noiseless Y_test
+        Y_train, _ = train_test_split(noisy_Y)
+        noiseless_Y_train, Y_test = train_test_split(noiseless_Y)
 
         if target == "y"
             data = zip(X_train, Y_train)
@@ -81,6 +83,8 @@ for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
         elseif target == "none"
             data = zip(X_train)
             data_test = zip(X_test)
+        else
+            error("Target $target does not exist")
         end
 
         for pipeline in pipelines[setting][target]
@@ -103,10 +107,9 @@ for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
 
             if target == "none"
                 flux_loss = flux_loss_no_target
-                Y_train_true = generate_predictions(true_model, true_optimizer[setting], X_train)
-                Y_test_true = generate_predictions(true_model, true_optimizer[setting], X_test)
-                V_train = [loss.cost(y; instance=x) for (x, y) in zip(X_train, Y_train_true)]
-                V_test = [loss.cost(y; instance=x) for (x, y) in zip(X_test, Y_test_true)]
+                # use noiseless Y train and test to compute objective_gap metrics
+                V_train = [loss.cost(y; instance=x) for (x, y) in zip(X_train, noiseless_Y_train)]
+                V_test = [loss.cost(y; instance=x) for (x, y) in zip(X_test, Y_test)]
             elseif target == "(θ,y)"
                 flux_loss = flux_loss_double_target
             else  # target == "θ" || target == "y"
