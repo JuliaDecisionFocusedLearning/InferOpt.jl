@@ -88,7 +88,7 @@ for setting in ["argmax", "ranking"], target in ["y", "θ", "(θ,y)", "none"]
         end
 
         for pipeline in pipelines[setting][target]
-            @unpack model, loss = pipeline
+            (; model, loss) = pipeline
 
             @info "Testing probability simplex" setting target model loss
 

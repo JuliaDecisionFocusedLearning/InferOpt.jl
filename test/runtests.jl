@@ -9,14 +9,13 @@ using Random
 using Statistics
 using Test
 using UnicodePlots
-using UnPack
 using Zygote
 
 ## Setup
 
 Random.seed!(63)
 
-const SHOW_PLOTS = false
+SHOW_PLOTS = false
 
 include("utils.jl")
 
