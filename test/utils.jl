@@ -3,7 +3,11 @@
 mape(x1, x2) = 100 * mean(abs.((x1 .- x2) ./ x1))
 normalized_mape(x1, x2) = mape(x1 / norm(x1), x2 / norm(x2))
 
-function ranking(θ::AbstractVector; rev::Bool=false)
+function argmax_optimizer(θ::AbstractVector; instance=nothing)
+    return one_hot_argmax(θ)
+end
+
+function ranking(θ::AbstractVector; rev::Bool=false, instance=nothing)
     return invperm(sortperm(θ; rev=rev))
 end
 
@@ -21,9 +25,11 @@ function generate_dataset(
     model, optimizer; N::Integer, dim_x::Integer, dim_y::Integer, σ::Real
 )
     X = [randn(dim_x) for n in 1:N]
-    thetas = [model(X[n]) + σ * randn(dim_y) for n in 1:N]
-    Y = [optimizer(θ) for θ in thetas]
-    return (X=X, thetas=thetas, Y=Y)
+    thetas = [model(x) for x in X]
+    noiseless_Y = [optimizer(θ) for θ in thetas]
+    noisy_thetas = [θ + σ * randn(dim_y) for θ in thetas]
+    noisy_Y = [optimizer(θ) for θ in noisy_thetas]
+    return (X=X, thetas=thetas, noisy_Y=noisy_Y, noiseless_Y=noiseless_Y)
 end
 
 function generate_predictions(model, optimizer, X)
@@ -40,18 +46,26 @@ function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     return X_train, X_test
 end
 
-function plot_results(training_losses, test_accuracies, parameter_errors)
-    println(lineplot(training_losses; xlabel="Epoch", ylabel="Training loss"))
+function plot_results(training_losses, test_losses, test_accuracies, parameter_errors)
+    println(lineplot(training_losses; xlabel="Epoch", title="Training loss"))
+    println(lineplot(test_losses; xlabel="Epoch", title="Test loss"))
     println(
-        lineplot(test_accuracies; xlabel="Epoch", ylabel="Test accuracy", ylim=(0, 100))
+        lineplot(test_accuracies; xlabel="Epoch", title="Test accuracy", ylim=(0, 1))
     )
     println(
         lineplot(
             parameter_errors;
             xlabel="Epoch",
-            ylabel="Parameter error",
+            title="Parameter error",
             ylim=(0, maximum(parameter_errors)),
         ),
     )
+    return nothing
+end
+
+function plot_results(training_losses, test_losses, test_accuracies, parameter_errors, training_objective_gap, test_objective_gap)
+    plot_results(training_losses, test_losses, test_accuracies, parameter_errors)
+    println(lineplot(training_objective_gap; xlabel="Epoch", title="Train objective gap"))
+    println(lineplot(test_objective_gap; xlabel="Epoch", title="Test objective gap"))
     return nothing
 end
