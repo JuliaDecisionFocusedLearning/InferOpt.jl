@@ -1,8 +1,8 @@
 ## Dimensions and parameters
 
-N = 1000
-dim_x = 10
-dim_y = 8
+N = 500
+dim_x = 5
+dim_y = 4
 σ = 0.01
 epochs = 200
 
@@ -31,6 +31,17 @@ pipelines = Dict(
                 model=Chain(Dense(dim_x, dim_y), Perturbed(one_hot_argmax; ε=0.2, M=10)),
                 loss=Flux.Losses.mse,
             ),
+            # Generic perturbations
+            (
+                model=Dense(dim_x, dim_y),
+                loss=FenchelYoungLoss(
+                    PerturbedGeneric(
+                        one_hot_argmax;
+                        noise_dist=θ -> MultivariateNormal(θ, 0.1),
+                        M=10,
+                    ),
+                ),
+            ),
         ],
         "θ" => [(model=Dense(dim_x, dim_y), loss=SPOPlusLoss(one_hot_argmax))],
         "(θ,y)" => [(model=Dense(dim_x, dim_y), loss=SPOPlusLoss(one_hot_argmax))],
@@ -41,6 +52,14 @@ pipelines = Dict(
             (
                 model=Dense(dim_x, dim_y),
                 loss=FenchelYoungLoss(Perturbed(ranking; ε=0.1, M=10)),
+            ),
+            (
+                model=Dense(dim_x, dim_y),
+                loss=FenchelYoungLoss(
+                    PerturbedGeneric(
+                        ranking; noise_dist=θ -> MultivariateNormal(θ, 0.1), M=10
+                    ),
+                ),
             ),
             (
                 model=Chain(Dense(dim_x, dim_y), Perturbed(ranking; ε=0.1, M=10)),

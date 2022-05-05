@@ -1,6 +1,7 @@
 ## Imports
 
 using Aqua
+using Distributions
 using Flux
 using InferOpt
 using LinearAlgebra

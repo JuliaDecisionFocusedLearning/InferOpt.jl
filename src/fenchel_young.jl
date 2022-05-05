@@ -23,7 +23,7 @@ end
 
 function prediction_and_loss(
     fyl::FenchelYoungLoss{P}, θ::AbstractArray, y::AbstractArray; kwargs...
-) where {P<:Perturbed}
+) where {P<:AbstractPerturbed}
     ŷ, Fθ = compute_y_and_Fθ(fyl.predictor, θ; kwargs...)
     l = Fθ - dot(θ, y)
     return ŷ, l

@@ -1,6 +1,7 @@
 module InferOpt
 
 using ChainRulesCore
+using Distributions
 using Folds
 using LinearAlgebra
 using Random
@@ -21,6 +22,7 @@ export shannon_entropy, half_square_norm
 export Interpolation
 export IsRegularizedPrediction
 export Perturbed, PerturbedCost
+export PerturbedGeneric
 export FenchelYoungLoss
 export SPOPlusLoss
 export ZeroOneLoss, GeneralStructuredLoss
