@@ -1,3 +1,12 @@
+using Distributions
+using InferOpt
+using LinearAlgebra
+using Random
+using Test
+using Zygote
+
+Random.seed!(63)
+
 one_hot_argmax_approximations = [
     Perturbed(one_hot_argmax; ε=0.3, M=1000)
     PerturbedGeneric(

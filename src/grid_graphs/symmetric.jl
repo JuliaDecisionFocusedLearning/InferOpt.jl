@@ -15,16 +15,16 @@ end
 function Graphs.outneighbors(g::SymmetricGridGraph, s::Integer)
     h, w = size(g)
     i, j = node_coord(g, s)
-    possible_neighbors = (
-        (i - 1, j - 1),
-        (i + 0, j - 1),
-        (i + 1, j - 1),
-        (i - 1, j + 0),
-        (i + 1, j + 0),
-        (i - 1, j + 1),
-        (i + 0, j + 1),
-        (i + 1, j + 1),
-    )  # listed in ascending index order!
+    possible_neighbors = ( # listed in ascending index order!
+        (i - 1, j - 1),  # top left
+        (i + 0, j - 1),  # left
+        (i + 1, j - 1),  # bottom left
+        (i - 1, j + 0),  # top
+        (i + 1, j + 0),  # bottom
+        (i - 1, j + 1),  # top right
+        (i + 0, j + 1),  # right
+        (i + 1, j + 1),  # bottom right
+    )
     neighbors = (
         node_index(g, id, jd) for
         (id, jd) in possible_neighbors if (1 <= id <= h) && (1 <= jd <= w)

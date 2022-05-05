@@ -16,7 +16,7 @@ struct Perturbed{F} <: AbstractPerturbed
     M::Int
 end
 
-Perturbed(maximizer; ε=1.0, M=2) = Perturbed(maximizer, ε, M)
+Perturbed(maximizer; ε=1.0, M=2) = Perturbed(maximizer, float(ε), M)
 
 function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
     (; maximizer, ε, M) = perturbed

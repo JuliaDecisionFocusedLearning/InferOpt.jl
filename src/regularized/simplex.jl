@@ -5,7 +5,7 @@ One-hot encoding of the argmax function.
 
 Corresponds to regularized prediction on the probability simplex with zero penalty.
 """
-function one_hot_argmax(z::AbstractVector{R}) where {R<:Real}
+function one_hot_argmax(z::AbstractVector{R}; kwargs...) where {R<:Real}
     e = zeros(R, length(z))
     e[argmax(z)] = one(R)
     return e
@@ -18,7 +18,7 @@ Softmax function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 
 Corresponds to regularized prediction on the probability simplex with entropic penalty.
 """
-function softmax(z::AbstractVector{<:Real})
+function softmax(z::AbstractVector{<:Real}; kwargs...)
     s = exp.(z)
     s ./= sum(s)
     return s
@@ -31,7 +31,7 @@ Project the vector `z` onto the probability simplex `Δ` in time `O(d log d)`.
 
 Corresponds to regularized prediction on the probability simplex with square norm penalty.
 """
-function sparsemax(z::AbstractVector{<:Real})
+function sparsemax(z::AbstractVector{<:Real}; kwargs...)
     p, _ = simplex_projection_and_support(z)
     return p
 end
@@ -64,3 +64,10 @@ function ChainRulesCore.rrule(::typeof(sparsemax), z::AbstractVector{<:Real})
     end
     return p, sparsemax_pullback
 end
+
+"""
+    positive_part(x)
+
+Compute `max(x,0)`.
+"""
+positive_part(x) = x >= 0 ? x : zero(x)

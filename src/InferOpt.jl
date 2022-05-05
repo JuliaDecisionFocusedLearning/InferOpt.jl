@@ -10,12 +10,17 @@ using Random
 using SimpleTraits
 using SparseArrays
 using Statistics
+using Test
+using UnicodePlots
 
-include("utils/functions.jl")
+include("utils/proba.jl")
+include("utils/error.jl")
+include("utils/testing.jl")
 
 include("regularized/penalties.jl")
 include("regularized/simplex.jl")
 include("regularized/prediction.jl")
+include("regularized/ranking.jl")
 
 include("interpolation.jl")
 include("perturbed.jl")
@@ -28,9 +33,9 @@ include("grid_graphs/acyclic.jl")
 include("grid_graphs/symmetric.jl")
 include("grid_graphs/shortest_paths.jl")
 
-export one_hot_argmax, softmax, sparsemax
 export shannon_entropy, half_square_norm
-
+export one_hot_argmax, softmax, sparsemax
+export ranking
 export IsRegularizedPrediction
 
 export Interpolation
