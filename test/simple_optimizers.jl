@@ -57,7 +57,9 @@ pipelines = Dict(
                 model=Dense(dim_x, dim_y),
                 loss=FenchelYoungLoss(
                     PerturbedGeneric(
-                        ranking; noise_dist=θ -> MultivariateNormal(θ, 0.1), M=10
+                        ranking;
+                        noise_dist=θ -> MultivariateNormal(θ, 0.1),
+                        M=10,
                     ),
                 ),
             ),

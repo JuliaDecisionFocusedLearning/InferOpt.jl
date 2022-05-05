@@ -1,6 +1,8 @@
 one_hot_argmax_approximations = [
     Perturbed(one_hot_argmax; ε=0.3, M=1000)
-    PerturbedGeneric(one_hot_argmax; noise_dist=θ -> MultivariateNormal(θ, 0.3), M=1000)
+    PerturbedGeneric(
+        one_hot_argmax; noise_dist=θ -> MultivariateNormal(θ, 0.3), M=1000
+    )
 ]
 
 for approx in one_hot_argmax_approximations

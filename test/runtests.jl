@@ -10,7 +10,6 @@ using Random
 using Statistics
 using Test
 using UnicodePlots
-using UnPack
 using Zygote
 
 ## Setup
