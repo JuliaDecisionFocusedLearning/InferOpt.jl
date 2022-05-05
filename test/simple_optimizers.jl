@@ -38,7 +38,7 @@ pipelines = Dict(
                 loss=FenchelYoungLoss(
                     PerturbedGeneric(
                         one_hot_argmax;
-                        noise_dist=θ -> MultivariateNormal(θ, 0.1),
+                        noise_dist=θ -> MultivariateNormal(θ, 0.1^2 * I),
                         M=10,
                     ),
                 ),
@@ -59,7 +59,7 @@ pipelines = Dict(
                 loss=FenchelYoungLoss(
                     PerturbedGeneric(
                         ranking;
-                        noise_dist=θ -> MultivariateNormal(θ, 0.1),
+                        noise_dist=θ -> MultivariateNormal(θ, 0.1^2 * I),
                         M=10,
                     ),
                 ),

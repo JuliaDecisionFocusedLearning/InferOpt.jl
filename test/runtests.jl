@@ -23,11 +23,11 @@ include("utils.jl")
 ## Tests
 
 @testset verbose = true "InferOpt.jl" begin
-    @testset verbose = true "Simple optimizers" begin
-        include("simple_optimizers.jl")
-    end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
+    end
+    @testset verbose = true "Simple optimizers" begin
+        include("simple_optimizers.jl")
     end
     @testset verbose = true "Tutorial" begin
         include("tutorial.jl")
