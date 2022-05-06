@@ -6,7 +6,7 @@ Compute the Shannon entropy of a probability distribution: `H(p) = -∑ pᵢlog(
 function shannon_entropy(p::AbstractVector{R}) where {R<:Real}
     H = zero(R)
     for x in p
-        if x > 0.0
+        if x > zero(R)
             H -= x * log(x)
         end
     end

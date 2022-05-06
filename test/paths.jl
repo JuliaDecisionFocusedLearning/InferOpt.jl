@@ -1,5 +1,6 @@
 using Distributions
 using Flux
+using Graphs
 using InferOpt
 using LinearAlgebra
 using ProgressMeter
@@ -14,17 +15,22 @@ include("pipelines.jl")
 ## Dimensions and parameters
 
 nb_features = 5
-nb_instances = 100
-instance_dim = 20
+nb_instances = 50
+instance_dim = (10, 20)
 noise_std = 0.02
 
-epochs = 200
+epochs = 500
 show_plots = true
 
 ## Main functions
 
 true_encoder = Chain(Dense(nb_features, 1), InferOpt.dropfirstdim)
-true_maximizer(θ; kwargs...) = ranking(θ; kwargs...)
+
+function true_maximizer(θ::AbstractMatrix; kwargs...)
+    g = AcyclicGridGraph(-θ)
+    return grid_shortest_path(g, 1, nv(g))
+end
+
 cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(y1, y2) = Flux.Losses.mse(y1, y2)
 
@@ -41,23 +47,17 @@ data_train, data_test = InferOpt.generate_dataset(
 
 ## Pipelines
 
-pipelines = list_standard_pipelines(true_maximizer; cost=cost, nb_features=nb_features)
+pipelines = list_standard_pipelines(true_maximizer; cost=nothing, nb_features=nb_features)
 
-push!(
-    pipelines["y"],
-    (
-        encoder=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-        maximizer=Interpolation(true_maximizer; λ=10.0),
-        loss=Flux.Losses.mse,
-    ),
-);
+delete!(pipelines, "θ")
+delete!(pipelines, "(θ,y)")
 
 ## Test loop
 
 for target in keys(pipelines), pipeline in pipelines[target]
     (; encoder, maximizer, loss) = pipeline
     flux_loss = InferOpt.define_flux_loss(encoder, maximizer, loss, target)
-    @info "Testing ranking" target encoder maximizer loss
+    @info "Testing paths" target encoder maximizer loss
 
     ## Optimization
 

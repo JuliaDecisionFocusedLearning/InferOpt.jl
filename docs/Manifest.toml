@@ -401,7 +401,7 @@ uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
 version = "0.1.1"
 
 [[deps.InferOpt]]
-deps = ["ChainRulesCore", "Distributions", "Folds", "LinearAlgebra", "Random", "SimpleTraits", "SparseArrays", "Statistics"]
+deps = ["ChainRulesCore", "DataStructures", "Distributions", "Folds", "Graphs", "LinearAlgebra", "Random", "SimpleTraits", "SparseArrays", "Statistics", "Test", "UnicodePlots"]
 path = ".."
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
 version = "0.1.0"

@@ -9,28 +9,30 @@ using UnicodePlots
 
 Random.seed!(63)
 
+include("pipelines.jl")
+
 ## Dimensions and parameters
 
 nb_features = 5
 nb_instances = 100
-instance_dim = 100
+instance_dim = 10
 noise_std = 0.02
 
-epochs = 200
-show_plots = false
+epochs = 500
+show_plots = true
 
 ## Main functions
 
-true_model = Chain(Dense(nb_features, 1), InferOpt.dropfirstdim)
-optimizer = one_hot_argmax
-error_function = InferOpt.hamming_distance
-cost(y; instance) = dot(y, -true_model(instance))
+true_encoder = Chain(Dense(nb_features, 1), InferOpt.dropfirstdim)
+true_maximizer(θ; kwargs...) = one_hot_argmax(θ; kwargs...)
+cost(y; instance) = dot(y, -true_encoder(instance))
+error_function(y1, y2) = InferOpt.hamming_distance(y1, y2)
 
 ## Dataset generation
 
 data_train, data_test = InferOpt.generate_dataset(
-    true_model,
-    optimizer;
+    true_encoder,
+    true_maximizer;
     nb_features=nb_features,
     instance_dim=instance_dim,
     nb_instances=nb_instances,
@@ -39,70 +41,42 @@ data_train, data_test = InferOpt.generate_dataset(
 
 ## Pipelines
 
-pipelines = Dict(
-    "none" => [(
-        model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-        loss=PerturbedCost(one_hot_argmax, cost; ε=1.0, M=10),
-    )],
-    "θ" => [(
-        model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-        loss=SPOPlusLoss(one_hot_argmax),
-    )],
-    "(θ,y)" => [(
-        model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-        loss=SPOPlusLoss(one_hot_argmax),
-    )],
-    "y" => [
+pipelines = list_standard_pipelines(true_maximizer; cost=cost, nb_features=nb_features)
+
+append!(
+    pipelines["y"],
+    [
         # Structured SVM
         (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            encoder=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            maximizer=identity,
             loss=StructuredSVMLoss(ZeroOneLoss()),
         ),
         # Regularized prediction: explicit
         (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            encoder=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            maximizer=identity,
             loss=FenchelYoungLoss(one_hot_argmax),
         ),
         (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            encoder=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            maximizer=identity,
             loss=FenchelYoungLoss(sparsemax),
         ),
         (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            encoder=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
+            maximizer=identity,
             loss=FenchelYoungLoss(InferOpt.softmax),
         ),
-        # Perturbations
-        (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-            loss=FenchelYoungLoss(Perturbed(one_hot_argmax; ε=1.0, M=10)),
-        ),
-        (
-            model=Chain(
-                Dense(nb_features, 1),
-                InferOpt.dropfirstdim,
-                Perturbed(one_hot_argmax; ε=1.0, M=10),
-            ),
-            loss=Flux.Losses.mse,
-        ),
-        # Generic perturbations
-        (
-            model=Chain(Dense(nb_features, 1), InferOpt.dropfirstdim),
-            loss=FenchelYoungLoss(
-                PerturbedGeneric(
-                    one_hot_argmax;
-                    noise_dist=θ -> MultivariateNormal(θ, 1.0^2 * I),
-                    M=10,
-                ),
-            ),
-        ),
     ],
-)
+);
 
 ## Test loop
 
-for target in ["θ", "(θ,y)", "y"], (; model, loss) in pipelines[target]
-    @info "Testing argmax" target model loss
-    flux_loss = InferOpt.define_flux_loss(model, loss, target)
+for target in keys(pipelines), pipeline in pipelines[target]
+    (; encoder, maximizer, loss) = pipeline
+    flux_loss = InferOpt.define_flux_loss(encoder, maximizer, loss, target)
+    @info "Testing argmax" target encoder maximizer loss
 
     ## Optimization
 
@@ -114,14 +88,14 @@ for target in ["θ", "(θ,y)", "y"], (; model, loss) in pipelines[target]
             perf_storage;
             data_train=data_train,
             data_test=data_test,
-            true_model=true_model,
-            model=model,
-            optimizer=optimizer,
+            true_encoder=true_encoder,
+            encoder=encoder,
+            true_maximizer=true_maximizer,
             flux_loss=flux_loss,
             error_function=error_function,
             cost=cost,
         )
-        Flux.train!(flux_loss, Flux.params(model), zip(data_train...), opt)
+        Flux.train!(flux_loss, Flux.params(encoder), zip(data_train...), opt)
     end
 
     ## Evaluation
@@ -129,5 +103,5 @@ for target in ["θ", "(θ,y)", "y"], (; model, loss) in pipelines[target]
     if show_plots
         InferOpt.plot_perf(perf_storage)
     end
-    InferOpt.test_perf(perf_storage; test_name="$target - $model - $loss")
+    InferOpt.test_perf(perf_storage; test_name="$target - $maximizer - $loss")
 end

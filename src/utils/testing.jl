@@ -3,17 +3,17 @@ dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
 ## Dataset
 
 function generate_dataset(
-    true_model,
-    optimizer;
+    true_encoder,
+    true_maximizer;
     nb_features::Integer,
-    instance_dim::Integer,
+    instance_dim,
     nb_instances::Integer,
     noise_std::Real,
 )
-    X = [randn(nb_features, instance_dim) for n in 1:nb_instances]
-    thetas = [true_model(x) for x in X]
-    noiseless_Y = [optimizer(θ) for θ in thetas]
-    noisy_Y = [optimizer(θ + noise_std * randn(instance_dim)) for θ in thetas]
+    X = [randn(nb_features, instance_dim...) for n in 1:nb_instances]
+    thetas = [true_encoder(x) for x in X]
+    noiseless_Y = [true_maximizer(θ) for θ in thetas]
+    noisy_Y = [true_maximizer(θ + noise_std * randn(instance_dim...)) for θ in thetas]
 
     X_train, X_test = InferOpt.train_test_split(X)
     thetas_train, thetas_test = InferOpt.train_test_split(thetas)
@@ -25,8 +25,8 @@ function generate_dataset(
     return data_train, data_test
 end
 
-function generate_predictions(model, optimizer, X)
-    Y_pred = [optimizer(model(x)) for x in X]
+function generate_predictions(encoder, maximizer, X)
+    Y_pred = [maximizer(encoder(x)) for x in X]
     return Y_pred
 end
 
@@ -39,11 +39,11 @@ function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     return X_train, X_test
 end
 
-function define_flux_loss(model, loss, target)
-    flux_loss_none(x, θ, y) = loss(model(x); instance=x)
-    flux_loss_θ(x, θ, y) = loss(model(x), θ)
-    flux_loss_y(x, θ, y) = loss(model(x), y)
-    flux_loss_θy(x, θ, y) = loss(model(x), θ, y)
+function define_flux_loss(encoder, maximizer, loss, target)
+    flux_loss_none(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
+    flux_loss_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
+    flux_loss_y(x, θ, y) = loss(maximizer(encoder(x)), y)
+    flux_loss_θy(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
 
     flux_losses = Dict(
         "none" => flux_loss_none,
@@ -74,9 +74,9 @@ function update_perf!(
     perf_storage::NamedTuple;
     data_train,
     data_test,
-    true_model,
-    model,
-    optimizer,
+    true_encoder,
+    encoder,
+    true_maximizer,
     flux_loss,
     error_function,
     cost,
@@ -97,8 +97,8 @@ function update_perf!(
     train_loss = sum(flux_loss(t...) for t in zip(data_train...))
     test_loss = sum(flux_loss(t...) for t in zip(data_test...))
 
-    Y_train_pred = generate_predictions(model, optimizer, X_train)
-    Y_test_pred = generate_predictions(model, optimizer, X_test)
+    Y_train_pred = generate_predictions(encoder, true_maximizer, X_train)
+    Y_test_pred = generate_predictions(encoder, true_maximizer, X_test)
 
     train_error = mean(
         error_function(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
@@ -117,8 +117,8 @@ function update_perf!(
         (c - c_opt) / abs(c_opt) for (c, c_opt) in zip(test_cost, test_cost_opt)
     )
 
-    w_true = first(true_model).weight
-    w_learned = first(model).weight
+    w_true = first(true_encoder).weight
+    w_learned = first(encoder).weight
     parameter_error = InferOpt.normalized_mape(w_true, w_learned)
 
     push!(train_losses, train_loss)
@@ -194,22 +194,40 @@ function plot_perf(perf_storage::NamedTuple)
     end
 
     if length(train_errors) > 0
-        plt = lineplot(train_errors; xlabel="Epoch", title="Train error")
+        plt = lineplot(
+            train_errors;
+            xlabel="Epoch",
+            title="Train error",
+            # ylim=(0, maximum(train_errors)),
+        )
         push!(plts, plt)
     end
 
     if length(test_errors) > 0
-        plt = lineplot(test_errors; xlabel="Epoch", title="Test error")
+        plt = lineplot(
+            test_errors; xlabel="Epoch", title="Test error",
+            # ylim=(0, maximum(test_errors))
+        )
         push!(plts, plt)
     end
 
     if length(train_cost_gaps) > 0
-        plt = lineplot(train_cost_gaps; xlabel="Epoch", title="Train cost gap")
+        plt = lineplot(
+            train_cost_gaps;
+            xlabel="Epoch",
+            title="Train cost gap",
+            # ylim=(0, maximum(train_cost_gaps)),
+        )
         push!(plts, plt)
     end
 
     if length(train_cost_gaps) > 0
-        plt = lineplot(test_cost_gaps; xlabel="Epoch", title="Test cost gap")
+        plt = lineplot(
+            test_cost_gaps;
+            xlabel="Epoch",
+            title="Test cost gap",
+            # ylim=(0, maximum(test_cost_gaps)),
+        )
         push!(plts, plt)
     end
 
@@ -218,7 +236,7 @@ function plot_perf(perf_storage::NamedTuple)
             parameter_errors;
             xlabel="Epoch",
             title="Parameter error",
-            ylim=(0, maximum(parameter_errors)),
+            # ylim=(0, maximum(parameter_errors)),
         )
         push!(plts, plt)
     end
