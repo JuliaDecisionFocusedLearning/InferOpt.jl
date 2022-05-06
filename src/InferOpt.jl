@@ -17,16 +17,22 @@ include("utils/proba.jl")
 include("utils/error.jl")
 include("utils/testing.jl")
 
+include("interpolation/interpolation.jl")
+
 include("regularized/penalties.jl")
 include("regularized/simplex.jl")
 include("regularized/prediction.jl")
 include("regularized/ranking.jl")
 
-include("interpolation.jl")
-include("perturbed.jl")
-include("fenchel_young.jl")
-include("smart_predict_optimize.jl")
-include("structured_svm.jl")
+include("perturbed/perturbed.jl")
+include("perturbed/perturbed_generic.jl")
+
+include("fenchel_young/fenchel_young.jl")
+
+include("smart_predict_optimize/smart_predict_optimize.jl")
+
+include("structured_svm/structured_loss.jl")
+include("structured_svm/structured_svm.jl")
 
 include("grid_graphs/abstract.jl")
 include("grid_graphs/acyclic.jl")

@@ -119,6 +119,7 @@ for target in ["θ", "(θ,y)", "y"], (; model, loss) in pipelines[target]
             optimizer=optimizer,
             flux_loss=flux_loss,
             error_function=error_function,
+            cost=cost,
         )
         Flux.train!(flux_loss, Flux.params(model), zip(data_train...), opt)
     end

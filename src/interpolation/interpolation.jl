@@ -12,7 +12,7 @@ struct Interpolation{F}
     λ::Float64
 end
 
-Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, λ)
+Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, float(λ))
 
 function (interpolation::Interpolation)(θ::AbstractArray; kwargs...)
     return interpolation.maximizer(θ; kwargs...)

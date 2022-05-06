@@ -63,8 +63,8 @@ function init_perf()
         test_losses=Float64[],
         train_errors=Float64[],
         test_errors=Float64[],
-        train_objective_gaps=Float64[],
-        test_objective_gaps=Float64[],
+        train_cost_gaps=Float64[],
+        test_cost_gaps=Float64[],
         parameter_errors=Float64[],
     )
     return perf_storage
@@ -79,14 +79,15 @@ function update_perf!(
     optimizer,
     flux_loss,
     error_function,
+    cost,
 )
     (;
         train_losses,
         test_losses,
         train_errors,
         test_errors,
-        train_objective_gaps,
-        test_objective_gaps,
+        train_cost_gaps,
+        test_cost_gaps,
         parameter_errors,
     ) = perf_storage
 
@@ -104,6 +105,18 @@ function update_perf!(
     )
     test_error = mean(error_function(y, y_pred) for (y, y_pred) in zip(Y_test, Y_test_pred))
 
+    train_cost = [cost(y; instance=x) for (x, y) in zip(X_train, Y_train_pred)]
+    train_cost_opt = [cost(y; instance=x) for (x, y) in zip(X_train, Y_train)]
+    test_cost = [cost(y; instance=x) for (x, y) in zip(X_test, Y_test_pred)]
+    test_cost_opt = [cost(y; instance=x) for (x, y) in zip(X_test, Y_test)]
+
+    train_cost_gap = mean(
+        (c - c_opt) / abs(c_opt) for (c, c_opt) in zip(train_cost, train_cost_opt)
+    )
+    test_cost_gap = mean(
+        (c - c_opt) / abs(c_opt) for (c, c_opt) in zip(test_cost, test_cost_opt)
+    )
+
     w_true = first(true_model).weight
     w_learned = first(model).weight
     parameter_error = InferOpt.normalized_mape(w_true, w_learned)
@@ -112,6 +125,8 @@ function update_perf!(
     push!(test_losses, test_loss)
     push!(train_errors, train_error)
     push!(test_errors, test_error)
+    push!(train_cost_gaps, train_cost_gap)
+    push!(test_cost_gaps, test_cost_gap)
     push!(parameter_errors, parameter_error)
     return nothing
 end
@@ -122,8 +137,8 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         test_losses,
         train_errors,
         test_errors,
-        train_objective_gaps,
-        test_objective_gaps,
+        train_cost_gaps,
+        test_cost_gaps,
         parameter_errors,
     ) = perf_storage
 
@@ -143,11 +158,11 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
             @test test_errors[end] < test_errors[1] / 2
         end
         # Cost
-        if length(train_objective_gaps) > 0
-            @test train_objective_gaps[end] < train_objective_gaps[1]
+        if length(train_cost_gaps) > 0
+            @test train_cost_gaps[end] < train_cost_gaps[1]
         end
-        if length(test_objective_gaps) > 0
-            @test test_objective_gaps[end] < test_objective_gaps[1]
+        if length(test_cost_gaps) > 0
+            @test test_cost_gaps[end] < test_cost_gaps[1]
         end
         # Parameter errors
         if length(parameter_errors) > 0
@@ -162,8 +177,8 @@ function plot_perf(perf_storage::NamedTuple)
         test_losses,
         train_errors,
         test_errors,
-        train_objective_gaps,
-        test_objective_gaps,
+        train_cost_gaps,
+        test_cost_gaps,
         parameter_errors,
     ) = perf_storage
     plts = []
@@ -188,13 +203,13 @@ function plot_perf(perf_storage::NamedTuple)
         push!(plts, plt)
     end
 
-    if length(train_objective_gaps) > 0
-        plt = lineplot(train_objective_gaps; xlabel="Epoch", title="Train objective gap")
+    if length(train_cost_gaps) > 0
+        plt = lineplot(train_cost_gaps; xlabel="Epoch", title="Train cost gap")
         push!(plts, plt)
     end
 
-    if length(train_objective_gaps) > 0
-        plt = lineplot(test_objective_gaps; xlabel="Epoch", title="Test objective gap")
+    if length(train_cost_gaps) > 0
+        plt = lineplot(test_cost_gaps; xlabel="Epoch", title="Test cost gap")
         push!(plts, plt)
     end
 
