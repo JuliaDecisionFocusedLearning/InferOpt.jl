@@ -3,182 +3,168 @@
 # ## Context
 
 #=
-Let us imagine that we observe the itineraries chosen by a public transport user in several different networks, and that we want to recover their preferences (a.k.a. utility function).
+Let us imagine that we observe the itineraries chosen by a public transport user in several different networks, and that we want to understand their decision-making process (a.k.a. recover their utility function).
 
 More precisely, each point in our dataset consists in:
-- a graph `g` & two vertices `i` and `j`
-- a shortest path from `i` to `j` in `g`, computed with user-defined edge costs
+- a graph ``G``
+- a shortest path ``P`` from the top left to the bottom right corner
 
-Assume we know the features that the user combines to define edge costs, but we don't know the respective weights of these features.
+We don't know the true costs that were used to compute the shortest path, but we can exploit a set of features to approximate these costs.
+The question is: how should we combine these features?
 
-We will use `InferOpt.jl` to learn these weights, so that we may propose relevant paths to the user in the future.
+We will use `InferOpt` to learn the appropriate weights, so that we may propose relevant paths to the user in the future.
 =#
 
-# ## Setup
-
-# We start by importing the relevant packages
-
 using Flux
-using Graphs
 using InferOpt
+using InferOpt.GridGraphs
+using InferOpt.Testing
 using LinearAlgebra
 using ProgressMeter
 using Random
-using StatsBase: mean, sample
-using SparseArrays
+using Statistics
 using Test
+using UnicodePlots
 
 Random.seed!(63);
 
+# ## Grid graphs
+
 #=
-We first define an encoder, which takes a graph `g` as input and computes an embedding matrix `x`.
+For the purposes of this tutorial, we consider grid graphs, as implemented in `InferOpt.GridGraphs`.
+In such graphs, each vertex corresponds to a couple of coordinates ``(i, j)``, where ``1 \leq i \leq h`` and ``1 \leq j \leq w``.
+
+To ensure acyclicity, we only allow the user to move right, down or both.
+Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its cost matrix ``\theta \in \mathbb{R}^{h \times w}``.
 =#
 
-dim = 5
+h, w = 50, 100
+g = AcyclicGridGraph(rand(h, w));
 
-function encoder(g::AbstractGraph)
-    x = rand(dim, ne(g))
-    return x
+#=
+For convenience, `InferOpt.GridGraphs` also provides custom functions to compute shortest paths.
+Let us see what those look like.
+=#
+
+p = grid_shortest_path(g, 1, nv(g));
+spy(p)
+
+# ## Dataset
+
+#=
+As announced, we do not know the cost of each vertex, only a set of relevant features.
+Let us assume that the user combines them using a shallow neural network.
+=#
+
+nb_features = 5
+
+true_encoder = Chain(Dense(nb_features, 1), dropfirstdim);
+
+#=
+The true vertex costs computed from this encoding are then used within shortest path computations.
+To be consistent with the literature, we frame this problem as a linear maximization problem, which justifies the change of sign in front of ``\theta``.
+=#
+
+function linear_maximizer(θ)
+    g = AcyclicGridGraph(-θ)
+    return grid_shortest_path(g, 1, nv(g))
 end;
 
 #=
-Now we define our maximizer, which solves the shortest path problem on `g` with edge costs `-θ`.
-The minus sign is important since `InferOpt.jl` deals with linear maximization problems, while the shortest path is a linear minimization problem.
+We now have everything we need to build our dataset.
 =#
 
-function maximizer(θ; g, i, j)
-    ## Build the cost matrix
-    Ic = [src(e) for e in edges(g)]
-    Jc = [dst(e) for e in edges(g)]
-    Vc = [-θ[k] for (k, e) in enumerate(edges(g))]
-    c = Symmetric(sparse(Ic, Jc, Vc, nv(g), nv(g)))
-    ## Compute the shortest path from i to j
-    path = a_star(g, i, j, c)
-    ## Encode it as a binary vector
-    Iy = Int[k for (k, e) in enumerate(edges(g)) if (e in path) || reverse(e) in path]
-    Vy = ones(Int, length(Iy))
-    y = sparsevec(Iy, Vy, ne(g))
-    return y
-end;
+nb_instances = 30
 
-#=
-To generate instances, we sample from a family of connected graphs and select the source and destination at random.
-We then perform the following steps:
-1. extract the features with our `encoder`
-2. deduce edge costs with the `true_model` of the user's preferences
-3. compute the shortest path with our `maximizer`
-=#
-
-function build_instance(connected_graph_generator, true_model)
-    g = connected_graph_generator()
-    i, j = sample(1:nv(g), 2; replace=false)
-    x = encoder(g)
-    θ = true_model(x)
-    y = maximizer(θ; g=g, i=i, j=j)
-    return (x, y, (g=g, i=i, j=j))
-end;
+X_train = [randn(nb_features, h, w) for n in 1:nb_instances];
+θ_train = [true_encoder(x) for x in X_train];
+Y_train = [linear_maximizer(θ) for θ in θ_train];
 
 # ## Learning
 
 #=
-Now we put everything together, starting with the true user model for edge costs.
-We use a linear combination of the features, composed with the sigmoid activation and a negative absolute value.
-This last step is used to obtain negative values in `θ`, which will correspond to positive edge costs in `-θ`.
+We create a trainable model with the same structure as the true encoder but another set of randomly-initialized weights.
 =#
 
-true_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
-
-# We generate 200 grid graphs of size 10*10.
-
-connected_graph_generator() = grid((10, 10))
-training_data = [build_instance(connected_graph_generator, true_model) for _ in 1:200];
-
-# We create a trainable model with the same structure as the true model but another set of randomly-initialized weights.
-
-initial_model = Chain(Dense(dim, 1), z -> -exp.(z), vec);
+initial_encoder = Chain(Dense(nb_features, 1), dropfirstdim);
 
 #=
-Here is the crucial part where `InferOpt.jl` intervenes: the choice of a clever loss function that enables us to
-- differentiate through the shortest path maximizer, even though it is a discrete operation
+Here is the crucial part where `InferOpt` intervenes: the choice of a clever loss function that enables us to
+- differentiate through the shortest path maximizer, even though it is a combinatorial operation
 - evaluate the quality of our model based on the paths that it recommends
 =#
 
-loss = FenchelYoungLoss(Perturbed(maximizer; ε=1.0, M=2));
+regularized_predictor = Perturbed(linear_maximizer; ε=1.0, M=5);
+loss = FenchelYoungLoss(regularized_predictor);
 
-# Finally, we choose a standard gradient optimizer
+#=
+The regularized predictor is just a thin wrapper around our `linear_maximizer`, but with a very different behavior:
+=#
 
+p_regularized = regularized_predictor(θ_train[1]);
+spy(p_regularized)
+
+#=
+Instead of choosing just one path, it spreads over several possible paths, allowing its output to change smoothly as ``\theta`` varies.
+Thanks to this smoothing, we can now train our model with a standard gradient optimizer.
+=#
+
+encoder = deepcopy(initial_encoder)
 opt = ADAM();
-
-# We can now train our model for 200 epochs
-
-model = deepcopy(initial_model)
-par = Flux.params(model)
-
-for epoch in 1:200
-    for sample in training_data
-        x, y, kwargs = sample
-        gs = gradient(par) do
-            loss(model(x), y; kwargs...)
+losses = Float64[]
+for epoch in 1:100
+    l = 0.
+    for (x, y) in zip(X_train, Y_train)
+        grads = gradient(Flux.params(encoder)) do
+            l += loss(encoder(x), y)
         end
-        Flux.update!(opt, par, gs)
+        Flux.update!(opt, Flux.params(encoder), grads)
     end
+    push!(losses, l)
 end;
 
 # ## Results
 
-# First, we compare the learned weights with their true (hidden) values
-
-w = model[1].weight
-true_w = true_model[1].weight
-vcat(w / norm(w), true_w / norm(true_w))
-
 #=
-We are already quite close to recovering the exact user weights.
-But in reality, it doesn't matter as much as our ability to provide accurate path predictions.
-
-To evaluate it, we use the Hamming distance on the space of (binary-encoded) paths.
+Since the Fenchel-Young loss is convex, it is no wonder that optimization worked like a charm.
 =#
 
-function hamming_distance(y, ȳ)
-    return sum(y[i] != ȳ[i] for i in eachindex(y))
-end;
+lineplot(losses, xlabel="Epoch", ylabel="Loss")
 
-# Let us now compare our predictions with the actual paths on the training set
+#=
+To assess performance, we can compare the learned weights with their true (hidden) values
+=#
 
-Ȳ = [y for (x, y, kwargs) in training_data];
-Y = [maximizer(model(x); kwargs...) for (x, y, kwargs) in training_data];
+learned_weight = encoder[1].weight / norm(encoder[1].weight)
+true_weight = true_encoder[1].weight / norm(true_encoder[1].weight)
+@info "Parameter error" learned_weight true_weight
 
-train_error = mean(hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y, Ȳ))
+#=
+We are quite close to recovering the exact user weights.
+But in reality, it doesn't matter as much as our ability to provide accurate path predictions.
+Let us therefore compare our predictions with the actual paths on the training set.
+=#
 
-# Not too bad, at least compared with our initial model.
+Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
 
-Y0 = [maximizer(initial_model(x); kwargs...) for (x, y, kwargs) in training_data];
-
-train_error_initial_model = mean(
-    hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y0, Ȳ)
+train_error = mean(
+    normalized_hamming_distance(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
 )
 
-# But we should check on a test set, just to be sure.
+# Not too bad, at least compared with our random initial encoder.
 
-test_data = [build_instance(connected_graph_generator, true_model) for _ in 1:1000];
+Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
-Ȳ_test = [y for (x, y, kwargs) in test_data];
-Y_test = [maximizer(model(x); kwargs...) for (x, y, kwargs) in test_data];
-
-test_error = mean(hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y_test, Ȳ_test))
-
-# Again, we compare to the initial model
-
-Y_test0 = [maximizer(initial_model(x); kwargs...) for (x, y, kwargs) in test_data];
-
-test_error_initial_model = mean(
-    hamming_distance(y, ȳ) / length(y) for (y, ȳ) in zip(Y_test0, Ȳ_test)
+train_error_initial = mean(
+    normalized_hamming_distance(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
 )
 
-# This is definitely a success. We just add a few tests for Continuous Integration purposes:
+#=
+This is definitely a success.
+Of course in real prediction settings we should measure performance on a test set as well.
+This is left as an exercise to the reader.
+=#
 
-@test train_error < train_error_initial_model / 3
+# CI tests, not included in the documentation  #src
 
-#-
-
-@test test_error < test_error_initial_model / 3
+@test train_error < train_error_initial / 3  #src

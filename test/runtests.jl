@@ -16,7 +16,7 @@ using Test
     @testset verbose = true "Paths" begin
         include("paths.jl")
     end
-    # @testset verbose = true "Tutorial" begin
-    #     include("tutorial.jl")
-    # end
+    @testset verbose = true "Tutorial" begin
+        include("tutorial.jl")
+    end
 end

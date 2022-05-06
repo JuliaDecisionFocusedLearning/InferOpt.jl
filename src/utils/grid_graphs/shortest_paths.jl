@@ -52,7 +52,7 @@ end
 ## Rebuild path
 
 function grid_shortest_paths(g::AbstractGridGraph, s::Integer)
-    error("Not implemented")
+    return error("Not implemented")
 end
 
 function grid_shortest_path(g::AbstractGridGraph, s::Integer, d::Integer)

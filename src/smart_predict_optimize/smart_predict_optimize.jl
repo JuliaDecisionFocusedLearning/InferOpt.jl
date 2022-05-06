@@ -47,7 +47,7 @@ function ChainRulesCore.rrule(
     return l, spol_pullback
 end
 
-function ChainRulesCore.rrule(spol::SPOPlusLoss, θ::AbstractVector, θ_true::AbstractVector)
+function ChainRulesCore.rrule(spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray)
     y_true = spol.maximizer(θ_true)
     l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent()

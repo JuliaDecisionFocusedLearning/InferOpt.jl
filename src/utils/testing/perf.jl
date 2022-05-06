@@ -1,60 +1,3 @@
-dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
-
-## Dataset
-
-function generate_dataset(
-    true_encoder,
-    true_maximizer;
-    nb_features::Integer,
-    instance_dim,
-    nb_instances::Integer,
-    noise_std::Real,
-)
-    X = [randn(nb_features, instance_dim...) for n in 1:nb_instances]
-    thetas = [true_encoder(x) for x in X]
-    noiseless_Y = [true_maximizer(θ) for θ in thetas]
-    noisy_Y = [true_maximizer(θ + noise_std * randn(instance_dim...)) for θ in thetas]
-
-    X_train, X_test = InferOpt.train_test_split(X)
-    thetas_train, thetas_test = InferOpt.train_test_split(thetas)
-    Y_train, _ = InferOpt.train_test_split(noisy_Y)
-    _, Y_test = InferOpt.train_test_split(noiseless_Y)
-
-    data_train = (X_train, thetas_train, Y_train)
-    data_test = (X_test, thetas_test, Y_test)
-    return data_train, data_test
-end
-
-function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
-    return Y_pred
-end
-
-function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
-    N = length(X)
-    N_train = floor(Int, N * train_percentage)
-    N_test = N - N_train
-    train_ind, test_ind = 1:N_train, (N_train + 1):(N_train + N_test)
-    X_train, X_test = X[train_ind], X[test_ind]
-    return X_train, X_test
-end
-
-function define_flux_loss(encoder, maximizer, loss, target)
-    flux_loss_none(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
-    flux_loss_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
-    flux_loss_y(x, θ, y) = loss(maximizer(encoder(x)), y)
-    flux_loss_θy(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
-
-    flux_losses = Dict(
-        "none" => flux_loss_none,
-        "θ" => flux_loss_θ,
-        "y" => flux_loss_y,
-        "(θ,y)" => flux_loss_θy,
-    )
-
-    return flux_losses[target]
-end
-
 ## Performance metrics
 
 function init_perf()
@@ -119,7 +62,7 @@ function update_perf!(
 
     w_true = first(true_encoder).weight
     w_learned = first(encoder).weight
-    parameter_error = InferOpt.normalized_mape(w_true, w_learned)
+    parameter_error = normalized_mape(w_true, w_learned)
 
     push!(train_losses, train_loss)
     push!(test_losses, test_loss)

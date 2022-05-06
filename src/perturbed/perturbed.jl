@@ -40,7 +40,6 @@ end
 function ChainRulesCore.rrule(perturbed::Perturbed, θ::AbstractArray; kwargs...)
     (; maximizer, ε, M) = perturbed
     d = size(θ)
-
     Z_samples = [randn(d) for m in 1:M]
     y_samples = [maximizer(θ + ε * Z; kwargs...) for Z in Z_samples]
     y_mean = mean(y_samples)
@@ -80,7 +79,7 @@ PerturbedCost(maximizer, cost; ε=1.0, M=2) = PerturbedCost(maximizer, cost, ε,
 
 function (perturbed_cost::PerturbedCost)(θ::AbstractArray; kwargs...)
     (; maximizer, cost, ε, M) = perturbed_cost
-    d = length(θ)
+    d = size(θ)
     y_samples = [maximizer(θ + ε * randn(d); kwargs...) for m in 1:M]
     costs = [cost(y; kwargs...) for y in y_samples]
     return mean(costs)
@@ -88,8 +87,7 @@ end
 
 function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractArray; kwargs...)
     (; maximizer, cost, ε, M) = perturbed_cost
-    d = length(θ)
-
+    d = size(θ)
     Z_samples = [randn(d) for m in 1:M]
     y_samples = [maximizer(θ + ε * Z; kwargs...) for Z in Z_samples]
     costs = [cost(y; kwargs...) for y in y_samples]
