@@ -20,6 +20,7 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
 [compat]
 ChainRulesCore = "1"
+DataStructures = "0.18"
 SimpleTraits = "0.9"
 julia = "1.7"
 
