@@ -43,73 +43,32 @@ function list_standard_pipelines(true_maximizer; nb_features, cost=nothing)
     return pipelines
 end
 
-# function test_loop(
-#     pipelines;
-#     true_encoder,
-#     true_maximizer,
-#     data_train,
-#     data_test,
-#     error_function,
-#     cost,
-#     epochs,
-#     show_plots,
-#     setting_name="???",
-# )
-#     pipelines = deepcopy(pipelines)
-
-#     for target in keys(pipelines), pipeline in pipelines[target]
-#         (; encoder, maximizer, loss) = pipeline
-#         flux_loss = define_flux_loss(encoder, maximizer, loss, target)
-#         @info "Testing $setting_name" target encoder maximizer loss
-
-#         ## Optimization
-
-#         opt = ADAM()
-#         perf_storage = init_perf()
-
-#         @showprogress for _ in 1:epochs
-#             update_perf!(
-#                 perf_storage;
-#                 data_train=data_train,
-#                 data_test=data_test,
-#                 true_encoder=true_encoder,
-#                 encoder=encoder,
-#                 true_maximizer=true_maximizer,
-#                 flux_loss=flux_loss,
-#                 error_function=error_function,
-#                 cost=cost,
-#             )
-#             Flux.train!(flux_loss, Flux.params(encoder), zip(data_train...), opt)
-#         end
-
-#         ## Evaluation
-
-#         if show_plots
-#             plot_perf(perf_storage)
-#         end
-#         test_perf(perf_storage; test_name="$target - $maximizer - $loss")
-#     end
-# end
-
 function train!(t::InferOptTrainer, nb_epochs::Integer)
     @showprogress for _ in 1:nb_epochs
         compute_metrics!(t)
-        Flux.train!(t.flux_loss, Flux.params(t.model.encoder), zip(get_data_train(t)...), t.opt)
+        (;X, θ, Y) = t.data_train
+        Flux.train!(t.flux_loss, Flux.params(t.model.encoder), zip(X, θ, Y), t.opt)
     end
 end
 
-function test_loop(pipelines, data, true_maximizer; nb_epochs=500, show_plots=true)
+function test_loop(pipelines, data_train, data_test, true_maximizer, cost, true_encoder; nb_epochs=500, show_plots=true, setting_name="???")
     for target in keys(pipelines), pipeline in pipelines[target]
         (; encoder, maximizer, loss) = pipeline
         model = InferOptModel(encoder, maximizer, loss)
 
         flux_loss = define_flux_loss(encoder, maximizer, loss, target)
-        metrics = [TrainLoss(), TestLoss(), ErrorFunctionTrain(), ErrorFunctionTest()]
+        train_metrics = [Loss("Train loss"), HammingDistance("Train hamming distance"), CostGap("Train cost gap"), ParameterError("Train parameter error")]
+        test_metrics = [Loss("Test loss"), HammingDistance("Test Hamming distance"), CostGap("Test cost gap"), ParameterError("Test parameter error")]
         opt = ADAM()
 
-        trainer = InferOptTrainer(data, model, metrics, opt, flux_loss, true_maximizer)
+        trainer = InferOptTrainer(
+            data_train, data_test,
+            model,
+            train_metrics, test_metrics,
+            opt, flux_loss, true_maximizer, cost, true_encoder
+        )
 
-        @info "Testing argmax" target encoder maximizer loss
+        @info "Testing $setting_name" target encoder maximizer loss
         train!(trainer, nb_epochs)
 
         ## Evaluation

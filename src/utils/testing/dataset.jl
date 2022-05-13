@@ -1,3 +1,9 @@
+struct InferOptDataset{X, Y, T}
+    X::X
+    θ::T
+    Y::Y
+end
+
 function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     N = length(X)
     N_train = floor(Int, N * train_percentage)
@@ -25,8 +31,8 @@ function generate_dataset(
     Y_train, _ = train_test_split(noisy_Y)
     _, Y_test = train_test_split(noiseless_Y)
 
-    data_train = (X_train, thetas_train, Y_train)
-    data_test = (X_test, thetas_test, Y_test)
+    data_train = InferOptDataset(X_train, thetas_train, Y_train)
+    data_test = InferOptDataset(X_test, thetas_test, Y_test)
     return data_train, data_test
 end
 

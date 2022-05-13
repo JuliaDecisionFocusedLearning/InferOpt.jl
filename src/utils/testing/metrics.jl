@@ -1,7 +1,7 @@
 abstract type AbstractScalarMetric end
 
-function compute_value!(m::AbstractScalarMetric, t::InferOptTrainer; kwargs...)
-    push!(m.history, m(t; kwargs...))
+function compute_value!(m::AbstractScalarMetric, t::InferOptTrainer, data; kwargs...)
+    push!(m.history, m(t, data; kwargs...))
 end
 
 function test_perf(metric::AbstractScalarMetric)
@@ -10,63 +10,70 @@ end
 
 ## ---
 
-struct TrainLoss <: AbstractScalarMetric
+struct Loss <: AbstractScalarMetric
     name::String
     history::Vector{Float64}
 end
 
-TrainLoss(name="Train loss") = TrainLoss(name, Float64[])
+Loss(name="Loss") = Loss(name, Float64[])
 
-function (m::TrainLoss)(trainer::InferOptTrainer; kwargs...)
-    return sum(trainer.flux_loss(t...) for t in zip(get_data_train(trainer)...))
+function (m::Loss)(trainer::InferOptTrainer, data; kwargs...)
+    (; X, θ, Y) = data
+    return sum(trainer.flux_loss(t...) for t in zip(X, θ, Y))
 end
 
 ## ---
 
-struct TestLoss <: AbstractScalarMetric
+struct HammingDistance <: AbstractScalarMetric
     name::String
     history::Vector{Float64}
 end
 
-TestLoss(name="Test loss") = TestLoss(name, Float64[])
+HammingDistance(name="Hamming distance") = HammingDistance(name, Float64[])
 
-function (m::TestLoss)(trainer::InferOptTrainer; kwargs...)
-    return sum(trainer.flux_loss(t...) for t in zip(get_data_test(trainer)...))
-end
-
-## ---
-
-struct ErrorFunctionTrain <: AbstractScalarMetric
-    name::String
-    history::Vector{Float64}
-end
-
-ErrorFunctionTrain(name="Train hamming distance") = ErrorFunctionTrain(name, Float64[])
-
-function (m::ErrorFunctionTrain)(trainer::InferOptTrainer; Y_train_pred, kwargs...)
+function (m::HammingDistance)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
     train_error = mean(
-        hamming_distance(y, y_pred) for (y, y_pred) in zip(trainer.dataset.Y_train, Y_train_pred)
+        hamming_distance(y, y_pred) for (y, y_pred) in zip(data.Y, Y_pred)
     )
     return train_error
 end
 
 ## ---
 
-struct ErrorFunctionTest <: AbstractScalarMetric
+struct CostGap <: AbstractScalarMetric
     name::String
     history::Vector{Float64}
 end
 
-ErrorFunctionTest(name="Test hamming distance") = ErrorFunctionTest(name, Float64[])
+CostGap(name="Cost gap") = CostGap(name, Float64[])
 
-function (m::ErrorFunctionTest)(trainer::InferOptTrainer; Y_test_pred, kwargs...)
-    train_error = mean(
-        hamming_distance(y, y_pred) for (y, y_pred) in zip(trainer.dataset.Y_train, Y_test_pred)
+function (m::CostGap)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
+    train_cost = [trainer.cost(y; instance=x) for (x, y) in zip(data.X, Y_pred)]
+    train_cost_opt = [trainer.cost(y; instance=x) for (x, y) in zip(data.X, data.Y)]
+
+    cost_gap = mean(
+        (c - c_opt) / abs(c_opt) for (c, c_opt) in zip(train_cost, train_cost_opt)
     )
-    return train_error
+    return cost_gap
 end
 
 ## ---
+
+struct ParameterError <: AbstractScalarMetric
+    name::String
+    history::Vector{Float64}
+end
+
+ParameterError(name="Parameter error") = ParameterError(name, Float64[])
+
+function (m::ParameterError)(trainer::InferOptTrainer, data; kwargs...)
+    w_true = first(trainer.true_encoder).weight
+    w_learned = first(trainer.model.encoder).weight
+    parameter_error = normalized_mape(w_true, w_learned)
+    return parameter_error
+end
+
+## ----
 
 struct ScalarMetric{R <: Real, F} <: AbstractScalarMetric
     name::String

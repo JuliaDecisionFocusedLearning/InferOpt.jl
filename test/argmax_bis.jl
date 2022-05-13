@@ -60,9 +60,12 @@ data_train, data_test = generate_dataset(
     noise_std=0.02,
 );
 
-X_train, θ_train, Y_train = data_train
-X_test, θ_test, Y_test = data_test
-data = InferOptDataset(X_train, X_test, θ_train, θ_test, Y_train, Y_test)
+# X_train, θ_train, Y_train = data_train
+# X_test, θ_test, Y_test = data_test
+# data = InferOptDataset(X_train, X_test, θ_train, θ_test, Y_train, Y_test)
 
 ## Test loop
-test_loop(pipelines, data, true_maximizer; nb_epochs=500, show_plots=true)
+test_loop(
+    pipelines, data_train, data_test, true_maximizer, cost, true_encoder;
+    nb_epochs=500, show_plots=true, setting_name="argmax"
+)
