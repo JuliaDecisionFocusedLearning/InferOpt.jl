@@ -20,11 +20,11 @@ export generate_dataset
 export mape, normalized_mape
 export hamming_distance, normalized_hamming_distance
 export define_flux_loss
-export init_perf, update_perf!, plot_perf, test_perf
+export plot_perf, test_perf
 export dropfirstdim
 
 export InferOptTrainer, InferOptModel, InferOptDataset
-export Loss, HammingDistance, CostGap, ParameterError
-export compute_metrics!, get_data_train, get_data_test
+export Loss, HammingDistance, CostGap, ParameterError, MeanSquaredError
+export compute_metrics!
 
 end

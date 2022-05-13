@@ -51,21 +51,22 @@ function train!(t::InferOptTrainer, nb_epochs::Integer)
     end
 end
 
-function test_loop(pipelines, data_train, data_test, true_maximizer, cost, true_encoder; nb_epochs=500, show_plots=true, setting_name="???")
+function test_loop(pipelines, data_train, data_test, true_maximizer, cost, true_encoder, metrics; nb_epochs=500, show_plots=true, setting_name="???")
     for target in keys(pipelines), pipeline in pipelines[target]
         (; encoder, maximizer, loss) = pipeline
         model = InferOptModel(encoder, maximizer, loss)
 
         flux_loss = define_flux_loss(encoder, maximizer, loss, target)
-        train_metrics = [Loss("Train loss"), HammingDistance("Train hamming distance"), CostGap("Train cost gap"), ParameterError("Train parameter error")]
-        test_metrics = [Loss("Test loss"), HammingDistance("Test Hamming distance"), CostGap("Test cost gap"), ParameterError("Test parameter error")]
+        train_metrics = [metric("Train $name") for (name, metric) in metrics]
+        test_metrics = [metric("Test $name") for (name, metric) in metrics]
         opt = ADAM()
+        additional_info = (; cost, true_encoder)
 
         trainer = InferOptTrainer(
             data_train, data_test,
             model,
             train_metrics, test_metrics,
-            opt, flux_loss, true_maximizer, cost, true_encoder
+            opt, flux_loss, true_maximizer, additional_info
         )
 
         @info "Testing $setting_name" target encoder maximizer loss

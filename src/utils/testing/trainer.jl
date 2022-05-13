@@ -1,14 +1,10 @@
-# ---
-
 struct InferOptModel{E, M, L}
     encoder::E
     maximizer::M
     loss::L
 end
 
-# ---
-
-struct InferOptTrainer{D <: InferOptDataset, M <: InferOptModel, MM, O, L, T, C, E}
+struct InferOptTrainer{D <: InferOptDataset, M <: InferOptModel, MM, O, L, T, I}
     data_train::D
     data_test::D
     model::M
@@ -17,12 +13,10 @@ struct InferOptTrainer{D <: InferOptDataset, M <: InferOptModel, MM, O, L, T, C,
     opt::O
     flux_loss::L
     true_maximizer::T
-    cost::C
-    true_encoder::E
-    #additional_info::I
+    additional_info::I
 end
 
-# TODO: better constructors
+# TODO: better constructor
 
 function compute_metrics!(t::InferOptTrainer)
     Y_train_pred = generate_predictions(t.model.encoder, t.true_maximizer, t.data_train.X)

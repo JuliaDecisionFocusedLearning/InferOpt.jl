@@ -16,7 +16,6 @@ nb_features = 5
 
 true_encoder = Chain(Dense(nb_features, 1), dropfirstdim)
 cost(y; instance) = dot(y, -true_encoder(instance))
-error_function(y1, y2) = Flux.Losses.mse(y1, y2)
 
 function true_maximizer(θ::AbstractMatrix; kwargs...)
     g = AcyclicGridGraph(-θ)
@@ -39,16 +38,13 @@ data_train, data_test = generate_dataset(
 );
 
 ## Test loop
-
+metrics = Dict(
+    "loss" => Loss,
+    "mse" => MeanSquaredError,
+    "cost gap" => CostGap,
+    "parameter error" => ParameterError
+)
 test_loop(
-    pipelines;
-    true_encoder=true_encoder,
-    true_maximizer=true_maximizer,
-    data_train=data_train,
-    data_test=data_test,
-    error_function=error_function,
-    cost=cost,
-    epochs=500,
-    show_plots=true,
-    setting_name="paths",
+    pipelines, data_train, data_test, true_maximizer, cost, true_encoder, metrics;
+    nb_epochs=500, show_plots=true, setting_name="paths"
 )

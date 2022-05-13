@@ -4,6 +4,8 @@ struct InferOptDataset{X, Y, T}
     Y::Y
 end
 
+InferOptDataset(; X=nothing, θ=nothing, Y=nothing) = InferOptDataset(X, θ, Y)
+
 function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     N = length(X)
     N_train = floor(Int, N * train_percentage)

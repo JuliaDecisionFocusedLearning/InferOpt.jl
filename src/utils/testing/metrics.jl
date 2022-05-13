@@ -32,10 +32,14 @@ end
 HammingDistance(name="Hamming distance") = HammingDistance(name, Float64[])
 
 function (m::HammingDistance)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
-    train_error = mean(
+    dist = mean(
         hamming_distance(y, y_pred) for (y, y_pred) in zip(data.Y, Y_pred)
     )
-    return train_error
+    return dist
+end
+
+function test_perf(metric::HammingDistance)
+    @test metric.history[end] < metric.history[1] / 2
 end
 
 ## ---
@@ -48,8 +52,9 @@ end
 CostGap(name="Cost gap") = CostGap(name, Float64[])
 
 function (m::CostGap)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
-    train_cost = [trainer.cost(y; instance=x) for (x, y) in zip(data.X, Y_pred)]
-    train_cost_opt = [trainer.cost(y; instance=x) for (x, y) in zip(data.X, data.Y)]
+    (; cost) = trainer.additional_info
+    train_cost = [cost(y; instance=x) for (x, y) in zip(data.X, Y_pred)]
+    train_cost_opt = [cost(y; instance=x) for (x, y) in zip(data.X, data.Y)]
 
     cost_gap = mean(
         (c - c_opt) / abs(c_opt) for (c, c_opt) in zip(train_cost, train_cost_opt)
@@ -67,10 +72,35 @@ end
 ParameterError(name="Parameter error") = ParameterError(name, Float64[])
 
 function (m::ParameterError)(trainer::InferOptTrainer, data; kwargs...)
-    w_true = first(trainer.true_encoder).weight
+    (; true_encoder) = trainer.additional_info
+    w_true = first(true_encoder).weight
     w_learned = first(trainer.model.encoder).weight
     parameter_error = normalized_mape(w_true, w_learned)
     return parameter_error
+end
+
+function test_perf(metric::ParameterError)
+    @test metric.history[end] < metric.history[1] / 2
+end
+
+## ---
+
+struct MeanSquaredError <: AbstractScalarMetric
+    name::String
+    history::Vector{Float64}
+end
+
+MeanSquaredError(name="Mean squared error") = MeanSquaredError(name, Float64[])
+
+function (m::MeanSquaredError)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
+    train_error = mean(
+        sum((y - y_pred) .^ 2) for (y, y_pred) in zip(data.Y, Y_pred)
+    )
+    return train_error
+end
+
+function test_perf(metric::MeanSquaredError)
+    @test metric.history[end] < metric.history[1] / 2
 end
 
 ## ----
