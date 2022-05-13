@@ -1,14 +1,22 @@
 ## Performance metrics
 
-function init_perf()
+function init_perf(;
+    train_losss=true,
+    test_losss=true,
+    train_errors=true,
+    test_errors=true,
+    train_cost_gaps=true,
+    test_cost_gaps=true,
+    parameter_errors=true,
+)
     perf_storage = (
-        train_losses=Float64[],
-        test_losses=Float64[],
-        train_errors=Float64[],
-        test_errors=Float64[],
-        train_cost_gaps=Float64[],
-        test_cost_gaps=Float64[],
-        parameter_errors=Float64[],
+        train_losses=train_losss ? Float64[] : nothing,
+        test_losses=test_losss ? Float64[] : nothing,
+        train_errors=train_errors ? Float64[] : nothing,
+        test_errors=test_errors ? Float64[] : nothing,
+        train_cost_gaps=train_cost_gaps ? Float64[] : nothing,
+        test_cost_gaps=test_cost_gaps ? Float64[] : nothing,
+        parameter_errors=parameter_errors ? Float64[] : nothing,
     )
     return perf_storage
 end
@@ -34,11 +42,18 @@ function update_perf!(
         parameter_errors,
     ) = perf_storage
 
-    (X_train, thetas_train, Y_train) = data_train
-    (X_test, thetas_test, Y_test) = data_test
+    (X_train, _, Y_train) = data_train
+    (X_test, _, Y_test) = data_test
 
-    train_loss = sum(flux_loss(t...) for t in zip(data_train...))
-    test_loss = sum(flux_loss(t...) for t in zip(data_test...))
+    if !isnothing(train_losses)
+        train_loss = sum(flux_loss(t...) for t in zip(data_train...))
+        push!(train_losses, train_loss)
+    end
+
+    if !isnothing(test_losses)
+        test_loss = sum(flux_loss(t...) for t in zip(data_test...))
+        push!(test_losses, test_loss)
+    end
 
     Y_train_pred = generate_predictions(encoder, true_maximizer, X_train)
     Y_test_pred = generate_predictions(encoder, true_maximizer, X_test)
@@ -64,8 +79,6 @@ function update_perf!(
     w_learned = first(encoder).weight
     parameter_error = normalized_mape(w_true, w_learned)
 
-    push!(train_losses, train_loss)
-    push!(test_losses, test_loss)
     push!(train_errors, train_error)
     push!(test_errors, test_error)
     push!(train_cost_gaps, train_cost_gap)
@@ -111,6 +124,33 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         if length(parameter_errors) > 0
             @test parameter_errors[end] < parameter_errors[1] / 2
         end
+    end
+end
+
+function test_perf(trainer::InferOptTrainer; test_name::String)
+    @testset "$test_name" begin
+        for metric in trainer.metrics
+            test_perf(metric)
+        end
+
+        # # Prediction errors
+        # if length(train_errors) > 0
+        #     @test train_errors[end] < train_errors[1] / 2
+        # end
+        # if length(test_errors) > 0
+        #     @test test_errors[end] < test_errors[1] / 2
+        # end
+        # # Cost
+        # if length(train_cost_gaps) > 0
+        #     @test train_cost_gaps[end] < train_cost_gaps[1]
+        # end
+        # if length(test_cost_gaps) > 0
+        #     @test test_cost_gaps[end] < test_cost_gaps[1]
+        # end
+        # # Parameter errors
+        # if length(parameter_errors) > 0
+        #     @test parameter_errors[end] < parameter_errors[1] / 2
+        # end
     end
 end
 
@@ -181,6 +221,19 @@ function plot_perf(perf_storage::NamedTuple)
             title="Parameter error",
             # ylim=(0, maximum(parameter_errors)),
         )
+        push!(plts, plt)
+    end
+
+    for plt in plts
+        println(plt)
+    end
+    return nothing
+end
+
+function plot_perf(t::InferOptTrainer)
+    plts = []
+    for metric in t.metrics
+        plt = lineplot(metric.history; xlabel="Epoch", title=name(metric))
         push!(plts, plt)
     end
 

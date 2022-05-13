@@ -7,6 +7,8 @@ using ..Statistics
 using ..Test
 using ..UnicodePlots
 
+include("trainer.jl")
+include("metrics.jl")
 include("dataset.jl")
 include("error.jl")
 include("loss.jl")
@@ -20,5 +22,9 @@ export hamming_distance, normalized_hamming_distance
 export define_flux_loss
 export init_perf, update_perf!, plot_perf, test_perf
 export dropfirstdim
+
+export InferOptTrainer, InferOptModel, InferOptDataset
+export TrainLoss, TestLoss, ErrorFunctionTrain, ErrorFunctionTest
+export compute_metrics!, get_data_train, get_data_test
 
 end
