@@ -19,8 +19,9 @@ We will use `InferOpt` to learn the appropriate weights, so that we may propose 
 
 ````@example tutorial
 using Flux
+using Graphs
+using GridGraphs
 using InferOpt
-using InferOpt.GridGraphs
 using InferOpt.Testing
 using LinearAlgebra
 using ProgressMeter
@@ -35,7 +36,7 @@ nothing #hide
 
 ## Grid graphs
 
-For the purposes of this tutorial, we consider grid graphs, as implemented in `InferOpt.GridGraphs`.
+For the purposes of this tutorial, we consider grid graphs, as implemented in [GridGraphs.jl](https://github.com/gdalle/GridGraphs.jl).
 In such graphs, each vertex corresponds to a couple of coordinates ``(i, j)``, where ``1 \leq i \leq h`` and ``1 \leq j \leq w``.
 
 To ensure acyclicity, we only allow the user to move right, down or both.
@@ -51,7 +52,7 @@ For convenience, `InferOpt.GridGraphs` also provides custom functions to compute
 Let us see what those look like.
 
 ````@example tutorial
-p = grid_shortest_path(g, 1, nv(g));
+p = path_to_matrix(g, grid_topological_sort(g, 1, nv(g)));
 spy(p)
 ````
 
@@ -73,7 +74,8 @@ To be consistent with the literature, we frame this problem as a linear maximiza
 ````@example tutorial
 function linear_maximizer(θ)
     g = AcyclicGridGraph(-θ)
-    return grid_shortest_path(g, 1, nv(g))
+    path = grid_topological_sort(g, 1, nv(g))
+    return path_to_matrix(g, path)
 end;
 nothing #hide
 ````

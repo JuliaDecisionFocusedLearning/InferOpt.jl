@@ -1,18 +1,10 @@
-using Distributions
 using InferOpt
 using LinearAlgebra
 using Random
 using Test
 using Zygote
 
-Random.seed!(63)
-
-one_hot_argmax_approximations = [
-    Perturbed(one_hot_argmax; ε=0.3, M=1000)
-    PerturbedGeneric(
-        one_hot_argmax; noise_dist=θ -> MultivariateNormal(θ, 0.3^2 * I), M=1000
-    )
-]
+one_hot_argmax_approximations = [Perturbed(one_hot_argmax; ε=0.3, M=5000)]
 
 for approx in one_hot_argmax_approximations
     @testset verbose = true "$approx" begin

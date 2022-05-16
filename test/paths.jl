@@ -1,14 +1,11 @@
 using Flux
+using Graphs
+using GridGraphs
 using InferOpt
 using InferOpt.Testing
-using InferOpt.GridGraphs
 using LinearAlgebra
 using Random
 using Test
-
-Random.seed!(63)
-
-include("utils.jl")
 
 ## Main functions
 
@@ -18,9 +15,12 @@ true_encoder = Chain(Dense(nb_features, 1), dropfirstdim)
 cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(y1, y2) = Flux.Losses.mse(y1, y2)
 
-function true_maximizer(θ::AbstractMatrix; kwargs...)
-    g = AcyclicGridGraph(-θ)
-    return grid_shortest_path(g, 1, nv(g))
+function true_maximizer(θ::AbstractMatrix{R}; kwargs...) where {R<:Real}
+    g = AcyclicGridGraph{Int,R}(-θ)
+    shortest_path_tree = GridGraphs.grid_topological_sort(g, 1)
+    path = GridGraphs.get_path(shortest_path_tree, 1, nv(g))
+    y = GridGraphs.path_to_matrix(g, path)
+    return y
 end
 
 ## Pipelines

@@ -16,8 +16,9 @@ We will use `InferOpt` to learn the appropriate weights, so that we may propose 
 =#
 
 using Flux
+using Graphs
+using GridGraphs
 using InferOpt
-using InferOpt.GridGraphs
 using InferOpt.Testing
 using LinearAlgebra
 using ProgressMeter
@@ -31,7 +32,7 @@ Random.seed!(63);
 # ## Grid graphs
 
 #=
-For the purposes of this tutorial, we consider grid graphs, as implemented in `InferOpt.GridGraphs`.
+For the purposes of this tutorial, we consider grid graphs, as implemented in [GridGraphs.jl](https://github.com/gdalle/GridGraphs.jl).
 In such graphs, each vertex corresponds to a couple of coordinates ``(i, j)``, where ``1 \leq i \leq h`` and ``1 \leq j \leq w``.
 
 To ensure acyclicity, we only allow the user to move right, down or both.
@@ -42,11 +43,11 @@ h, w = 50, 100
 g = AcyclicGridGraph(rand(h, w));
 
 #=
-For convenience, `InferOpt.GridGraphs` also provides custom functions to compute shortest paths.
-Let us see what those look like.
+For convenience, `GridGraphs.jl` also provides custom functions to compute shortest paths efficiently.
+Let us see what those paths look like.
 =#
 
-p = grid_shortest_path(g, 1, nv(g));
+p = path_to_matrix(g, grid_topological_sort(g, 1, nv(g)));
 spy(p)
 
 # ## Dataset
@@ -67,7 +68,8 @@ To be consistent with the literature, we frame this problem as a linear maximiza
 
 function linear_maximizer(θ)
     g = AcyclicGridGraph(-θ)
-    return grid_shortest_path(g, 1, nv(g))
+    path = grid_topological_sort(g, 1, nv(g))
+    return path_to_matrix(g, path)
 end;
 
 #=

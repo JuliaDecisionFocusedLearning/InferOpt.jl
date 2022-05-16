@@ -1,18 +1,12 @@
 module InferOpt
 
 using ChainRulesCore
-using DataStructures
-using Distributions
-using Folds
-using Graphs
 using LinearAlgebra
-using ProgressMeter
 using Random
 using SimpleTraits
 using SparseArrays
 using Statistics
 using Test
-using UnicodePlots
 
 include("interpolation/interpolation.jl")
 
@@ -22,8 +16,8 @@ include("regularized/simplex.jl")
 include("regularized/prediction.jl")
 include("regularized/ranking.jl")
 
-include("perturbed/perturbed.jl")
-include("perturbed/perturbed_generic.jl")
+include("perturbed/perturbed_abstract.jl")
+include("perturbed/perturbed_normal.jl")
 
 include("fenchel_young/fenchel_young.jl")
 
@@ -32,7 +26,8 @@ include("smart_predict_optimize/smart_predict_optimize.jl")
 include("structured_svm/structured_loss.jl")
 include("structured_svm/structured_svm.jl")
 
-include("utils/grid_graphs/GridGraphs.jl")
+include("experimental/perturbed_lognormal.jl")
+
 include("utils/testing/Testing.jl")
 
 export shannon_entropy, half_square_norm
@@ -43,7 +38,6 @@ export IsRegularizedPrediction
 export Interpolation
 
 export Perturbed, PerturbedCost
-export PerturbedGeneric
 
 export FenchelYoungLoss
 
