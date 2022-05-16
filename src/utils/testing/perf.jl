@@ -1,6 +1,6 @@
 ## Performance metrics
 
-function test_perf(trainer::InferOptTrainer; test_name::String)
+function test_perf(trainer::InferOptTrainer; test_name::String="Test")
     @testset "$test_name" begin
         for metric in trainer.train_metrics
             test_perf(metric)

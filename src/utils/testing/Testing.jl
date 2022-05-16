@@ -22,6 +22,7 @@ export hamming_distance, normalized_hamming_distance
 export define_flux_loss
 export plot_perf, test_perf
 export dropfirstdim
+export train_test_split
 
 export InferOptTrainer, InferOptModel, InferOptDataset
 export Loss, HammingDistance, CostGap, ParameterError, MeanSquaredError

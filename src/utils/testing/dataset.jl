@@ -37,8 +37,3 @@ function generate_dataset(
     data_test = InferOptDataset(X_test, thetas_test, Y_test)
     return data_train, data_test
 end
-
-function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
-    return Y_pred
-end

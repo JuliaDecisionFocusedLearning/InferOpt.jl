@@ -19,7 +19,12 @@ Loss(name="Loss") = Loss(name, Float64[])
 
 function (m::Loss)(trainer::InferOptTrainer, data; kwargs...)
     (; X, θ, Y) = data
-    return sum(trainer.flux_loss(t...) for t in zip(X, θ, Y))
+    if isnothing(θ)
+        d = zip(X, Y)
+    else
+        d = zip(X, θ, Y)
+    end
+    return sum(trainer.flux_loss(t...) for t in d)
 end
 
 ## ---
@@ -74,7 +79,7 @@ ParameterError(name="Parameter error") = ParameterError(name, Float64[])
 function (m::ParameterError)(trainer::InferOptTrainer, data; kwargs...)
     (; true_encoder) = trainer.additional_info
     w_true = first(true_encoder).weight
-    w_learned = first(trainer.model.encoder).weight
+    w_learned = first(trainer.encoder).weight
     parameter_error = normalized_mape(w_true, w_learned)
     return parameter_error
 end
@@ -110,6 +115,8 @@ struct ScalarMetric{R <: Real, F} <: AbstractScalarMetric
     history::Vector{R}
     f::F
 end
+
+ScalarMetric(;name::String, f) = ScalarMetric(name, [], f)
 
 function (m::ScalarMetric)(t::InferOptTrainer)
     return m.f(t)
