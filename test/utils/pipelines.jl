@@ -4,7 +4,7 @@ using InferOpt.Testing
 
 function list_standard_pipelines(true_maximizer; nb_features, cost=nothing)
     pipelines = Dict{String,Vector}()
-
+    # SPO+
     pipelines["θ"] = [(
         encoder=Chain(Dense(nb_features, 1), dropfirstdim),
         maximizer=identity,
@@ -18,15 +18,21 @@ function list_standard_pipelines(true_maximizer; nb_features, cost=nothing)
     )]
 
     pipelines["y"] = [
-        # Perturbations
+        # Perturbations with FYL
         (
             encoder=Chain(Dense(nb_features, 1), dropfirstdim),
             maximizer=identity,
-            loss=FenchelYoungLoss(Perturbed(true_maximizer; ε=1.0, M=5)),
+            loss=FenchelYoungLoss(PerturbedNormal(true_maximizer; ε=1.0, M=5)),
         ),
         (
             encoder=Chain(Dense(nb_features, 1), dropfirstdim),
-            maximizer=Perturbed(true_maximizer; ε=1.0, M=5),
+            maximizer=identity,
+            loss=FenchelYoungLoss(PerturbedLogNormal(true_maximizer; ε=0.1, M=5)),
+        ),
+        # Perturbation with MSE
+        (
+            encoder=Chain(Dense(nb_features, 1), dropfirstdim),
+            maximizer=PerturbedNormal(true_maximizer; ε=1.0, M=5),
             loss=Flux.Losses.mse,
         ),
     ]
@@ -35,7 +41,7 @@ function list_standard_pipelines(true_maximizer; nb_features, cost=nothing)
         pipelines["none"] = [(
             encoder=Chain(Dense(nb_features, 1), dropfirstdim),
             maximizer=identity,
-            loss=PerturbedCost(true_maximizer, cost; ε=1.0, M=5),
+            loss=PerturbedCost(PerturbedNormal(true_maximizer; ε=1.0, M=5), cost),
         )]
     end
 

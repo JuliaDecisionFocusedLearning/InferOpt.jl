@@ -33,9 +33,9 @@ data_train, data_test = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=20,
+    instance_dim=10,
     nb_instances=100,
-    noise_std=0.02,
+    noise_std=0.01,
 );
 
 ## Test loop

@@ -16,8 +16,10 @@ include("regularized/simplex.jl")
 include("regularized/prediction.jl")
 include("regularized/ranking.jl")
 
-include("perturbed/perturbed_abstract.jl")
-include("perturbed/perturbed_normal.jl")
+include("perturbed/abstract.jl")
+include("perturbed/normal.jl")
+include("perturbed/lognormal.jl")
+include("perturbed/cost.jl")
 
 include("fenchel_young/fenchel_young.jl")
 
@@ -25,8 +27,6 @@ include("smart_predict_optimize/smart_predict_optimize.jl")
 
 include("structured_svm/structured_loss.jl")
 include("structured_svm/structured_svm.jl")
-
-include("experimental/perturbed_lognormal.jl")
 
 include("utils/testing/Testing.jl")
 
@@ -37,7 +37,10 @@ export IsRegularizedPrediction
 
 export Interpolation
 
-export Perturbed, PerturbedCost
+export AbstractPerturbed
+export PerturbedNormal
+export PerturbedLogNormal
+export PerturbedCost
 
 export FenchelYoungLoss
 

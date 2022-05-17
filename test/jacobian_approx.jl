@@ -4,7 +4,7 @@ using Random
 using Test
 using Zygote
 
-one_hot_argmax_approximations = [Perturbed(one_hot_argmax; ε=0.3, M=5000)]
+one_hot_argmax_approximations = [PerturbedNormal(one_hot_argmax; ε=0.3, M=5000)]
 
 for approx in one_hot_argmax_approximations
     @testset verbose = true "$approx" begin
