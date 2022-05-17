@@ -48,8 +48,8 @@ g = AcyclicGridGraph(rand(h, w));
 nothing #hide
 ````
 
-For convenience, `InferOpt.GridGraphs` also provides custom functions to compute shortest paths.
-Let us see what those look like.
+For convenience, `GridGraphs.jl` also provides custom functions to compute shortest paths efficiently.
+Let us see what those paths look like.
 
 ````@example tutorial
 p = path_to_matrix(g, grid_topological_sort(g, 1, nv(g)));
@@ -105,7 +105,7 @@ Here is the crucial part where `InferOpt` intervenes: the choice of a clever los
 - evaluate the quality of our model based on the paths that it recommends
 
 ````@example tutorial
-regularized_predictor = Perturbed(linear_maximizer; ε=1.0, M=5);
+regularized_predictor = PerturbedNormal(linear_maximizer; ε=1.0, M=5);
 loss = FenchelYoungLoss(regularized_predictor);
 nothing #hide
 ````
@@ -124,7 +124,7 @@ Thanks to this smoothing, we can now train our model with a standard gradient op
 encoder = deepcopy(initial_encoder)
 opt = ADAM();
 losses = Float64[]
-for epoch in 1:100
+for epoch in 1:200
     l = 0.
     for (x, y) in zip(X_train, Y_train)
         grads = gradient(Flux.params(encoder)) do

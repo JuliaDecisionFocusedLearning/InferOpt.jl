@@ -11,36 +11,21 @@ using Test
 
 nb_features = 5
 
-true_encoder = Chain(Dense(nb_features, 1), dropfirstdim, z -> -exp.(z) .- 1.)
+encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim)
+true_encoder = encoder_factory()
 cost(y; instance) = dot(y, -true_encoder(instance))
-error_function(y1, y2) = Flux.Losses.mse(y1, y2)
+error_function(ŷ, y) = half_square_norm(ŷ - y)
 
 function true_maximizer(θ::AbstractMatrix{R}; kwargs...) where {R<:Real}
-    g = GridGraph{Int,R}(-θ)
-    path = grid_dijkstra(g, 1, nv(g))
+    g = AcyclicGridGraph{Int,R}(-θ)
+    path = grid_topological_sort(g, 1, nv(g))
     y = path_to_matrix(g, path)
     return y
 end
 
 ## Pipelines
 
-# pipelines = list_standard_pipelines(true_maximizer; cost=cost, nb_features=nb_features)
-
-pipelines = Dict{String,Vector}()
-
-pipelines["y"] = [
-    # Perturbations
-    # (
-    #     encoder=Chain(Dense(nb_features, 1), dropfirstdim, z -> -exp.(z) .- 1.),
-    #     maximizer=identity,
-    #     loss=FenchelYoungLoss(Perturbed(true_maximizer; ε=0.1, M=5)),
-    # ),
-    (
-        encoder=Chain(Dense(nb_features, 1), dropfirstdim, z -> -exp.(z) .- 1.),
-        maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedLogNormal(true_maximizer; ε=0.1, M=5)),
-    ),
-]
+pipelines = list_standard_pipelines(encoder_factory, true_maximizer; cost=cost)
 
 ## Dataset generation
 
@@ -48,9 +33,9 @@ data_train, data_test = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=(10, 15),
-    nb_instances=100,
-    noise_std=0.02,
+    instance_dim=(10, 12),
+    nb_instances=200,
+    noise_std=0.01,
 );
 
 ## Test loop
@@ -63,7 +48,7 @@ test_loop(
     data_test=data_test,
     error_function=error_function,
     cost=cost,
-    epochs=100,
+    epochs=200,
     show_plots=true,
     setting_name="paths",
 )

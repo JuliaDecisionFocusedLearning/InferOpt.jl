@@ -44,9 +44,9 @@ function update_perf!(
     Y_test_pred = generate_predictions(encoder, true_maximizer, X_test)
 
     train_error = mean(
-        error_function(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
+        error_function(y_pred, y) for (y, y_pred) in zip(Y_train, Y_train_pred)
     )
-    test_error = mean(error_function(y, y_pred) for (y, y_pred) in zip(Y_test, Y_test_pred))
+    test_error = mean(error_function(y_pred, y) for (y, y_pred) in zip(Y_test, Y_test_pred))
 
     train_cost = [cost(y; instance=x) for (x, y) in zip(X_train, Y_train_pred)]
     train_cost_opt = [cost(y; instance=x) for (x, y) in zip(X_train, Y_train)]
@@ -148,7 +148,9 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
 
     if length(test_errors) > 0
         plt = lineplot_function(
-            test_errors; xlabel="Epoch", title="Test error",
+            test_errors;
+            xlabel="Epoch",
+            title="Test error",
             # ylim=(0, maximum(test_errors))
         )
         push!(plts, plt)

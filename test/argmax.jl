@@ -9,37 +9,34 @@ using Test
 
 nb_features = 5
 
-true_encoder = Chain(Dense(nb_features, 1), dropfirstdim)
+encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim)
+true_encoder = encoder_factory()
 true_maximizer(θ; kwargs...) = one_hot_argmax(θ; kwargs...)
 cost(y; instance) = dot(y, -true_encoder(instance))
-error_function(y1, y2) = hamming_distance(y1, y2)
+error_function(ŷ, y) = hamming_distance(ŷ, y)
 
 ## Pipelines
 
-pipelines = list_standard_pipelines(true_maximizer; cost=cost, nb_features=nb_features)
+pipelines = list_standard_pipelines(encoder_factory, true_maximizer; cost=cost)
 
 append!(
     pipelines["y"],
     [
         # Structured SVM
         (
-            encoder=Chain(Dense(nb_features, 1), dropfirstdim),
+            encoder=encoder_factory(),
             maximizer=identity,
             loss=StructuredSVMLoss(ZeroOneLoss()),
         ),
         # Regularized prediction: explicit
         (
-            encoder=Chain(Dense(nb_features, 1), dropfirstdim),
+            encoder=encoder_factory(),
             maximizer=identity,
             loss=FenchelYoungLoss(one_hot_argmax),
         ),
+        (encoder=encoder_factory(), maximizer=identity, loss=FenchelYoungLoss(sparsemax)),
         (
-            encoder=Chain(Dense(nb_features, 1), dropfirstdim),
-            maximizer=identity,
-            loss=FenchelYoungLoss(sparsemax),
-        ),
-        (
-            encoder=Chain(Dense(nb_features, 1), dropfirstdim),
+            encoder=encoder_factory(),
             maximizer=identity,
             loss=FenchelYoungLoss(InferOpt.softmax),
         ),
@@ -69,5 +66,5 @@ test_loop(
     cost=cost,
     epochs=500,
     show_plots=true,
-    setting_name="argmax"
+    setting_name="argmax",
 )

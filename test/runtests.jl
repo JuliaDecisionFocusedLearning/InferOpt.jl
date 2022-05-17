@@ -1,7 +1,6 @@
 using InferOpt
 using Test
 
-include("utils/pipelines.jl")
 include("utils/loop.jl")
 
 @testset verbose = true "InferOpt.jl" begin
