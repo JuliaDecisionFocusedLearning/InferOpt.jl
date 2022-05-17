@@ -5,10 +5,6 @@ using LinearAlgebra
 using Random
 using Test
 
-Random.seed!(63)
-
-include("utils.jl")
-
 ## Main functions
 
 nb_features = 5

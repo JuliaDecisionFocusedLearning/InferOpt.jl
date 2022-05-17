@@ -12,17 +12,13 @@ function test_perf(trainer::InferOptTrainer; test_name::String="Test")
     end
 end
 
-function plot_perf(t::InferOptTrainer)
-    plts = []
+function plot_perf(t::InferOptTrainer; lineplot_function::Function)
     for m_list in (t.train_metrics, t.test_metrics)
         for metric in m_list
-            plt = lineplot(metric.history; xlabel="Epoch", title=name(metric))
-            push!(plts, plt)
+            plt = lineplot_function(metric.history; xlabel="Epoch", title=name(metric))
+            println(plt)
         end
     end
 
-    for plt in plts
-        println(plt)
-    end
     return nothing
 end

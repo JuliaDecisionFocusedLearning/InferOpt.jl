@@ -1,11 +1,9 @@
 module Testing
 
-using ..InferOpt
-using ..LinearAlgebra
-using ..ProgressMeter
-using ..Statistics
-using ..Test
-using ..UnicodePlots
+using InferOpt
+using LinearAlgebra
+using Statistics
+using Test
 
 include("dataset.jl")
 include("trainer.jl")
@@ -19,7 +17,7 @@ dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
 export generate_dataset
 export mape, normalized_mape
 export hamming_distance, normalized_hamming_distance
-export define_flux_loss
+export define_pipeline_loss
 export plot_perf, test_perf
 export dropfirstdim
 export train_test_split

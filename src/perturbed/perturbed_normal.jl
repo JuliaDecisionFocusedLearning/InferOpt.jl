@@ -1,9 +1,7 @@
-abstract type AbstractPerturbed end
-
 """
     Perturbed{F}
 
-Differentiable perturbation of a black-box optimizer.
+Differentiable normal perturbation of a black-box optimizer.
 
 # Fields
 - `maximizer::F`: underlying argmax function
@@ -21,7 +19,7 @@ Perturbed(maximizer; ε=1.0, M=2) = Perturbed(maximizer, float(ε), M)
 function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
     (; maximizer, ε, M) = perturbed
     d = size(θ)
-    y_samples = Folds.map(m -> maximizer(θ + ε * randn(d); kwargs...), 1:M)
+    y_samples = [maximizer(θ + ε * randn(d); kwargs...) for _ in 1:M]
     y_mean = mean(y_samples)
     return y_mean
 end
@@ -29,11 +27,11 @@ end
 function compute_y_and_Fθ(perturbed::Perturbed, θ::AbstractArray; kwargs...)
     (; maximizer, ε, M) = perturbed
     d = size(θ)
-    perturbed_θs = [θ + ε * randn(d) for _ in 1:M]
-    y_samples = Folds.map(θ_perturbed -> maximizer(θ_perturbed; kwargs...), perturbed_θs)
-    F_θ_sample = [dot(θ_perturbed, y) for (θ_perturbed, y) in zip(perturbed_θs, y_samples)]
+    θ_samples = [θ + ε * randn(d) for _ in 1:M]
+    y_samples = [maximizer(θ_sample; kwargs...) for θ_sample in θ_samples]
+    F_θ_samples = [dot(θ_sample, y) for (θ_sample, y) in zip(θ_samples, y_samples)]
     y_mean = mean(y_samples)
-    Fθ_mean = mean(F_θ_sample)  # useful for computing Fenchel-Young loss
+    Fθ_mean = mean(F_θ_samples)  # useful for computing Fenchel-Young loss
     return y_mean, Fθ_mean
 end
 
@@ -88,7 +86,7 @@ end
 function ChainRulesCore.rrule(perturbed_cost::PerturbedCost, θ::AbstractArray; kwargs...)
     (; maximizer, cost, ε, M) = perturbed_cost
     d = size(θ)
-    Z_samples = [randn(d) for m in 1:M]
+    Z_samples = [randn(d) for _ in 1:M]
     y_samples = [maximizer(θ + ε * Z; kwargs...) for Z in Z_samples]
     costs = [cost(y; kwargs...) for y in y_samples]
 
