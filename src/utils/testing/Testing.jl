@@ -2,6 +2,7 @@ module Testing
 
 using InferOpt
 using LinearAlgebra
+using Logging
 using Statistics
 using Test
 
