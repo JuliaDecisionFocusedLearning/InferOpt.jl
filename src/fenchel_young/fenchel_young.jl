@@ -15,16 +15,19 @@ end
 @traitfn function prediction_and_loss(
     fyl::FenchelYoungLoss{P}, θ::AbstractArray, y::AbstractArray; kwargs...
 ) where {P; IsRegularizedPrediction{P}}
-    ŷ = fyl.predictor(θ; kwargs...)
-    Ω(z) = compute_regularization(fyl.predictor, z)
-    l = dot(θ, ŷ - y) - (Ω(ŷ) - Ω(y))
+    (; predictor) = fyl
+    ŷ = predictor(θ; kwargs...)
+    fy = compute_regularization(predictor, y) - dot(θ, y)
+    fŷ = compute_regularization(predictor, ŷ) - dot(θ, ŷ)
+    l = fy - fŷ
     return ŷ, l
 end
 
 function prediction_and_loss(
     fyl::FenchelYoungLoss{P}, θ::AbstractArray, y::AbstractArray; kwargs...
 ) where {P<:AbstractPerturbed}
-    ŷ, Fθ = compute_y_and_Fθ(fyl.predictor, θ; kwargs...)
+    (; predictor) = fyl
+    ŷ, Fθ = compute_y_and_Fθ(predictor, θ; kwargs...)
     l = Fθ - dot(θ, y)
     return ŷ, l
 end

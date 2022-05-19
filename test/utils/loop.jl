@@ -11,14 +11,14 @@ function test_loop(
     for target in keys(pipelines), pipeline in pipelines[target]
         (; encoder, maximizer, loss) = pipeline
 
-        flux_loss = define_pipeline_loss(encoder, maximizer, loss, target)
+        pipeline_loss = define_pipeline_loss(encoder, maximizer, loss, target)
         opt = ADAM()
         extra_info = (; cost, true_encoder, encoder)
         pipeline(x) = true_maximizer(encoder(x))
 
         trainer = InferOptTrainer(
             metrics_dict=metrics,
-            loss=flux_loss,
+            loss=pipeline_loss,
             pipeline=pipeline,
             extra_info=extra_info
         )

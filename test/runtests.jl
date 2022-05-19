@@ -1,18 +1,11 @@
-using Aqua
 using InferOpt
 using Test
 
-include("utils/pipelines.jl")
 include("utils/loop.jl")
 
 @testset verbose = true "InferOpt.jl" begin
     @testset verbose = true "Code quality (Aqua.jl)" begin
-        Aqua.test_all(
-            InferOpt;
-            deps_compat=true,
-            project_extras=true,
-            ambiguities=false
-        )
+        include("quality.jl")
     end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")

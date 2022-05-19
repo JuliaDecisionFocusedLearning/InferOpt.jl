@@ -11,20 +11,20 @@ using Test
 
 nb_features = 5
 
-true_encoder = Chain(Dense(nb_features, 1), dropfirstdim)
+encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim)
+true_encoder = encoder_factory()
 cost(y; instance) = dot(y, -true_encoder(instance))
 
 function true_maximizer(θ::AbstractMatrix{R}; kwargs...) where {R<:Real}
     g = AcyclicGridGraph{Int,R}(-θ)
-    shortest_path_tree = GridGraphs.grid_topological_sort(g, 1)
-    path = GridGraphs.get_path(shortest_path_tree, 1, nv(g))
-    y = GridGraphs.path_to_matrix(g, path)
+    path = grid_topological_sort(g, 1, nv(g))
+    y = path_to_matrix(g, path)
     return y
 end
 
 ## Pipelines
 
-pipelines = list_standard_pipelines(true_maximizer; cost=cost, nb_features=nb_features)
+pipelines = list_standard_pipelines(encoder_factory, true_maximizer; cost=cost)
 
 ## Dataset generation
 
@@ -32,9 +32,9 @@ data = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=(10, 20),
-    nb_instances=100,
-    noise_std=0.02,
+    instance_dim=(10, 12),
+    nb_instances=200,
+    noise_std=0.01,
 );
 
 ## Test loop
