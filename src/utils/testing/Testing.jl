@@ -23,8 +23,8 @@ export plot_perf, test_perf
 export dropfirstdim
 export train_test_split
 
-export InferOptTrainer, InferOptModel, InferOptDataset
-export Loss, HammingDistance, CostGap, ParameterError, MeanSquaredError
+export InferOptTrainer, InferOptDataset
 export compute_metrics!
+export Loss, HammingDistance, CostGap, ParameterError, MeanSquaredError
 
 end

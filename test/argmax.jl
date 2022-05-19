@@ -47,7 +47,7 @@ append!(
 
 ## Dataset generation
 
-data_train, data_test = generate_dataset(
+data = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
@@ -64,6 +64,6 @@ metrics = Dict(
     "parameter error" => ParameterError
 )
 test_loop(
-    pipelines, data_train, data_test, true_maximizer, cost, true_encoder, metrics;
+    pipelines, data, true_maximizer, cost, true_encoder, metrics;
     nb_epochs=500, show_plots=true, setting_name="argmax"
 )

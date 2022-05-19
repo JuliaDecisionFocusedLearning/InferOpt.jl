@@ -1,48 +1,33 @@
-struct InferOptModel{E, M, L}
-    encoder::E
-    maximizer::M
-    loss::L
-end
-
-InferOptModel(;encoder, loss) = InferOptModel(encoder, identity, loss)
-
-function (m::InferOptModel)(x::AbstractArray)
-    return m.encoder(m.maximizer(x))
-end
-
-struct InferOptTrainer{E, M, O, L, P, I}
-    encoder::E
+struct InferOptTrainer{M, P, L, I}
     train_metrics::Vector{M}
     test_metrics::Vector{M}
-    opt::O
-    flux_loss::L
     pipeline::P
-    # true_maximizer::T
-    additional_info::I
+    loss::L
+    extra_info::I
 end
 
-function InferOptTrainer(; encoder, metrics_dict::Dict, opt, flux_loss, pipeline, additional_info)
+function InferOptTrainer(; metrics_dict::Dict, loss, pipeline, extra_info)
     train_metrics = [metric("Train $name") for (name, metric) in metrics_dict]
     test_metrics = [metric("Test $name") for (name, metric) in metrics_dict]
-    return InferOptTrainer(encoder, train_metrics, test_metrics, opt, flux_loss, pipeline, additional_info)
+    return InferOptTrainer(train_metrics, test_metrics, pipeline, loss, extra_info)
 end
     I
 
-function generate_predictions(t::InferOptTrainer, X)
-    Y_pred = [t.pipeline(x) for x in X]
+function generate_predictions(trainer::InferOptTrainer, X)
+    Y_pred = [trainer.pipeline(x) for x in X]
     return Y_pred
 end
 
-function compute_metrics!(t::InferOptTrainer, data_train, data_test; logger=nothing)
-    Y_train_pred = generate_predictions(t, data_train.X)
-    for (idx, metric) in enumerate(t.train_metrics)
-        compute_value!(metric, t, data_train; Y_pred=Y_train_pred)
+function compute_metrics!(trainer::InferOptTrainer, data::InferOptDataset; logger=nothing)
+    Y_train_pred = generate_predictions(trainer, data.train.X)
+    for (idx, metric) in enumerate(trainer.train_metrics)
+        compute_value!(metric, trainer, data.train; Y_pred=Y_train_pred)
         log_last_measure!(metric, logger; train=true, step_increment=(idx==1 ? 1 : 0))
     end
 
-    Y_test_pred = generate_predictions(t, data_test.X)
-    for metric in t.test_metrics
-        compute_value!(metric, t, data_test; Y_pred=Y_test_pred)
+    Y_test_pred = generate_predictions(trainer, data.test.X)
+    for metric in trainer.test_metrics
+        compute_value!(metric, trainer, data.test; Y_pred=Y_test_pred)
         log_last_measure!(metric, logger; train=false, step_increment=0)
     end
 end

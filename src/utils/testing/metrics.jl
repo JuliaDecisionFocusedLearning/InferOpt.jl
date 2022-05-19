@@ -20,13 +20,14 @@ end
 Loss(name="Loss") = Loss(name, Float64[])
 
 function (m::Loss)(trainer::InferOptTrainer, data; kwargs...)
-    (; X, θ, Y) = data
-    if isnothing(θ)
+    (; X, thetas, Y) = data
+    # TODO: find a better way to do that (does not work for all edge cases)
+    if isnothing(thetas)
         d = zip(X, Y)
     else
-        d = zip(X, θ, Y)
+        d = zip(X, thetas, Y)
     end
-    return sum(trainer.flux_loss(t...) for t in d)
+    return sum(trainer.loss(t...) for t in d)
 end
 
 function log_last_measure!(m::Loss, logger::AbstractLogger; train=true, step_increment=0)
@@ -73,7 +74,7 @@ end
 CostGap(name="Cost gap") = CostGap(name, Float64[])
 
 function (m::CostGap)(trainer::InferOptTrainer, data; Y_pred, kwargs...)
-    (; cost) = trainer.additional_info
+    (; cost) = trainer.extra_info
     train_cost = [cost(y; instance=x) for (x, y) in zip(data.X, Y_pred)]
     train_cost_opt = [cost(y; instance=x) for (x, y) in zip(data.X, data.Y)]
 
@@ -100,9 +101,9 @@ end
 ParameterError(name="Parameter error") = ParameterError(name, Float64[])
 
 function (m::ParameterError)(trainer::InferOptTrainer, data; kwargs...)
-    (; true_encoder) = trainer.additional_info
+    (; true_encoder, encoder) = trainer.extra_info
     w_true = first(true_encoder).weight
-    w_learned = first(trainer.encoder).weight
+    w_learned = first(encoder).weight
     parameter_error = normalized_mape(w_true, w_learned)
     return parameter_error
 end
