@@ -126,17 +126,17 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     ) = perf_storage
     plts = []
 
-    if length(train_losses) > 0
+    if any(!isnan, train_losses)
         plt = lineplot_function(train_losses; xlabel="Epoch", title="Train loss")
         push!(plts, plt)
     end
 
-    if length(test_losses) > 0
+    if any(!isnan, test_losses)
         plt = lineplot_function(test_losses; xlabel="Epoch", title="Test loss")
         push!(plts, plt)
     end
 
-    if length(train_errors) > 0
+    if any(!isnan, train_errors)
         plt = lineplot_function(
             train_errors;
             xlabel="Epoch",
@@ -146,7 +146,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
         push!(plts, plt)
     end
 
-    if length(test_errors) > 0
+    if any(!isnan, test_errors)
         plt = lineplot_function(
             test_errors;
             xlabel="Epoch",
@@ -156,7 +156,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
         push!(plts, plt)
     end
 
-    if length(train_cost_gaps) > 0
+    if any(!isnan, train_cost_gaps)
         plt = lineplot_function(
             train_cost_gaps;
             xlabel="Epoch",
@@ -166,7 +166,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
         push!(plts, plt)
     end
 
-    if length(train_cost_gaps) > 0
+    if any(!isnan, train_cost_gaps)
         plt = lineplot_function(
             test_cost_gaps;
             xlabel="Epoch",
@@ -176,7 +176,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
         push!(plts, plt)
     end
 
-    if length(parameter_errors) > 0
+    if any(!isnan, parameter_errors)
         plt = lineplot_function(
             parameter_errors;
             xlabel="Epoch",

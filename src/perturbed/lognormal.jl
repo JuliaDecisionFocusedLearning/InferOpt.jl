@@ -29,3 +29,10 @@ function gradlogpdf_perturbation(
 end
 
 difflogpdf_lognormal(x::Real, μ::Real, σ::Real) = -inv(x) - (log(x) - μ) / (x * σ^2)
+
+function compute_y_and_Fθ(perturbed::PerturbedLogNormal, θ::AbstractArray; kwargs...)
+    (; maximizer, M) = perturbed
+    θ_samples = [sample_perturbation(perturbed, θ) for _ in 1:M]
+    y_samples = [maximizer(θs; kwargs...) for θs in θ_samples]
+    return mean(y_samples), NaN
+end
