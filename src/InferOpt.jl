@@ -19,7 +19,6 @@ include("regularized/ranking.jl")
 include("perturbed/abstract.jl")
 include("perturbed/normal.jl")
 include("perturbed/lognormal.jl")
-include("perturbed/cost.jl")
 
 include("fenchel_young/fenchel_young.jl")
 
