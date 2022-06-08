@@ -7,6 +7,9 @@ include("utils/loop.jl")
     @testset verbose = true "Code quality (Aqua.jl)" begin
         include("quality.jl")
     end
+    @testset verbose = true "Tutorial" begin
+        include("tutorial.jl")
+    end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
     end
@@ -18,8 +21,5 @@ include("utils/loop.jl")
     end
     @testset verbose = true "Paths" begin
         include("paths.jl")
-    end
-    @testset verbose = true "Tutorial" begin
-        include("tutorial.jl")
     end
 end

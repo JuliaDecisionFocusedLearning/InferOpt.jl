@@ -1,7 +1,7 @@
 """
     PerturbedLogNormal{F}
 
-Differentiable log-normal perturbation of a black-box optimizer: `θ -> exp[εZ - ε²/2] * θ` where `Z ∼ N(0, 1)`.
+Differentiable log-normal perturbation of a black-box optimizer: the input undergoes `θ -> exp[εZ - ε²/2] * θ` where `Z ∼ N(0, 1)`.
 
 # Fields
 - `maximizer::F`: underlying argmax function
@@ -16,9 +16,33 @@ end
 
 PerturbedLogNormal(maximizer; ε=1.0, M=2) = PerturbedLogNormal(maximizer, float(ε), M)
 
-function sample_perturbation(perturbed::PerturbedLogNormal, θ::AbstractArray)
-    (; ε) = perturbed
-    return exp.(ε .* randn(size(θ)) .- ε^2) .* θ
+function (perturbed::PerturbedLogNormal)(θ::AbstractArray, Z::AbstractArray; kwargs...)
+    (; maximizer, ε) = perturbed
+    eZ = exp.(ε .* Z .- ε^2)
+    return eZ .* maximizer(eZ .* θ; kwargs...)
 end
 
-difflogpdf_lognormal(x::Real, μ::Real, σ::Real) = -inv(x) - (log(x) - μ) / (x * σ^2)
+## Fenchel-Young loss
+
+function compute_y_and_F(
+    perturbed::AbstractPerturbed, θ::AbstractArray, Z::AbstractArray; kwargs...
+)
+    (; maximizer, ε) = perturbed
+    eZ = exp.(ε .* Z .- ε^2)
+    y_unscaled = maximizer(eZ .* θ; kwargs...)
+    y = eZ .* y_unscaled
+    F = dot(eZ .* θ, y_unscaled)
+    return y, F
+end
+
+## Backward pass
+
+function ChainRulesCore.rrule(perturbed::PerturbedLogNormal, θ::AbstractArray; kwargs...)
+    return error("not implemented")
+end
+
+function ChainRulesCore.rrule(
+    perturbed_cost::PerturbedCost{F,P}, θ::AbstractArray; kwargs...
+) where {F,P<:PerturbedLogNormal{F}}
+    return error("not implemented")
+end

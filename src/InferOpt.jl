@@ -7,6 +7,7 @@ using SimpleTraits
 using SparseArrays
 using Statistics
 using Test
+using Unzip
 
 include("interpolation/interpolation.jl")
 
@@ -17,6 +18,7 @@ include("regularized/prediction.jl")
 include("regularized/ranking.jl")
 
 include("perturbed/abstract.jl")
+include("perturbed/cost.jl")
 include("perturbed/normal.jl")
 include("perturbed/lognormal.jl")
 

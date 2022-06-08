@@ -29,11 +29,6 @@ append!(
             loss=StructuredSVMLoss(ZeroOneLoss()),
         ),
         # Regularized prediction: explicit
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=FenchelYoungLoss(one_hot_argmax),
-        ),
         (encoder=encoder_factory(), maximizer=identity, loss=FenchelYoungLoss(sparsemax)),
         (
             encoder=encoder_factory(),
