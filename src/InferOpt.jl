@@ -1,6 +1,7 @@
 module InferOpt
 
 using ChainRulesCore
+using ForwardDiff
 using LinearAlgebra
 using Random
 using SimpleTraits

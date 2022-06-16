@@ -34,11 +34,18 @@ function list_standard_pipelines(encoder_factory, true_maximizer; cost=nothing)
     ]
     # Learning by experience
     if !isnothing(cost)
-        pipelines["none"] = [(
+        pipelines["none"] = [
+            (
             encoder=encoder_factory(),
             maximizer=identity,
             loss=PerturbedCost(PerturbedNormal(true_maximizer; ε=1.0, M=5), cost),
-        )]
+        ),
+        (
+            encoder=encoder_factory(),
+            maximizer=identity,
+            loss=PerturbedCost(PerturbedLogNormal(true_maximizer; ε=0.7, M=5), cost),
+        ),
+        ]
     end
 
     return pipelines

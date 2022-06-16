@@ -38,11 +38,27 @@ end
 ## Backward pass
 
 function ChainRulesCore.rrule(perturbed::PerturbedLogNormal, θ::AbstractArray; kwargs...)
-    return error("not implemented")
+    (; maximizer, ε, M) = perturbed
+    Z_samples = [randn(size(θ)) for _ in 1:M]
+    y_samples = [maximizer(θ .* exp.(ε .* Z .- ε^2) ; kwargs...) for Z in Z_samples]
+    function perturbed_pullback(dy)
+        vjp = inv(ε) .* mean(dot(dy, y) .* Z for (Z, y) in zip(Z_samples, y_samples)) ./θ
+        return NoTangent(), vjp
+    end
+    return mean(y_samples), perturbed_pullback
 end
 
 function ChainRulesCore.rrule(
     perturbed_cost::PerturbedCost{F,P}, θ::AbstractArray; kwargs...
 ) where {F,P<:PerturbedLogNormal{F}}
-    return error("not implemented")
+    (; perturbed, cost) = perturbed_cost
+    (; maximizer, ε, M) = perturbed
+    Z_samples = [randn(size(θ)) for _ in 1:M]
+    y_samples = [maximizer(θ .* exp.(ε .* Z .- ε^2) ; kwargs...) for Z in Z_samples]
+    cost_samples = [cost(ys; kwargs...) for ys in y_samples]
+    function perturbed_cost_pullback(dc)
+        vjp = inv(ε) .* mean((dc * c) .* Z for (Z, c) in zip(Z_samples, cost_samples)) ./θ
+        return NoTangent(), vjp, NoTangent()
+    end
+    return mean(cost_samples), perturbed_cost_pullback
 end
