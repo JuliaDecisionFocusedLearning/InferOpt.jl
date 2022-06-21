@@ -95,10 +95,10 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         end
         # Prediction errors
         if length(train_errors) > 0
-            @test train_errors[end] < train_errors[1] / 2
+            @test train_errors[end] < train_errors[1]
         end
         if length(test_errors) > 0
-            @test test_errors[end] < test_errors[1] / 2
+            @test test_errors[end] < test_errors[1]
         end
         # Cost
         if length(train_cost_gaps) > 0
@@ -109,7 +109,7 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         end
         # Parameter errors
         if length(parameter_errors) > 0
-            @test parameter_errors[end] < parameter_errors[1] / 2
+            @test parameter_errors[end] < parameter_errors[1]
         end
     end
 end

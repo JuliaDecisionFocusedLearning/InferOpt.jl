@@ -4,6 +4,9 @@ using InferOpt.Testing
 using ProgressMeter
 using UnicodePlots
 
+dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
+make_positive(z::AbstractArray) = softplus.(z)
+
 function test_loop(
     pipelines;
     true_encoder,
@@ -46,7 +49,7 @@ function test_loop(
         ## Evaluation
 
         if show_plots
-            plts = plot_perf(perf_storage; lineplot_function = lineplot)
+            plts = plot_perf(perf_storage; lineplot_function=lineplot)
             for plt in plts
                 println(plt)
             end

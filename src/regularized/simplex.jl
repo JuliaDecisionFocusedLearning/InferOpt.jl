@@ -12,26 +12,26 @@ function one_hot_argmax(z::AbstractVector{R}; kwargs...) where {R<:Real}
 end
 
 """
-    softmax(θ)
+    soft_argmax(θ)
 
-Softmax function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
+Soft argmax function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 
 Corresponds to regularized prediction on the probability simplex with entropic penalty.
 """
-function softmax(z::AbstractVector{<:Real}; kwargs...)
+function soft_argmax(z::AbstractVector{<:Real}; kwargs...)
     s = exp.(z)
     s ./= sum(s)
     return s
 end
 
 """
-    sparsemax(z)
+    sparse_argmax(z)
 
 Project the vector `z` onto the probability simplex `Δ` in time `O(d log d)`.
 
 Corresponds to regularized prediction on the probability simplex with square norm penalty.
 """
-function sparsemax(z::AbstractVector{<:Real}; kwargs...)
+function sparse_argmax(z::AbstractVector{<:Real}; kwargs...)
     p, _ = simplex_projection_and_support(z)
     return p
 end
@@ -39,7 +39,7 @@ end
 """
     simplex_projection_and_support(z)
 
-Compute the Euclidean projection `p` of `z` on the probability simplex (also called [`sparsemax`](@ref)), and the indicators `s` of its support.
+Compute the Euclidean projection `p` of `z` on the probability simplex (also called [`sparse_argmax`](@ref)), and the indicators `s` of its support.
 
 See <https://arxiv.org/abs/1602.02068>.
 """
@@ -55,14 +55,14 @@ function simplex_projection_and_support(z::AbstractVector{<:Real})
     return p, s
 end
 
-function ChainRulesCore.rrule(::typeof(sparsemax), z::AbstractVector{<:Real})
+function ChainRulesCore.rrule(::typeof(sparse_argmax), z::AbstractVector{<:Real})
     p, s = simplex_projection_and_support(z)
     S = sum(s)
-    function sparsemax_pullback(dp)
+    function sparse_argmax_pullback(dp)
         vjp = s .* (dp .- (dp's) / S)
         return (NoTangent(), vjp)
     end
-    return p, sparsemax_pullback
+    return p, sparse_argmax_pullback
 end
 
 """
@@ -70,4 +70,4 @@ end
 
 Compute `max(x,0)`.
 """
-positive_part(x) = x >= 0 ? x : zero(x)
+positive_part(x) = x >= zero(x) ? x : zero(x)

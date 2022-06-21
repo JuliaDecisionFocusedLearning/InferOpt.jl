@@ -12,18 +12,25 @@ struct SPOPlusLoss{F}
     α::Float64
 end
 
+function Base.show(io::IO, spol::SPOPlusLoss)
+    (; maximizer, α) = spol
+    print(io, "SPOPlusLoss($maximizer, $α)")
+end
+
 SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, α)
 
 ## Forward pass
 
-function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray)
+function (spol::SPOPlusLoss)(
+    θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}
+)
     (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
     l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
     return l
 end
 
-function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray)
+function (spol::SPOPlusLoss)(θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real})
     y_true = spol.maximizer(θ_true)
     return spol(θ, θ_true, y_true)
 end
@@ -31,7 +38,10 @@ end
 ## Backward pass
 
 function compute_loss_and_gradient(
-    spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray
+    spol::SPOPlusLoss,
+    θ::AbstractArray{<:Real},
+    θ_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real},
 )
     (; maximizer, α) = spol
     y_α = maximizer(α * θ - θ_true)
@@ -40,14 +50,19 @@ function compute_loss_and_gradient(
 end
 
 function ChainRulesCore.rrule(
-    spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray
+    spol::SPOPlusLoss,
+    θ::AbstractArray{<:Real},
+    θ_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real},
 )
     l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent(), NoTangent()
     return l, spol_pullback
 end
 
-function ChainRulesCore.rrule(spol::SPOPlusLoss, θ::AbstractArray, θ_true::AbstractArray)
+function ChainRulesCore.rrule(
+    spol::SPOPlusLoss, θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}
+)
     y_true = spol.maximizer(θ_true)
     l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent()

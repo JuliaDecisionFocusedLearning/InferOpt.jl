@@ -59,7 +59,7 @@ Let us assume that the user combines them using a shallow neural network.
 
 nb_features = 5
 
-true_encoder = Chain(Dense(nb_features, 1), dropfirstdim);
+true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
@@ -88,7 +88,7 @@ Y_train = [linear_maximizer(θ) for θ in θ_train];
 We create a trainable model with the same structure as the true encoder but another set of randomly-initialized weights.
 =#
 
-initial_encoder = Chain(Dense(nb_features, 1), dropfirstdim);
+initial_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 
 #=
 Here is the crucial part where `InferOpt` intervenes: the choice of a clever loss function that enables us to
@@ -96,7 +96,7 @@ Here is the crucial part where `InferOpt` intervenes: the choice of a clever los
 - evaluate the quality of our model based on the paths that it recommends
 =#
 
-regularized_predictor = PerturbedNormal(linear_maximizer; ε=1.0, M=5);
+regularized_predictor = PerturbedAdditive(linear_maximizer; ε=1.0, nb_samples=5);
 loss = FenchelYoungLoss(regularized_predictor);
 
 #=
@@ -115,7 +115,7 @@ encoder = deepcopy(initial_encoder)
 opt = ADAM();
 losses = Float64[]
 for epoch in 1:200
-    l = 0.
+    l = 0.0
     for (x, y) in zip(X_train, Y_train)
         grads = gradient(Flux.params(encoder)) do
             l += loss(encoder(x), y)
@@ -131,7 +131,7 @@ end;
 Since the Fenchel-Young loss is convex, it is no wonder that optimization worked like a charm.
 =#
 
-lineplot(losses, xlabel="Epoch", ylabel="Loss")
+lineplot(losses; xlabel="Epoch", ylabel="Loss")
 
 #=
 To assess performance, we can compare the learned weights with their true (hidden) values
@@ -158,7 +158,8 @@ train_error = mean(
 Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
 train_error_initial = mean(
-    normalized_hamming_distance(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
+    normalized_hamming_distance(y, y_pred) for
+    (y, y_pred) in zip(Y_train, Y_train_pred_initial)
 )
 
 #=

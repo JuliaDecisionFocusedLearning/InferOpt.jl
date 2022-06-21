@@ -10,10 +10,15 @@ struct FenchelYoungLoss{P}
     predictor::P
 end
 
+function Base.show(io::IO, fyl::FenchelYoungLoss)
+    (; predictor) = fyl
+    print(io, "FenchelYoungLoss($predictor)")
+end
+
 ## Forward pass
 
 @traitfn function prediction_and_loss(
-    fyl::FenchelYoungLoss{P}, θ::AbstractArray, y::AbstractArray; kwargs...
+    fyl::FenchelYoungLoss{P}, θ::AbstractArray{<:Real}, y::AbstractArray{<:Real}; kwargs...
 ) where {P; IsRegularizedPrediction{P}}
     (; predictor) = fyl
     ŷ = predictor(θ; kwargs...)
@@ -24,7 +29,7 @@ end
 end
 
 function prediction_and_loss(
-    fyl::FenchelYoungLoss{P}, θ::AbstractArray, y::AbstractArray; kwargs...
+    fyl::FenchelYoungLoss{P}, θ::AbstractArray{<:Real}, y::AbstractArray{<:Real}; kwargs...
 ) where {P<:AbstractPerturbed}
     (; predictor) = fyl
     ŷ, Fθ = compute_y_and_F(predictor, θ; kwargs...)

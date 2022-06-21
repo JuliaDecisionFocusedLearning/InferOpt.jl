@@ -12,13 +12,20 @@ struct Interpolation{F}
     λ::Float64
 end
 
+function Base.show(io::IO, interpolation::Interpolation)
+    (; maximizer, λ) = interpolation
+    return print(io, "Interpolation($maximizer, $λ)")
+end
+
 Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, float(λ))
 
-function (interpolation::Interpolation)(θ::AbstractArray; kwargs...)
+function (interpolation::Interpolation)(θ::AbstractArray{<:Real}; kwargs...)
     return interpolation.maximizer(θ; kwargs...)
 end
 
-function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractArray; kwargs...)
+function ChainRulesCore.rrule(
+    interpolation::Interpolation, θ::AbstractArray{<:Real}; kwargs...
+)
     (; maximizer, λ) = interpolation
     y = maximizer(θ; kwargs...)
     function interpolation_pullback(dy)

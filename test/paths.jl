@@ -11,7 +11,7 @@ using Test
 
 nb_features = 5
 
-encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim)
+encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
 true_encoder = encoder_factory()
 cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(ŷ, y) = half_square_norm(ŷ - y)
@@ -25,7 +25,59 @@ end
 
 ## Pipelines
 
-pipelines = list_standard_pipelines(encoder_factory, true_maximizer; cost=cost)
+pipelines = Dict{String,Vector}()
+
+pipelines["θ"] = [(
+    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
+)]
+
+pipelines["(θ,y)"] = [(
+    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
+)]
+
+pipelines["y"] = [
+    # Fenchel-Young loss (test forward pass)
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5)),
+    ),
+    # Other differentiable loss (test backward pass)
+    (
+        encoder=encoder_factory(),
+        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5),
+        loss=Flux.Losses.mse,
+    ),
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5),
+    #     loss=Flux.Losses.mse,
+    # ),
+     # Interpolation
+    #  (
+    #     encoder=encoder_factory(),
+    #     maximizer=Interpolation(true_maximizer; λ=10.0),
+    #     loss=Flux.Losses.mse,
+    # ),
+]
+
+pipelines["none"] = [
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=cost ∘ PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5),
+    ),
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=identity,
+    #     loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5),
+    # ),
+]
 
 ## Dataset generation
 
@@ -33,8 +85,8 @@ data_train, data_test = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=(10, 12),
-    nb_instances=200,
+    instance_dim=(10, 10),
+    nb_instances=100,
     noise_std=0.01,
 );
 
@@ -48,7 +100,7 @@ test_loop(
     data_test=data_test,
     error_function=error_function,
     cost=cost,
-    epochs=200,
+    epochs=500,
     show_plots=true,
     setting_name="paths",
 )

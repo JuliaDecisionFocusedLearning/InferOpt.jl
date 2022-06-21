@@ -29,12 +29,12 @@ struct ZeroOneLoss end
 
 @traitimpl IsStructuredLossFunction{ZeroOneLoss}
 
-function (::ZeroOneLoss)(y::AbstractArray, y_true::AbstractArray)
+function (::ZeroOneLoss)(y::AbstractArray{<:Real}, y_true::AbstractArray{<:Real})
     return y != y_true ? 1.0 : 0.0
 end
 
 function compute_maximizer(
-    zol::ZeroOneLoss, θ::AbstractVector, α::Real, y_true::AbstractVector
+    zol::ZeroOneLoss, θ::AbstractVector{<:Real}, α::Real, y_true::AbstractVector{<:Real}
 )
     base = 1:length(θ)
     Y = [base .== i for i in base]
@@ -55,17 +55,24 @@ struct GeneralStructuredLoss{F1,F2}
     maximizer::F2
 end
 
+function Base.show(io::IO, gsl::GeneralStructuredLoss)
+    (; delta_loss, maximizer) = gsl
+    print(io, "GeneralStructuredLoss($delta_loss, $maximizer)")
+end
+
 @traitimpl IsStructuredLossFunction{GeneralStructuredLoss}
 
-function (gsl::GeneralStructuredLoss)(y::AbstractArray, y_true::AbstractArray)
+function (gsl::GeneralStructuredLoss)(
+    y::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}
+)
     return gsl.delta_loss(y, y_true)
 end
 
 function compute_maximizer(
     structured_loss::GeneralStructuredLoss,
-    θ::AbstractArray,
+    θ::AbstractArray{<:Real},
     α::Real,
-    y_true::AbstractArray,
+    y_true::AbstractArray{<:Real},
 )
     return structured_loss.maximizer(θ, α, y_true)
 end
