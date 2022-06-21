@@ -4,6 +4,8 @@ using Random
 using Test
 using Zygote
 
+Random.seed!(63)
+
 θ = [3, 5, 4, 2]
 
 perturbed1 = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=10_00)

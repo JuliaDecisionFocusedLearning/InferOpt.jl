@@ -14,7 +14,7 @@ end
 
 function Base.show(io::IO, ssvml::StructuredSVMLoss)
     (; predictor, α) = ssvml
-    print(io, "StructuredSVMLoss($predictor, $α)")
+    return print(io, "StructuredSVMLoss($predictor, $α)")
 end
 
 StructuredSVMLoss(predictor; α=1.0) = StructuredSVMLoss(predictor, α)

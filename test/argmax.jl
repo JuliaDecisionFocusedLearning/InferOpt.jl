@@ -5,6 +5,8 @@ using LinearAlgebra
 using Random
 using Test
 
+Random.seed!(63)
+
 ## Main functions
 
 nb_features = 5
@@ -32,22 +34,22 @@ pipelines["y"] = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
+        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3)),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5)),
+        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3)),
     ),
     # Other differentiable loss (test backward pass)
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5),
+        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3),
         loss=Flux.Losses.mse,
     ),
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5),
+        maximizer=PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3),
         loss=Flux.Losses.mse,
     ),
     # Structured SVM
@@ -61,12 +63,12 @@ pipelines["none"] = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=cost ∘ PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5),
+        loss=cost ∘ PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=0.2, nb_samples=5),
+        loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3),
     ),
 ]
 
@@ -76,8 +78,8 @@ data_train, data_test = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=10,
-    nb_instances=100,
+    instance_dim=7,
+    nb_instances=50,
     noise_std=0.01,
 );
 
@@ -91,7 +93,7 @@ test_loop(
     data_test=data_test,
     error_function=error_function,
     cost=cost,
-    epochs=1000,
-    show_plots=true,
+    epochs=500,
+    verbose=true,
     setting_name="argmax",
 )

@@ -12,7 +12,7 @@ end
 
 function Base.show(io::IO, fyl::FenchelYoungLoss)
     (; predictor) = fyl
-    print(io, "FenchelYoungLoss($predictor)")
+    return print(io, "FenchelYoungLoss($predictor)")
 end
 
 ## Forward pass

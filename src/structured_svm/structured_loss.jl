@@ -57,7 +57,7 @@ end
 
 function Base.show(io::IO, gsl::GeneralStructuredLoss)
     (; delta_loss, maximizer) = gsl
-    print(io, "GeneralStructuredLoss($delta_loss, $maximizer)")
+    return print(io, "GeneralStructuredLoss($delta_loss, $maximizer)")
 end
 
 @traitimpl IsStructuredLossFunction{GeneralStructuredLoss}

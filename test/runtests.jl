@@ -1,6 +1,9 @@
 using Aqua
 using InferOpt
+using JuliaFormatter
 using Test
+
+format(InferOpt; verbose=true)
 
 include("utils.jl")
 

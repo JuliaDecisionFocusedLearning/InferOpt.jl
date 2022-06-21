@@ -94,9 +94,9 @@ version = "3.11.0"
 
 [[deps.ChainRules]]
 deps = ["ChainRulesCore", "Compat", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "Statistics"]
-git-tree-sha1 = "68938888dad80c4da1db4e7e3c4405c13d0afd13"
+git-tree-sha1 = "97fd0a3b7703948a847265156a41079730805c77"
 uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
-version = "1.35.3"
+version = "1.36.0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
@@ -335,9 +335,9 @@ version = "8.3.2"
 
 [[deps.GPUCompiler]]
 deps = ["ExprTools", "InteractiveUtils", "LLVM", "Libdl", "Logging", "TimerOutputs", "UUIDs"]
-git-tree-sha1 = "21b5d9da260afa6a8638ba2aaa0edbbb671c37bd"
+git-tree-sha1 = "47f63159f7cb5d0e5e0cfd2f20454adea429bec9"
 uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
-version = "0.16.0"
+version = "0.16.1"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]

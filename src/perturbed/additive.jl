@@ -15,7 +15,9 @@ end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
-    print(io, "PerturbedAdditive($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)")
+    return print(
+        io, "PerturbedAdditive($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)"
+    )
 end
 
 function PerturbedAdditive(

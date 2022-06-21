@@ -14,7 +14,7 @@ end
 
 function Base.show(io::IO, spol::SPOPlusLoss)
     (; maximizer, α) = spol
-    print(io, "SPOPlusLoss($maximizer, $α)")
+    return print(io, "SPOPlusLoss($maximizer, $α)")
 end
 
 SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, α)

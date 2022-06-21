@@ -5,7 +5,8 @@ Differentiable log-normal perturbation of a black-box optimizer: the input under
 
 See also: [`AbstractPerturbed{F}`](@ref).
 """
-struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
+struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <:
+       AbstractPerturbed{F}
     maximizer::F
     ε::Float64
     rng::R
@@ -15,7 +16,9 @@ end
 
 function Base.show(io::IO, perturbed::PerturbedMultiplicative)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
-    print(io, "PerturbedMultiplicative($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)")
+    return print(
+        io, "PerturbedMultiplicative($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)"
+    )
 end
 
 function PerturbedMultiplicative(

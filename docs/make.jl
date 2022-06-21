@@ -47,7 +47,4 @@ makedocs(;
     ],
 )
 
-deploydocs(;
-    repo="github.com/axelparmentier/InferOpt.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/axelparmentier/InferOpt.jl", devbranch="main")

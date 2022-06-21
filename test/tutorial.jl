@@ -139,7 +139,7 @@ To assess performance, we can compare the learned weights with their true (hidde
 
 learned_weight = encoder[1].weight / norm(encoder[1].weight)
 true_weight = true_encoder[1].weight / norm(true_encoder[1].weight)
-@info "Parameter error" learned_weight true_weight
+hcat(learned_weight, true_weight)
 
 #=
 We are quite close to recovering the exact user weights.

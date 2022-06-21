@@ -16,7 +16,7 @@ function test_loop(
     error_function,
     cost,
     epochs,
-    show_plots,
+    verbose,
     setting_name="???",
 )
     pipelines = deepcopy(pipelines)
@@ -31,7 +31,10 @@ function test_loop(
         opt = ADAM()
         perf_storage = init_perf()
 
-        @showprogress for _ in 1:epochs
+        prog = Progress(epochs; enabled=verbose)
+
+        for _ in 1:epochs
+            next!(prog)
             update_perf!(
                 perf_storage;
                 data_train=data_train,
@@ -48,7 +51,7 @@ function test_loop(
 
         ## Evaluation
 
-        if show_plots
+        if verbose
             plts = plot_perf(perf_storage; lineplot_function=lineplot)
             for plt in plts
                 println(plt)
