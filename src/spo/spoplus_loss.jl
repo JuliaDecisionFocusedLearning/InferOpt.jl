@@ -1,11 +1,13 @@
 """
     SPOPlusLoss{F}
 
-Convex surrogate of the SPO loss.
+Convex surrogate of the Smart "Predict-then-Optimize" loss.
 
 # Fields
-- `maximizer::F`: linear maximizer function of the form `θ ⟼ ŷ(θ) = argmax ⟨θ,y⟩`
+- `maximizer::F`: linear maximizer function of the form `θ ⟼ ŷ(θ) = argmax θᵀy`
 - `α::Float64`: convexification parameter
+
+Reference: <https://arxiv.org/abs/1710.08005>
 """
 struct SPOPlusLoss{F}
     maximizer::F
@@ -17,7 +19,7 @@ function Base.show(io::IO, spol::SPOPlusLoss)
     return print(io, "SPOPlusLoss($maximizer, $α)")
 end
 
-SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, α)
+SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, float(α))
 
 ## Forward pass
 
@@ -25,8 +27,9 @@ function (spol::SPOPlusLoss)(
     θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}
 )
     (; maximizer, α) = spol
-    y_α = maximizer(α * θ - θ_true)
-    l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
+    θ_α = α * θ - θ_true
+    y_α = maximizer(θ_α)
+    l = dot(θ_α, y_α) - dot(θ_α, y_true)
     return l
 end
 
@@ -44,9 +47,10 @@ function compute_loss_and_gradient(
     y_true::AbstractArray{<:Real},
 )
     (; maximizer, α) = spol
-    y_α = maximizer(α * θ - θ_true)
-    l = dot(α * θ - θ_true, y_α) + dot(θ_true - α * θ, y_true)
-    return l, α * (y_α - y_true)
+    θ_α = α * θ - θ_true
+    y_α = maximizer(θ_α)
+    l = dot(θ_α, y_α) - dot(θ_α, y_true)
+    return l, α .* (y_α .- y_true)
 end
 
 function ChainRulesCore.rrule(

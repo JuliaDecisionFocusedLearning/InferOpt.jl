@@ -4,6 +4,8 @@
 Differentiable normal perturbation of a black-box optimizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
 See also: [`AbstractPerturbed{F}`](@ref).
+
+Reference: <https://arxiv.org/abs/2002.08676>
 """
 struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
     maximizer::F
@@ -28,7 +30,9 @@ end
 
 ## Forward pass
 
-function (perturbed::PerturbedAdditive)(θ::AbstractArray, Z::AbstractArray; kwargs...)
+function (perturbed::PerturbedAdditive)(
+    θ::AbstractArray{<:Real}, Z::AbstractArray{<:Real}; kwargs...
+)
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z
     y = maximizer(θ_perturbed; kwargs...)
@@ -38,7 +42,10 @@ end
 ## Fenchel-Young loss
 
 function compute_y_and_F(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
+    perturbed::PerturbedAdditive,
+    θ::AbstractArray{<:Real},
+    Z::AbstractArray{<:Real};
+    kwargs...,
 )
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z

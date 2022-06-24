@@ -11,14 +11,22 @@ EditURL = "https://github.com/axelparmentier/InferOpt.jl/blob/main/README.md"
 
 ## Overview
 
-`InferOpt.jl` is a toolbox for using optimization algorithms within inference and learning tasks.
+`InferOpt.jl` is a toolbox for using combinatorial optimization algorithms within machine learning pipelines.
+
+It allows you to differentiate through things that should not be differentiable, such as Mixed Integer Linear Programs or graph algorithms.
+
+> This package is at a very early development stage, so proceed with caution!
 
 ## Getting started
 
-To install this package, open a Julia Pkg REPL and run the following command:
+To install the stable version, open a Julia REPL and run the following command:
 
 ```julia
-pkg> add https://github.com/axelparmentier/InferOpt.jl
+julia> using Pkg; Pkg.add("InferOpt")
 ```
 
-> This package is in a very early development stage, so use it at your own risk!
+To install the development version, run this command instead:
+
+```julia
+julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
+```

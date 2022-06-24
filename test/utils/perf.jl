@@ -1,3 +1,7 @@
+using Statistics
+using Test
+using UnicodePlots
+
 ## Performance metrics
 
 function init_perf()
@@ -37,8 +41,8 @@ function update_perf!(
     (X_train, thetas_train, Y_train) = data_train
     (X_test, thetas_test, Y_test) = data_test
 
-    train_loss = sum(pipeline_loss(t...) for t in zip(data_train...))
-    test_loss = sum(pipeline_loss(t...) for t in zip(data_test...))
+    train_loss = sum(pipeline_loss(x, θ, y) for (x, θ, y) in zip(data_train...))
+    test_loss = sum(pipeline_loss(x, θ, y) for (x, θ, y) in zip(data_test...))
 
     Y_train_pred = generate_predictions(encoder, true_maximizer, X_train)
     Y_test_pred = generate_predictions(encoder, true_maximizer, X_test)
@@ -95,26 +99,26 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         end
         # Prediction errors
         if length(train_errors) > 0
-            @test train_errors[end] < train_errors[1]
+            @test train_errors[end] < 0.7 * train_errors[1]
         end
         if length(test_errors) > 0
-            @test test_errors[end] < test_errors[1]
+            @test test_errors[end] < 0.7 * test_errors[1]
         end
         # Cost
         if length(train_cost_gaps) > 0
-            @test train_cost_gaps[end] < train_cost_gaps[1]
+            @test train_cost_gaps[end] < 0.7 * train_cost_gaps[1]
         end
         if length(test_cost_gaps) > 0
-            @test test_cost_gaps[end] < test_cost_gaps[1]
+            @test test_cost_gaps[end] < 0.7 * test_cost_gaps[1]
         end
         # Parameter errors
         if length(parameter_errors) > 0
-            @test parameter_errors[end] < parameter_errors[1]
+            @test parameter_errors[end] < 0.7 * parameter_errors[1]
         end
     end
 end
 
-function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
+function plot_perf(perf_storage::NamedTuple)
     (;
         train_losses,
         test_losses,
@@ -127,17 +131,17 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     plts = []
 
     if any(!isnan, train_losses)
-        plt = lineplot_function(train_losses; xlabel="Epoch", title="Train loss")
+        plt = lineplot(train_losses; xlabel="Epoch", title="Train loss")
         push!(plts, plt)
     end
 
     if any(!isnan, test_losses)
-        plt = lineplot_function(test_losses; xlabel="Epoch", title="Test loss")
+        plt = lineplot(test_losses; xlabel="Epoch", title="Test loss")
         push!(plts, plt)
     end
 
     if any(!isnan, train_errors)
-        plt = lineplot_function(
+        plt = lineplot(
             train_errors;
             xlabel="Epoch",
             title="Train error",
@@ -147,7 +151,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     end
 
     if any(!isnan, test_errors)
-        plt = lineplot_function(
+        plt = lineplot(
             test_errors;
             xlabel="Epoch",
             title="Test error",
@@ -157,7 +161,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     end
 
     if any(!isnan, train_cost_gaps)
-        plt = lineplot_function(
+        plt = lineplot(
             train_cost_gaps;
             xlabel="Epoch",
             title="Train cost gap",
@@ -167,7 +171,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     end
 
     if any(!isnan, train_cost_gaps)
-        plt = lineplot_function(
+        plt = lineplot(
             test_cost_gaps;
             xlabel="Epoch",
             title="Test cost gap",
@@ -177,7 +181,7 @@ function plot_perf(perf_storage::NamedTuple; lineplot_function::Function)
     end
 
     if any(!isnan, parameter_errors)
-        plt = lineplot_function(
+        plt = lineplot(
             parameter_errors;
             xlabel="Epoch",
             title="Parameter error",

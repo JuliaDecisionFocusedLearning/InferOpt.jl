@@ -19,7 +19,6 @@ using Flux
 using Graphs
 using GridGraphs
 using InferOpt
-using InferOpt.Testing
 using LinearAlgebra
 using ProgressMeter
 using Random
@@ -147,10 +146,14 @@ But in reality, it doesn't matter as much as our ability to provide accurate pat
 Let us therefore compare our predictions with the actual paths on the training set.
 =#
 
+normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x))
+
+#-
+
 Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
 
 train_error = mean(
-    normalized_hamming_distance(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
+    normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
 )
 
 # Not too bad, at least compared with our random initial encoder.
@@ -158,8 +161,7 @@ train_error = mean(
 Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
 train_error_initial = mean(
-    normalized_hamming_distance(y, y_pred) for
-    (y, y_pred) in zip(Y_train, Y_train_pred_initial)
+    normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
 )
 
 #=

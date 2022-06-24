@@ -1,6 +1,5 @@
 using Flux
 using InferOpt
-using InferOpt.Testing
 using LinearAlgebra
 using Random
 using Test
@@ -10,7 +9,6 @@ Random.seed!(63)
 ## Main functions
 
 nb_features = 5
-
 encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
 true_encoder = encoder_factory()
 true_maximizer(θ; kwargs...) = one_hot_argmax(θ; kwargs...)
@@ -19,17 +17,11 @@ error_function(ŷ, y) = hamming_distance(ŷ, y)
 
 ## Pipelines
 
-pipelines = Dict{String,Vector}()
-
-pipelines["θ"] = [(
+pipelines_imitation_θ = [(
     encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
 )]
 
-pipelines["(θ,y)"] = [(
-    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
-)]
-
-pipelines["y"] = [
+pipelines_imitation_y = [
     # Fenchel-Young loss (test forward pass)
     (
         encoder=encoder_factory(),
@@ -39,7 +31,7 @@ pipelines["y"] = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3)),
+        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
     ),
     # Other differentiable loss (test backward pass)
     (
@@ -49,17 +41,21 @@ pipelines["y"] = [
     ),
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3),
+        maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5),
         loss=Flux.Losses.mse,
     ),
     # Structured SVM
-    (encoder=encoder_factory(), maximizer=identity, loss=StructuredSVMLoss(ZeroOneLoss())),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=StructuredSVMLoss(ZeroOneBaseLoss()),
+    ),
     # Regularized prediction: explicit
     (encoder=encoder_factory(), maximizer=identity, loss=FenchelYoungLoss(sparse_argmax)),
     (encoder=encoder_factory(), maximizer=identity, loss=FenchelYoungLoss(soft_argmax)),
 ]
 
-pipelines["none"] = [
+pipelines_experience = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
@@ -68,7 +64,7 @@ pipelines["none"] = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=0.5, nb_samples=3),
+        loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5),
     ),
 ]
 
@@ -78,22 +74,66 @@ data_train, data_test = generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features=nb_features,
-    instance_dim=7,
-    nb_instances=50,
+    instance_dim=5,
+    nb_instances=100,
     noise_std=0.01,
 );
 
 ## Test loop
 
-test_loop(
-    pipelines;
-    true_encoder=true_encoder,
-    true_maximizer=true_maximizer,
-    data_train=data_train,
-    data_test=data_test,
-    error_function=error_function,
-    cost=cost,
-    epochs=500,
-    verbose=true,
-    setting_name="argmax",
-)
+for pipeline in pipelines_imitation_θ
+    pipeline = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline
+    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
+    test_pipeline!(
+        pipeline,
+        pipeline_loss_imitation_θ;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=100,
+        verbose=true,
+        setting_name="argmax - imitation_θ",
+    )
+end
+
+for pipeline in pipelines_imitation_y
+    pipeline = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline
+    pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
+    test_pipeline!(
+        pipeline,
+        pipeline_loss_imitation_y;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=200,
+        verbose=true,
+        setting_name="argmax - imitation_y",
+    )
+end
+
+for pipeline in pipelines_experience
+    pipeline = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline
+    pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
+    test_pipeline!(
+        pipeline,
+        pipeline_loss_experience;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=500,
+        verbose=true,
+        setting_name="argmax - experience",
+    )
+end

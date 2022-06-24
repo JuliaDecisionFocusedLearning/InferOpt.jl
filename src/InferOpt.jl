@@ -10,29 +10,29 @@ using Test
 
 include("interpolation/interpolation.jl")
 
-include("regularized/proba.jl")
-include("regularized/penalties.jl")
-include("regularized/simplex.jl")
-include("regularized/prediction.jl")
-include("regularized/ranking.jl")
+include("regularized/isregularized.jl")
+include("regularized/regularized_utils.jl")
+include("regularized/soft_argmax.jl")
+include("regularized/sparse_argmax.jl")
+include("regularized/frank_wolfe.jl")
 
-include("perturbed/abstract.jl")
+include("perturbed/abstract_perturbed.jl")
+include("perturbed/composition.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
 
 include("fenchel_young/fenchel_young.jl")
 
-include("smart_predict_optimize/smart_predict_optimize.jl")
+include("spo/spoplus_loss.jl")
 
-include("structured_svm/structured_loss.jl")
-include("structured_svm/structured_svm.jl")
-
-include("utils/testing/Testing.jl")
+include("ssvm/isbaseloss.jl")
+include("ssvm/zeroone_baseloss.jl")
+include("ssvm/ssvm_loss.jl")
 
 export shannon_entropy, half_square_norm
-export one_hot_argmax, soft_argmax, sparse_argmax
-export ranking
-export IsRegularizedPrediction
+export one_hot_argmax, ranking
+export IsRegularized
+export soft_argmax, sparse_argmax
 
 export Interpolation
 
@@ -45,8 +45,8 @@ export FenchelYoungLoss
 
 export SPOPlusLoss
 
-export ZeroOneLoss, GeneralStructuredLoss
-export IsStructuredLossFunction
+export IsBaseLoss
+export ZeroOneBaseLoss
 export StructuredSVMLoss
 
 end

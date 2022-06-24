@@ -22,7 +22,6 @@ using Flux
 using Graphs
 using GridGraphs
 using InferOpt
-using InferOpt.Testing
 using LinearAlgebra
 using ProgressMeter
 using Random
@@ -150,7 +149,7 @@ To assess performance, we can compare the learned weights with their true (hidde
 ````@example tutorial
 learned_weight = encoder[1].weight / norm(encoder[1].weight)
 true_weight = true_encoder[1].weight / norm(true_encoder[1].weight)
-@info "Parameter error" learned_weight true_weight
+hcat(learned_weight, true_weight)
 ````
 
 We are quite close to recovering the exact user weights.
@@ -158,10 +157,14 @@ But in reality, it doesn't matter as much as our ability to provide accurate pat
 Let us therefore compare our predictions with the actual paths on the training set.
 
 ````@example tutorial
+normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x))
+````
+
+````@example tutorial
 Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
 
 train_error = mean(
-    normalized_hamming_distance(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
+    normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
 )
 ````
 
@@ -171,8 +174,7 @@ Not too bad, at least compared with our random initial encoder.
 Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
 train_error_initial = mean(
-    normalized_hamming_distance(y, y_pred) for
-    (y, y_pred) in zip(Y_train, Y_train_pred_initial)
+    normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
 )
 ````
 

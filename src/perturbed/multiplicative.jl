@@ -29,7 +29,9 @@ end
 
 ## Forward pass
 
-function (perturbed::PerturbedMultiplicative)(θ::AbstractArray, Z::AbstractArray; kwargs...)
+function (perturbed::PerturbedMultiplicative)(
+    θ::AbstractArray{<:Real}, Z::AbstractArray{<:Real}; kwargs...
+)
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .* exp.(ε .* Z .- ε^2)
     y = maximizer(θ_perturbed; kwargs...)
@@ -39,7 +41,10 @@ end
 ## Fenchel-Young loss
 
 function compute_y_and_F(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
+    perturbed::PerturbedMultiplicative,
+    θ::AbstractArray{<:Real},
+    Z::AbstractArray{<:Real};
+    kwargs...,
 )
     (; maximizer, ε) = perturbed
     eZ = exp.(ε .* Z .- ε^2)

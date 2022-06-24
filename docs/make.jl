@@ -41,9 +41,8 @@ makedocs(;
         "Home" => "index.md",
         "Tutorial" => "tutorial.md",
         "Mathematical background" => "math.md",
-        "Algorithms" => "algorithms.md",
         "Implementation" => "implementation.md",
-        "API reference" => "api.md",
+        "Algorithms & API" => "algorithms.md",
     ],
 )
 

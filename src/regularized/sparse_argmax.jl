@@ -1,33 +1,7 @@
 """
-    one_hot_argmax(z)
-
-One-hot encoding of the argmax function.
-
-Corresponds to regularized prediction on the probability simplex with zero penalty.
-"""
-function one_hot_argmax(z::AbstractVector{R}; kwargs...) where {R<:Real}
-    e = zeros(R, length(z))
-    e[argmax(z)] = one(R)
-    return e
-end
-
-"""
-    soft_argmax(θ)
-
-Soft argmax function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
-
-Corresponds to regularized prediction on the probability simplex with entropic penalty.
-"""
-function soft_argmax(z::AbstractVector{<:Real}; kwargs...)
-    s = exp.(z)
-    s ./= sum(s)
-    return s
-end
-
-"""
     sparse_argmax(z)
 
-Project the vector `z` onto the probability simplex `Δ` in time `O(d log d)`.
+Compute the Euclidean projection of the vector `z` onto the probability simplex.
 
 Corresponds to regularized prediction on the probability simplex with square norm penalty.
 """
@@ -36,12 +10,20 @@ function sparse_argmax(z::AbstractVector{<:Real}; kwargs...)
     return p
 end
 
+@traitimpl IsRegularized{typeof(sparse_argmax)}
+
+function compute_regularization(
+    ::typeof(sparse_argmax), y::AbstractVector{R}
+) where {R<:Real}
+    return isprobadist(y) ? half_square_norm(y) : typemax(R)
+end
+
 """
     simplex_projection_and_support(z)
 
 Compute the Euclidean projection `p` of `z` on the probability simplex (also called [`sparse_argmax`](@ref)), and the indicators `s` of its support.
 
-See <https://arxiv.org/abs/1602.02068>.
+Reference: <https://arxiv.org/abs/1602.02068>.
 """
 function simplex_projection_and_support(z::AbstractVector{<:Real})
     d = length(z)
@@ -64,10 +46,3 @@ function ChainRulesCore.rrule(::typeof(sparse_argmax), z::AbstractVector{<:Real}
     end
     return p, sparse_argmax_pullback
 end
-
-"""
-    positive_part(x)
-
-Compute `max(x,0)`.
-"""
-positive_part(x) = x >= zero(x) ? x : zero(x)
