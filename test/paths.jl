@@ -133,7 +133,7 @@ for pipeline in pipelines_experience
         data_test=data_test,
         error_function=error_function,
         cost=cost,
-        epochs=500,
+        epochs=1000,
         verbose=true,
         setting_name="paths - experience",
     )

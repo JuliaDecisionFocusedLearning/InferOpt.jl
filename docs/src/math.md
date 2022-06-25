@@ -3,10 +3,10 @@
 Our goal is make machine learning models more expressive by incomporating combinatorial optimization algorithms as layers.
 For a broader perspective on the interactions between machine learning and combinatorial optimization, please refer to the following review papers:
 
-!!! tip "Reference"
+!!! note "Reference"
     [Machine Learning for Combinatorial Optimization: A Methodological Tour d’Horizon](https://arxiv.org/abs/1811.06128)
 
-!!! tip "Reference"
+!!! note "Reference"
     [End-to-end Constrained Optimization Learning: A Survey](https://arxiv.org/abs/2103.16378)
 
 

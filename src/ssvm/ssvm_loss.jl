@@ -46,7 +46,7 @@ end
 @traitfn function ChainRulesCore.rrule(
     ssvml::StructuredSVMLoss{L}, θ::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}
 ) where {L; IsBaseLoss{L}}
-    (; base_loss, α) = ssvml
+    (; α) = ssvml
     ŷ, l = prediction_and_loss(ssvml, θ, y_true)
     g = α .* (ŷ .- y_true)
     ssvml_pullback(dl) = NoTangent(), dl * g, NoTangent()

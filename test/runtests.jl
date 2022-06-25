@@ -18,6 +18,9 @@ includet("utils/pipeline.jl")
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
     end
+    @testset verbose = true "Frank-Wolfe" begin
+        include("frank_wolfe.jl")
+    end
     @testset verbose = true "Argmax" begin
         include("argmax.jl")
     end
