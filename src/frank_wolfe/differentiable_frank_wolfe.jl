@@ -61,7 +61,7 @@ function frank_wolfe_optimality_conditions(
 end
 
 function ChainRulesCore.rrule(
-    rc::RuleConfig, dfw::DifferentiableFrankWolfe, θ::AbstractVector; fw_kwargs=(;)
+    rc::RuleConfig, dfw::DifferentiableFrankWolfe, θ::AbstractVector{<:Real}; fw_kwargs=(;)
 )
     (; linear_solver) = dfw
 
@@ -93,4 +93,10 @@ function ChainRulesCore.rrule(
     end
 
     return active_set.x, frank_wolfe_pullback
+end
+
+function ChainRulesCore.rrule(
+    rc::RuleConfig, dfw::DifferentiableFrankWolfe, θ::AbstractArray{<:Real}; fw_kwargs=(;)
+)
+    throw(ArgumentError("θ must be a vector and not a higher-dimensional array"))
 end

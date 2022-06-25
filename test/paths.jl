@@ -25,12 +25,13 @@ end
 
 ## Pipelines
 
-pipelines_imitation_θ = [(
-    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
-)]
+pipelines_imitation_θ = [
+    # SPO+
+    (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)),
+]
 
 pipelines_imitation_y = [
-    # Fenchel-Young loss (test forward pass)
+    # Perturbed + FYL
     (
         encoder=encoder_factory(),
         maximizer=identity,
@@ -39,20 +40,26 @@ pipelines_imitation_y = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=FenchelYoungLoss(
-            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10)
-        ),
+        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
     ),
-    # Other differentiable loss (test backward pass)
+    # Perturbed + other loss
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5),
+        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
         loss=Flux.Losses.mse,
     ),
     (
         encoder=encoder_factory(),
         maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
         loss=Flux.Losses.mse,
+    ),
+    # Generic regularized + FYL
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            RegularizedGeneric(half_square_norm, identity, true_maximizer)
+        ),
     ),
 ]
 

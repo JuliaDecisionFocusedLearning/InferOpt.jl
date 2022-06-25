@@ -24,6 +24,11 @@ struct RegularizedGeneric{ΩF,ΩG,F,G,M,S}
     linear_solver::S
 end
 
+function Base.show(io::IO, regularized::RegularizedGeneric)
+    (; Ω, ∇Ω, maximizer, linear_solver) = regularized
+    return print(io, "RegularizedGeneric($Ω, $∇Ω, $maximizer, $linear_solver)")
+end
+
 function RegularizedGeneric(Ω, ∇Ω, maximizer; linear_solver=gmres)
     f(y, θ) = Ω(y) - dot(θ, y)
     ∇ₓf(y, θ) = ∇Ω(y) - θ
@@ -39,7 +44,7 @@ end
 ## Forward pass
 
 function (regularized::RegularizedGeneric)(
-    θ::AbstractArray; maximizer_kwargs=(;), fw_kwargs=(;)
+    θ::AbstractArray{<:Real}; maximizer_kwargs=(;), fw_kwargs=(;)
 )
     (; f, ∇ₓf, maximizer, linear_solver) = regularized
     lmo = LMOWrapper(maximizer, maximizer_kwargs)
@@ -60,4 +65,14 @@ function ChainRulesCore.rrule(
     lmo = LMOWrapper(maximizer, maximizer_kwargs)
     dfw = DifferentiableFrankWolfe(f, ∇ₓf, lmo, linear_solver)
     return rrule(rc, dfw, θ; fw_kwargs=fw_kwargs)
+end
+
+function ChainRulesCore.rrule(
+    rc::RuleConfig,
+    regularized::RegularizedGeneric,
+    θ::AbstractArray{<:Real};
+    maximizer_kwargs=(;),
+    fw_kwargs=(;),
+)
+    throw(ArgumentError("θ must be a vector and not a higher-dimensional array"))
 end

@@ -42,7 +42,8 @@ export Interpolation
 
 export DifferentiableFrankWolfe
 
-export shannon_entropy, half_square_norm
+export half_square_norm
+export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
 export IsRegularized
 export soft_argmax, sparse_argmax
