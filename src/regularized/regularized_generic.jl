@@ -16,8 +16,8 @@ Relies on the Frank-Wolfe algorithm to minimize a concave objective on a polytop
 See also: [`DifferentiableFrankWolfe`](@ref).
 """
 struct RegularizedGeneric{RF,RG,F,G,M,S}
-    Ω::ΩF
-    ∇Ω::ΩG
+    Ω::RF
+    ∇Ω::RG
     f::F
     ∇ₓf::G
     maximizer::M
