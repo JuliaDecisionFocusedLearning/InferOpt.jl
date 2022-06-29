@@ -58,7 +58,7 @@ pipelines_imitation_y = [
         encoder=encoder_factory(),
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(half_square_norm, identity, true_maximizer)
+            RegularizedGeneric(true_maximizer, half_square_norm, identity)
         ),
     ),
 ]

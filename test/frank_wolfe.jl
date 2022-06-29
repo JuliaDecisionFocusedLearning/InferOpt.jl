@@ -8,6 +8,7 @@ using Zygote
 Random.seed!(63)
 
 d = 100
+x0 = ones(d) / d;
 θ = rand(d);
 v = rand(d);
 rc = Zygote.ZygoteRuleConfig()
@@ -23,20 +24,20 @@ f(x, θ) = half_square_norm(x - θ)
 lmo = FrankWolfe.UnitSimplexOracle(1.0)
 
 dfw = DifferentiableFrankWolfe(f, ∇ₓf, lmo)
-_, pullback_dfw = rrule_via_ad(rc, dfw, θ; fw_kwargs=fw_kwargs);
+_, pullback_dfw = rrule_via_ad(rc, dfw, θ, x0; fw_kwargs=fw_kwargs);
 
 @testset verbose = true "DifferentiableFrankWolfe" begin
-    @test mean(abs, dfw(θ; fw_kwargs=fw_kwargs) - sparse_argmax(θ)) < 1e-3
+    @test mean(abs, dfw(θ, x0; fw_kwargs=fw_kwargs) - sparse_argmax(θ)) < 1e-3
     @test mean(abs, pullback_dfw(v)[2] - pullback_sparse_argmax(v)[2]) < 1e-3
 end
 
 ## RegularizedGeneric
 
+maximizer(θ) = one_hot_argmax(θ)
 Ω(y) = half_square_norm(y)
 ∇Ω(y) = y
-maximizer(θ) = one_hot_argmax(θ)
 
-regularized = RegularizedGeneric(Ω, ∇Ω, maximizer)
+regularized = RegularizedGeneric(maximizer, Ω, ∇Ω)
 _, pullback_regularized = rrule_via_ad(rc, regularized, θ; fw_kwargs=fw_kwargs);
 
 @testset verbose = true "RegularizedGeneric" begin

@@ -27,12 +27,14 @@ end
 ## Forward pass
 
 function optimal_active_set(
-    dfw::DifferentiableFrankWolfe, θ::AbstractArray{<:Real}; fw_kwargs=(;)
+    dfw::DifferentiableFrankWolfe,
+    θ::AbstractArray{<:Real},
+    x0::AbstractArray{<:Real};
+    fw_kwargs=(;),
 )
     (; f, ∇ₓf, lmo) = dfw
     obj(x) = f(x, θ)
     grad!(g, x) = g .= ∇ₓf(x, θ)
-    x0 = compute_extreme_point(lmo, zero(θ))
     full_fw_kwargs = merge(DEFAULT_FRANK_WOLFE_KWARGS, fw_kwargs)
     x, v, primal, dual_gap, traj_data, active_set = away_frank_wolfe(
         obj, grad!, lmo, x0; full_fw_kwargs...
@@ -41,62 +43,66 @@ function optimal_active_set(
     return active_set
 end
 
-function (dfw::DifferentiableFrankWolfe)(θ::AbstractArray{<:Real}; fw_kwargs=(;))
-    active_set::ActiveSet = optimal_active_set(dfw, θ; fw_kwargs=fw_kwargs)
+function (dfw::DifferentiableFrankWolfe)(
+    θ::AbstractArray{<:Real}, x0::AbstractArray{<:Real}; fw_kwargs=(;)
+)
+    active_set::ActiveSet = optimal_active_set(dfw, θ, x0; fw_kwargs=fw_kwargs)
     return active_set.x
 end
 
-## Backward pass, only works with vectors
+## Backward pass
 
 function frank_wolfe_optimality_conditions(
     dfw::DifferentiableFrankWolfe,
-    θ::AbstractVector{<:Real},
+    θ::AbstractArray{<:Real},
     p::AbstractVector{<:Real},
-    V::AbstractMatrix{<:Real},
+    A::AbstractVector{<:AbstractArray{<:Real}},
 )
     (; ∇ₓf) = dfw
-    ∇ₚg = V' * ∇ₓf(V * p, θ)
+    x = sum(pᵢ * Aᵢ for (pᵢ, Aᵢ) in zip(p, A))
+    b = ∇ₓf(x, θ)
+    ∇ₚg = [dot(Aᵢ, b) for Aᵢ in A]
     T = sparse_argmax(p - ∇ₚg)
     return T - p
 end
 
 function ChainRulesCore.rrule(
-    rc::RuleConfig, dfw::DifferentiableFrankWolfe, θ::AbstractVector{<:Real}; fw_kwargs=(;)
-)
+    rc::RuleConfig,
+    dfw::DifferentiableFrankWolfe,
+    θ::AbstractArray{R1},
+    x0::AbstractArray{R2};
+    fw_kwargs=(;),
+) where {R1<:Real,R2<:Real}
+    R = promote_type(R1, R2)
     (; linear_solver) = dfw
 
-    active_set::ActiveSet = optimal_active_set(dfw, θ; fw_kwargs=fw_kwargs)
-    V = reduce(hcat, active_set.atoms)
+    active_set::ActiveSet = optimal_active_set(dfw, θ, x0; fw_kwargs=fw_kwargs)
+    A = active_set.atoms
     p = active_set.weights
-    n, m = length(θ), length(p)
+    x = active_set.x
 
-    conditions_θ(θ_bis) = frank_wolfe_optimality_conditions(dfw, θ_bis, p, V)
-    conditions_p(p_bis) = -frank_wolfe_optimality_conditions(dfw, θ, p_bis, V)
+    conditions_θ(θ_bis) = frank_wolfe_optimality_conditions(dfw, θ_bis, p, A)
+    conditions_p(p_bis) = -frank_wolfe_optimality_conditions(dfw, θ, p_bis, A)
 
     pullback_Aᵀ = last ∘ rrule_via_ad(rc, conditions_p, p)[2]
     pullback_Bᵀ = last ∘ rrule_via_ad(rc, conditions_θ, θ)[2]
 
-    mul_Aᵀ!(res, v) = res .= pullback_Aᵀ(v)
-    mul_Bᵀ!(res, v) = res .= pullback_Bᵀ(v)
+    mul_Aᵀ!(res, u::AbstractVector) = res .= vec(pullback_Aᵀ(reshape(u, size(p))))
+    mul_Bᵀ!(res, v::AbstractVector) = res .= vec(pullback_Bᵀ(reshape(v, size(p))))
 
-    Aᵀ = LinearOperator(Float64, m, m, false, false, mul_Aᵀ!)
-    Bᵀ = LinearOperator(Float64, n, m, false, false, mul_Bᵀ!)
+    n, m = length(θ), length(p)
+    Aᵀ = LinearOperator(R, m, m, false, false, mul_Aᵀ!)
+    Bᵀ = LinearOperator(R, n, m, false, false, mul_Bᵀ!)
 
     function frank_wolfe_pullback(dx)
-        dp = V' * Vector(unthunk(dx))
+        dx = unthunk(dx)
+        dp = [dot(Aᵢ, dx) for Aᵢ in A]
         u, stats = linear_solver(Aᵀ, dp)
-        if !stats.solved
-            error("The linear solver failed to converge")
-        end
-        dθ = Bᵀ * u
-        return (NoTangent(), dθ)
+        stats.solved || error("Linear solver failed to converge")
+        dθ_vec = Bᵀ * u
+        dθ = reshape(dθ_vec, size(θ))
+        return (NoTangent(), dθ, NoTangent())
     end
 
-    return active_set.x, frank_wolfe_pullback
-end
-
-function ChainRulesCore.rrule(
-    rc::RuleConfig, dfw::DifferentiableFrankWolfe, θ::AbstractArray{<:Real}; fw_kwargs=(;)
-)
-    throw(ArgumentError("θ must be a vector and not a higher-dimensional array"))
+    return x, frank_wolfe_pullback
 end
