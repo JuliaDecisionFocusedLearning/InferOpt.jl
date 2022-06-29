@@ -52,6 +52,18 @@ function (regularized::RegularizedGeneric)(
     return dfw(θ; fw_kwargs=fw_kwargs)
 end
 
+function optimal_active_set(
+    regularized::RegularizedGeneric,
+    θ::AbstractArray{<:Real};
+    maximizer_kwargs=(;),
+    fw_kwargs=(;),
+)
+    (; f, ∇ₓf, maximizer, linear_solver) = regularized
+    lmo = LMOWrapper(maximizer, maximizer_kwargs)
+    dfw = DifferentiableFrankWolfe(f, ∇ₓf, lmo, linear_solver)
+    return optimal_active_set(dfw, θ; fw_kwargs=fw_kwargs)
+end
+
 ## Backward pass, only works with vectors
 
 function ChainRulesCore.rrule(
