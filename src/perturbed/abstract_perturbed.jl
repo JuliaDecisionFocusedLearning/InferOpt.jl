@@ -45,6 +45,33 @@ function (perturbed::AbstractPerturbed)(θ::AbstractArray{<:Real}; kwargs...)
     return mean(y_samples)
 end
 
+function get_probability_distribution(
+    perturbed::AbstractPerturbed, θ::AbstractArray{<:Real}; atol=0, kwargs...
+)
+    (; nb_samples) = perturbed
+    Z_samples = sample_perturbations(perturbed, θ)
+    y_samples = [perturbed(θ, Z; kwargs...) for Z in Z_samples]
+    multiplicity = ones(Int, nb_samples)
+    to_delete = Int[]
+    for i in nb_samples:-1:1
+        yi = y_samples[i]
+        for j in 1:(i - 1)
+            yj = y_samples[j]
+            if isapprox(yi, yj; atol=atol)
+                multiplicity[j] += 1
+                push!(to_delete, i)
+                break
+            end
+        end
+    end
+    sort!(to_delete)
+    deleteat!(y_samples, to_delete)
+    deleteat!(multiplicity, to_delete)
+    weights = multiplicity ./ sum(multiplicity)
+    y_mean = sum(w * a for (w, a) in zip(weights, y_samples))
+    return ActiveSet(weights, y_samples, y_mean)
+end
+
 """
     compute_y_and_F(perturbed, θ, Z; kwargs...)
 """

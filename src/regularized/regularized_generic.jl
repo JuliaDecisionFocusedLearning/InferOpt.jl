@@ -43,7 +43,7 @@ end
 
 ## Forward pass
 
-function optimal_active_set(
+function get_probability_distribution(
     regularized::RegularizedGeneric,
     θ::AbstractArray{<:Real};
     maximizer_kwargs=(;),
@@ -59,7 +59,7 @@ end
 function (regularized::RegularizedGeneric)(
     θ::AbstractArray{<:Real}; maximizer_kwargs=(;), fw_kwargs=(;)
 )
-    active_set = optimal_active_set(
+    active_set = get_probability_distribution(
         regularized, θ; maximizer_kwargs=maximizer_kwargs, fw_kwargs=fw_kwargs
     )
     return active_set.x

@@ -38,6 +38,8 @@ include("ssvm/isbaseloss.jl")
 include("ssvm/zeroone_baseloss.jl")
 include("ssvm/ssvm_loss.jl")
 
+export get_probability_distribution
+
 export Interpolation
 
 export DifferentiableFrankWolfe
