@@ -17,7 +17,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 ChainRulesCore = "1"
-FrankWolfe = "0.1.22"
+FrankWolfe = "0.2"
 Krylov = "0.8.2"
 LinearOperators = "2.3.2"
 SimpleTraits = "0.9"
