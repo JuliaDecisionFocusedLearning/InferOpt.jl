@@ -20,13 +20,13 @@ end
 ## Forward pass
 
 function (fyl::FenchelYoungLoss)(
-    θ::AbstractArray{<:Real}, y::AbstractArray{<:Real}; kwargs...
+    θ::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}; kwargs...
 )
-    _, l = prediction_and_loss(fyl, θ, y; kwargs...)
+    l, _ = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)
     return l
 end
 
-@traitfn function prediction_and_loss(
+@traitfn function fenchel_young_loss_and_grad(
     fyl::FenchelYoungLoss{P},
     θ::AbstractArray{<:Real},
     y_true::AbstractArray{<:Real};
@@ -37,24 +37,32 @@ end
     Ωy_true = compute_regularization(predictor, y_true)
     Ωŷ = compute_regularization(predictor, ŷ)
     l = (Ωy_true - dot(θ, y_true)) - (Ωŷ - dot(θ, ŷ))
-    return ŷ, l
+    g = ŷ - y_true
+    return l, g
 end
 
-function prediction_and_loss(
-    fyl::FenchelYoungLoss{P}, θ::AbstractArray{<:Real}, y::AbstractArray{<:Real}; kwargs...
+function fenchel_young_loss_and_grad(
+    fyl::FenchelYoungLoss{P},
+    θ::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
 ) where {P<:AbstractPerturbed}
     (; predictor) = fyl
-    ŷ, F = compute_y_and_F(predictor, θ; kwargs...)
-    l = F - dot(θ, y)
-    return ŷ, l
+    F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(predictor, θ; kwargs...)
+    l = F - dot(θ, y_true)
+    g = almost_ŷ - y_true
+    return l, g
 end
 
 ## Backward pass
 
 function ChainRulesCore.rrule(
-    fyl::FenchelYoungLoss, θ::AbstractArray{<:Real}, y::AbstractArray{<:Real}; kwargs...
+    fyl::FenchelYoungLoss,
+    θ::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
 )
-    ŷ, l = prediction_and_loss(fyl, θ, y; kwargs...)
-    fyl_pullback(dl) = NoTangent(), dl * (ŷ - y), NoTangent()
+    l, g = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)
+    fyl_pullback(dl) = NoTangent(), dl * g, NoTangent()
     return l, fyl_pullback
 end

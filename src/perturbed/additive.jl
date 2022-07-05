@@ -1,47 +1,45 @@
 """
     PerturbedAdditive{F}
 
-Differentiable normal perturbation of a black-box optimizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
+Differentiable normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
-See also: [`AbstractPerturbed{F}`](@ref).
+See also: [`AbstractPerturbed`](@ref).
 
 Reference: <https://arxiv.org/abs/2002.08676>
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
+struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
     maximizer::F
     ε::Float64
+    nb_samples::Int
     rng::R
     seed::S
-    nb_samples::Int
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
     return print(
-        io, "PerturbedAdditive($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)"
+        io, "PerturbedAdditive($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)"
     )
 end
 
+"""
+    PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
+
+Shorter constructor with defaults.
+"""
 function PerturbedAdditive(
-    maximizer; ε=1.0, rng=MersenneTwister(0), seed=nothing, nb_samples=2
+    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
 )
-    return PerturbedAdditive(maximizer, float(ε), rng, seed, nb_samples)
+    if isnothing(epsilon)
+        return PerturbedAdditive(maximizer, float(ε), nb_samples, rng, seed)
+    else
+        return PerturbedAdditive(maximizer, float(epsilon), nb_samples, rng, seed)
+    end
 end
 
 ## Forward pass
 
-function (perturbed::PerturbedAdditive)(
-    θ::AbstractArray{<:Real}, Z::AbstractArray{<:Real}; kwargs...
-)
-    (; maximizer, ε) = perturbed
-    θ_perturbed = θ .+ ε .* Z
-    y = maximizer(θ_perturbed; kwargs...)
-    return y
-end
-
-## Fenchel-Young loss
-
-function compute_y_and_F(
+function perturb_and_optimize(
     perturbed::PerturbedAdditive,
     θ::AbstractArray{<:Real},
     Z::AbstractArray{<:Real};
@@ -50,29 +48,24 @@ function compute_y_and_F(
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z
     y = maximizer(θ_perturbed; kwargs...)
-    F = dot(θ_perturbed, y)
-    return y, F
+    return y
 end
 
 ## Backward pass
 
 function ChainRulesCore.rrule(
-    perturbed_composition::PerturbedComposition{F,P,G}, θ::AbstractArray{<:Real}; kwargs...
-) where {F,P<:PerturbedAdditive{F},G}
-    (; perturbed, g) = perturbed_composition
-    (; maximizer, ε) = perturbed
-    Z_samples = sample_perturbations(perturbed, θ)
-    y_samples = [maximizer(θ .+ ε .* Z; kwargs...) for Z in Z_samples]
-    gy_samples = [g(y; kwargs...) for y in y_samples]
-    function perturbed_normal_composition_pullback(dgy)
-        vjp = inv(ε) * mean(dot(dgy, gy) * Z for (Z, gy) in zip(Z_samples, gy_samples))
-        return NoTangent(), vjp
-    end
-    return mean(gy_samples), perturbed_normal_composition_pullback
-end
-
-function ChainRulesCore.rrule(
-    perturbed::PerturbedAdditive, θ::AbstractArray{<:Real}; kwargs...
+    ::typeof(compute_probability_distribution),
+    perturbed::PerturbedAdditive,
+    θ::AbstractArray{<:Real};
+    kwargs...,
 )
-    return rrule(PerturbedComposition(perturbed, identity), θ; kwargs...)
+    (; ε) = perturbed
+    Z_samples = sample_perturbations(perturbed, θ)
+    probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
+    function perturbed_additive_probadist_pullback(probadist_tangent)
+        weigths_tangent = probadist_tangent.weights
+        dθ = inv(ε) * sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        return NoTangent(), NoTangent(), dθ
+    end
+    return probadist, perturbed_additive_probadist_pullback
 end

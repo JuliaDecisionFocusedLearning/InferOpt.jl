@@ -3,6 +3,7 @@
 *.jl.mem
 /Manifest.toml
 /docs/build/
+/test/profiling.jl
 
 *.tar.gz
 *.zip

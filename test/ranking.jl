@@ -17,37 +17,52 @@ error_function(ŷ, y) = hamming_distance(ŷ, y)
 
 ## Pipelines
 
-pipelines_imitation_θ = [(
-    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)
-)]
+pipelines_imitation_θ = [
+    # SPO+
+    (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)),
+]
 
 pipelines_imitation_y = [
-    # Fenchel-Young loss (test forward pass)
+    # Interpolation
+    (
+        encoder=encoder_factory(),
+        maximizer=Interpolation(true_maximizer; λ=5.0),
+        loss=Flux.Losses.mse,
+    ),
+    # Perturbed + FYL
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3)),
+        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
         loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
     ),
-    # Other differentiable loss (test backward pass)
+    # Perturbed + other loss
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3),
+        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
         loss=Flux.Losses.mse,
     ),
     (
         encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5),
+        maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
         loss=Flux.Losses.mse,
     ),
-    # Interpolation
+    # Generic regularized + FYL
     (
         encoder=encoder_factory(),
-        maximizer=Interpolation(true_maximizer; λ=5.0),
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            RegularizedGeneric(true_maximizer, half_square_norm, identity)
+        ),
+    ),
+    # Generic regularized + other loss
+    (
+        encoder=encoder_factory(),
+        maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
         loss=Flux.Losses.mse,
     ),
 ]
@@ -56,14 +71,24 @@ pipelines_experience = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=cost ∘ PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=3),
+        loss=ProbabilisticComposition(
+            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10), cost
+        ),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=cost ∘ PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5),
+        loss=ProbabilisticComposition(
+            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10), cost
+        ),
     ),
-    (encoder=encoder_factory(), maximizer=Interpolation(true_maximizer; λ=5.0), loss=cost),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=ProbabilisticComposition(
+            RegularizedGeneric(true_maximizer, half_square_norm, identity), cost
+        ),
+    ),
 ]
 
 ## Dataset generation

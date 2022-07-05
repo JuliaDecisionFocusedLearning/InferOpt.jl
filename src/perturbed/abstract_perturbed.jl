@@ -1,64 +1,70 @@
 """
-    AbstractPerturbed{F}
+    AbstractPerturbed
 
-Differentiable perturbation of a black-box optimizer.
+Differentiable perturbation of a black box optimizer.
+
+# Applicable functions
+
+- [`compute_probability_distribution(perturbed::AbstractPerturbed, θ)`](@ref)
+- `(perturbed::AbstractPerturbed)(θ)`
 
 # Available subtypes
-- [`PerturbedAdditive{F}`](@ref)
-- [`PerturbedMultiplicative{F}`](@ref)
 
-# Required fields
-- `maximizer::F`: underlying argmax function
-- `ε::Float64`: noise scaling parameter
+- [`PerturbedAdditive`](@ref)
+- [`PerturbedMultiplicative`](@ref)
+
+These subtypes share the following fields:
+
+- `maximizer`: black box optimizer
+- `ε`: magnitude of the perturbation
+- `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
-- `nb_samples::Int`: number of random samples for Monte-Carlo computations
-
-# Required methods
-- `(perturbed)(θ, Z; kwargs...)`
-- [`compute_y_and_F(perturbed, θ, Z; kwargs...)`](@ref)
-
-# Optional methods
-- `rrule(perturbed, θ; kwargs...)`
 """
-abstract type AbstractPerturbed{F} end
+abstract type AbstractPerturbed end
 
+"""
+    sample_perturbations(perturbed::AbstractPerturbed, θ)
+
+Draw random perturbations `Z` which will be applied to the objective direction `θ`.
+"""
 function sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray{<:Real})
     (; rng, seed, nb_samples) = perturbed
-    Random.seed!(rng, seed)
+    seed!(rng, seed)
     Z_samples = [randn(rng, size(θ)) for _ in 1:nb_samples]
     return Z_samples
 end
 
-"""
-    (perturbed)(θ, Z; kwargs...)
-"""
-function (perturbed::AbstractPerturbed)(
-    θ::AbstractArray{<:Real}, Z::AbstractArray{<:Real}; kwargs...
-)
-    return error("not implemented")
-end
-
-function (perturbed::AbstractPerturbed)(θ::AbstractArray{<:Real}; kwargs...)
-    Z_samples = sample_perturbations(perturbed, θ)
-    y_samples = [perturbed(θ, Z; kwargs...) for Z in Z_samples]
-    return mean(y_samples)
-end
-
-"""
-    compute_y_and_F(perturbed, θ, Z; kwargs...)
-"""
-function compute_y_and_F(
+function compute_probability_distribution(
     perturbed::AbstractPerturbed,
     θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
+    Z_samples::Vector{<:AbstractArray{<:Real}};
     kwargs...,
 )
-    return error("not implemented")
+    atoms = [perturb_and_optimize(perturbed, θ, Z; kwargs...) for Z in Z_samples]
+    weights = ones(length(atoms)) ./ length(atoms)
+    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
+    return probadist
 end
 
-function compute_y_and_F(perturbed::AbstractPerturbed, θ::AbstractArray{<:Real}; kwargs...)
+"""
+    compute_probability_distribution(perturbed::AbstractPerturbed, θ)
+
+Turn random perturbations of `θ` into a distribution on polytope vertices.
+"""
+function compute_probability_distribution(
+    perturbed::AbstractPerturbed, θ::AbstractArray{<:Real}; kwargs...
+)
     Z_samples = sample_perturbations(perturbed, θ)
-    y_and_F_samples = [compute_y_and_F(perturbed, θ, Z; kwargs...) for Z in Z_samples]
-    return mean(first, y_and_F_samples), mean(last, y_and_F_samples)
+    return compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
+end
+
+"""
+    (perturbed::AbstractPerturbed)(θ)
+
+Apply `compute_probability_distribution(perturbed, θ)` and return the expectation.
+"""
+function (perturbed::AbstractPerturbed)(θ::AbstractArray{<:Real}; kwargs...)
+    probadist = compute_probability_distribution(perturbed, θ; kwargs...)
+    return compute_expectation(probadist)
 end

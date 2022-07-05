@@ -64,3 +64,6 @@ Compute the vector `r` such that `rᵢ` is the rank of `θᵢ` in `θ`.
 function ranking(θ::AbstractVector{<:Real}; rev::Bool=false, kwargs...)
     return invperm(sortperm(θ; rev=rev))
 end
+
+zero_regularization(y) = zero(eltype(y))
+zero_gradient(y) = zero(y)

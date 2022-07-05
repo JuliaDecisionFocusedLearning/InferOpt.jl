@@ -27,6 +27,9 @@ includet("utils/pipeline.jl")
     @testset verbose = true "Paths" begin
         include("paths.jl")
     end
+    @testset verbose = true "Frank-Wolfe" begin
+        include("frank_wolfe.jl")
+    end
     @testset verbose = true "Tutorial" begin
         include("tutorial.jl")
     end
