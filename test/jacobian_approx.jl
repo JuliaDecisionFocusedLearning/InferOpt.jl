@@ -8,8 +8,8 @@ Random.seed!(63)
 
 θ = [3, 5, 4, 2]
 
-perturbed1 = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=10_000)
-perturbed2 = PerturbedMultiplicative(one_hot_argmax; ε=0.5, nb_samples=10_000)
+perturbed1 = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=1000, seed=0)
+perturbed2 = PerturbedMultiplicative(one_hot_argmax; ε=0.5, nb_samples=1000, seed=0)
 
 @testset verbose = true "PerturbedAdditive" begin
     # Compute jacobian with reverse mode

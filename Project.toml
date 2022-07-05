@@ -1,6 +1,6 @@
 name = "InferOpt"
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
-authors = ["Axel Parmentier", "Guillaume Dalle", "Léo Baty", "Louis Bouvier"]
+authors = ["Guillaume Dalle", "Léo Baty", "Louis Bouvier", "Axel Parmentier"]
 version = "0.2.0"
 
 [deps]
@@ -13,14 +13,16 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 ChainRulesCore = "1"
-FrankWolfe = "0.2"
-Krylov = "0.8.2"
-LinearOperators = "2.3.2"
+FrankWolfe = "0.2.1"
+Krylov = "0.8"
+LinearOperators = "2.3"
 SimpleTraits = "0.9"
+StatsBase = "0.33"
 julia = "1.7"
 
 [extras]

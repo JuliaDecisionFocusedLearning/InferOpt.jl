@@ -9,45 +9,46 @@ Compatible with implicit differentiation.
 
 # Fields
 - `f::F`: function `f(x, θ)` to minimize wrt `x`
-- `∇ₓf::G`: gradient `∇ₓf(x, θ)` of `f` wrt `x`
+- `f_grad1::G`: gradient `∇ₓf(x, θ)` of `f` wrt `x`
 - `lmo::M`: linear minimization oracle `θ -> argmin_{x ∈ C} θᵀx`
 - `linear_solver::S`: solver for linear systems of equations
 """
 struct DifferentiableFrankWolfe{F,G,M<:LinearMinimizationOracle,S}
     f::F
-    ∇ₓf::G
+    f_grad1::G
     lmo::M
     linear_solver::S
 end
 
-function DifferentiableFrankWolfe(f, ∇ₓf, lmo; linear_solver=gmres)
-    return DifferentiableFrankWolfe(f, ∇ₓf, lmo, linear_solver)
+function DifferentiableFrankWolfe(f, f_grad1, lmo; linear_solver=gmres)
+    return DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver)
 end
 
 ## Forward pass
 
-function optimal_active_set(
+function compute_probability_distribution(
     dfw::DifferentiableFrankWolfe,
     θ::AbstractArray{<:Real},
     x0::AbstractArray{<:Real};
     fw_kwargs=(;),
 )
-    (; f, ∇ₓf, lmo) = dfw
+    (; f, f_grad1, lmo) = dfw
     obj(x) = f(x, θ)
-    grad!(g, x) = g .= ∇ₓf(x, θ)
+    grad!(g, x) = g .= f_grad1(x, θ)
     full_fw_kwargs = merge(DEFAULT_FRANK_WOLFE_KWARGS, fw_kwargs)
     x, v, primal, dual_gap, traj_data, active_set = away_frank_wolfe(
         obj, grad!, lmo, x0; full_fw_kwargs...
     )
-    @assert length(active_set.atoms) > 0
-    return active_set
+    probadist = FixedAtomsProbabilityDistribution(active_set)
+    @assert length(probadist) > 0
+    return probadist
 end
 
 function (dfw::DifferentiableFrankWolfe)(
     θ::AbstractArray{<:Real}, x0::AbstractArray{<:Real}; fw_kwargs=(;)
 )
-    active_set::ActiveSet = optimal_active_set(dfw, θ, x0; fw_kwargs=fw_kwargs)
-    return active_set.x
+    probadist = compute_probability_distribution(dfw, θ, x0; fw_kwargs=fw_kwargs)
+    return compute_expectation(probadist)
 end
 
 ## Backward pass
@@ -56,18 +57,19 @@ function frank_wolfe_optimality_conditions(
     dfw::DifferentiableFrankWolfe,
     θ::AbstractArray{<:Real},
     p::AbstractVector{<:Real},
-    A::AbstractVector{<:AbstractArray{<:Real}},
+    V::AbstractVector{<:AbstractArray{<:Real}},
 )
-    (; ∇ₓf) = dfw
-    x = sum(pᵢ * Aᵢ for (pᵢ, Aᵢ) in zip(p, A))
-    b = ∇ₓf(x, θ)
-    ∇ₚg = [dot(Aᵢ, b) for Aᵢ in A]
+    (; f_grad1) = dfw
+    x = sum(pᵢ * Vᵢ for (pᵢ, Vᵢ) in zip(p, V))
+    ∇ₓf = f_grad1(x, θ)
+    ∇ₚg = [dot(Vᵢ, ∇ₓf) for Vᵢ in V]
     T = sparse_argmax(p - ∇ₚg)
     return T - p
 end
 
 function ChainRulesCore.rrule(
     rc::RuleConfig,
+    ::typeof(compute_probability_distribution),
     dfw::DifferentiableFrankWolfe,
     θ::AbstractArray{R1},
     x0::AbstractArray{R2};
@@ -76,13 +78,12 @@ function ChainRulesCore.rrule(
     R = promote_type(R1, R2)
     (; linear_solver) = dfw
 
-    active_set::ActiveSet = optimal_active_set(dfw, θ, x0; fw_kwargs=fw_kwargs)
-    A = active_set.atoms
-    p = active_set.weights
-    x = active_set.x
+    probadist = compute_probability_distribution(dfw, θ, x0; fw_kwargs=fw_kwargs)
+    V = probadist.atoms
+    p = probadist.weights
 
-    conditions_θ(θ_bis) = frank_wolfe_optimality_conditions(dfw, θ_bis, p, A)
-    conditions_p(p_bis) = -frank_wolfe_optimality_conditions(dfw, θ, p_bis, A)
+    conditions_θ(θ_bis) = frank_wolfe_optimality_conditions(dfw, θ_bis, p, V)
+    conditions_p(p_bis) = -frank_wolfe_optimality_conditions(dfw, θ, p_bis, V)
 
     pullback_Aᵀ = last ∘ rrule_via_ad(rc, conditions_p, p)[2]
     pullback_Bᵀ = last ∘ rrule_via_ad(rc, conditions_θ, θ)[2]
@@ -94,15 +95,15 @@ function ChainRulesCore.rrule(
     Aᵀ = LinearOperator(R, m, m, false, false, mul_Aᵀ!)
     Bᵀ = LinearOperator(R, n, m, false, false, mul_Bᵀ!)
 
-    function frank_wolfe_pullback(dx)
-        dx = unthunk(dx)
-        dp = [dot(Aᵢ, dx) for Aᵢ in A]
+    function frank_wolfe_probadist_pullback(probadist_tangent)
+        weights_tangent = probadist_tangent.weights
+        dp = convert(Vector, unthunk(weights_tangent))
         u, stats = linear_solver(Aᵀ, dp)
         stats.solved || error("Linear solver failed to converge")
         dθ_vec = Bᵀ * u
         dθ = reshape(dθ_vec, size(θ))
-        return (NoTangent(), dθ, NoTangent())
+        return (NoTangent(), NoTangent(), dθ, NoTangent())
     end
 
-    return x, frank_wolfe_pullback
+    return probadist, frank_wolfe_probadist_pullback
 end

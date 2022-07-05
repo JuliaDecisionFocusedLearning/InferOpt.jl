@@ -6,6 +6,13 @@
 Modules = [InferOpt]
 ```
 
+## Probability distributions
+
+```@autodocs
+Modules = [InferOpt]
+Pages = ["utils/probability_distribution.jl", "utils/composition.jl"]
+```
+
 ## Interpolation
 
 !!! note "Reference"

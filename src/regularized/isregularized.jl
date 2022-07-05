@@ -14,6 +14,4 @@ For `predictor::P` to comply with this interface, the following methods must exi
 """
 @traitdef IsRegularized{P}
 
-@traitfn function compute_regularization(predictor::P, y) where {P; IsRegularized{P}}
-    return error("not implemented")
-end
+@traitfn function compute_regularization(predictor::P, y) where {P; IsRegularized{P}} end

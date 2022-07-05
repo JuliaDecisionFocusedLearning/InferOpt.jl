@@ -20,10 +20,10 @@ fw_kwargs = (max_iteration=500, epsilon=1e-5)
 ## DifferentiableFrankWolfe
 
 f(x, θ) = half_square_norm(x - θ)
-∇ₓf(x, θ) = x - θ
+f_grad1(x, θ) = x - θ
 lmo = FrankWolfe.UnitSimplexOracle(1.0)
 
-dfw = DifferentiableFrankWolfe(f, ∇ₓf, lmo)
+dfw = DifferentiableFrankWolfe(f, f_grad1, lmo)
 _, pullback_dfw = rrule_via_ad(rc, dfw, θ, x0; fw_kwargs=fw_kwargs);
 
 @testset verbose = true "DifferentiableFrankWolfe" begin
@@ -33,11 +33,7 @@ end
 
 ## RegularizedGeneric
 
-maximizer(θ) = one_hot_argmax(θ)
-Ω(y) = half_square_norm(y)
-∇Ω(y) = y
-
-regularized = RegularizedGeneric(maximizer, Ω, ∇Ω)
+regularized = RegularizedGeneric(one_hot_argmax, half_square_norm, identity)
 _, pullback_regularized = rrule_via_ad(rc, regularized, θ; fw_kwargs=fw_kwargs);
 
 @testset verbose = true "RegularizedGeneric" begin

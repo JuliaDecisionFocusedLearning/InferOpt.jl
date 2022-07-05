@@ -14,10 +14,10 @@ Default configuration for the Frank-Wolfe wrapper.
 """
 const DEFAULT_FRANK_WOLFE_KWARGS = (
     away_steps=true,
-    epsilon=1e-3,
+    epsilon=1e-2,
     lazy=true,
     line_search=Adaptive(),
-    max_iteration=100,
+    max_iteration=10,
     timeout=1.0,
     verbose=false,
 )

@@ -7,12 +7,16 @@ using FrankWolfe: away_frank_wolfe, compute_extreme_point
 using Krylov: gmres
 using LinearAlgebra
 using LinearOperators: LinearOperator
-using Random
+using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using SimpleTraits: SimpleTraits
 using SimpleTraits: @traitdef, @traitfn, @traitimpl
 using SparseArrays
 using Statistics
+using StatsBase: StatsBase, sample
 using Test
+
+include("utils/probability_distribution.jl")
+include("utils/composition.jl")
 
 include("interpolation/interpolation.jl")
 
@@ -26,10 +30,10 @@ include("regularized/sparse_argmax.jl")
 include("regularized/regularized_generic.jl")
 
 include("perturbed/abstract_perturbed.jl")
-include("perturbed/composition.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
 
+include("fenchel_young/perturbed.jl")
 include("fenchel_young/fenchel_young.jl")
 
 include("spo/spoplus_loss.jl")
@@ -38,7 +42,9 @@ include("ssvm/isbaseloss.jl")
 include("ssvm/zeroone_baseloss.jl")
 include("ssvm/ssvm_loss.jl")
 
-export get_probability_distribution
+export FixedAtomsProbabilityDistribution, sample, compute_expectation
+export ProbabilisticComposition
+export compute_probability_distribution
 
 export Interpolation
 
@@ -53,7 +59,6 @@ export RegularizedGeneric
 
 export PerturbedAdditive
 export PerturbedMultiplicative
-export PerturbedComposition
 
 export FenchelYoungLoss
 
