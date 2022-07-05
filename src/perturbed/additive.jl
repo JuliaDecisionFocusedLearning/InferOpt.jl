@@ -3,11 +3,11 @@
 
 Differentiable normal perturbation of a black-box optimizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
-See also: [`AbstractPerturbed{F}`](@ref).
+See also: [`AbstractPerturbed`](@ref).
 
 Reference: <https://arxiv.org/abs/2002.08676>
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
+struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
     maximizer::F
     ε::Float64
     rng::R

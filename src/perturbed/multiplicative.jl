@@ -3,10 +3,11 @@
 
 Differentiable log-normal perturbation of a black-box optimizer: the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ N(0, I)`.
 
-See also: [`AbstractPerturbed{F}`](@ref).
+See also: [`AbstractPerturbed`](@ref).
+
+Reference: preprint coming soon.
 """
-struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <:
-       AbstractPerturbed{F}
+struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
     maximizer::F
     ε::Float64
     rng::R

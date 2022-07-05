@@ -1,11 +1,5 @@
 # API Reference
 
-## Index
-
-```@index
-Modules = [InferOpt]
-```
-
 ## Probability distributions
 
 ```@autodocs
@@ -48,6 +42,9 @@ Pages = ["ssvm/isbaseloss.jl", "ssvm/ssvm_loss.jl", "ssvm/zeroone_baseloss.jl"]
 !!! note "Reference"
     [Efficient and Modular Implicit Differentiation](http://arxiv.org/abs/2105.15183)
 
+!!! note "Reference"
+    [FrankWolfe.jl: a high-performance and flexible toolbox for Frank-Wolfe algorithms and Conditional Gradients](https://arxiv.org/abs/2104.06675)
+
 ```@autodocs
 Modules = [InferOpt]
 Pages = ["frank_wolfe/frank_wolfe_utils.jl", "frank_wolfe/differentiable_frank_wolfe.jl"]
@@ -60,7 +57,7 @@ Pages = ["frank_wolfe/frank_wolfe_utils.jl", "frank_wolfe/differentiable_frank_w
 
 ```@autodocs
 Modules = [InferOpt]
-Pages = ["regularized/frank_wolfe.jl", "regularized/isregularized.jl", "regularized/soft_argmax.jl", "regularized/sparse_argmax.jl", "regularized/regularized_generic.jl", "regularized/regularized_utils.jl"]
+Pages = ["regularized/isregularized.jl", "regularized/regularized_generic.jl", "regularized/regularized_utils.jl", "regularized/soft_argmax.jl", "regularized/sparse_argmax.jl"]
 ```
 
 ## Perturbed optimizers
@@ -70,7 +67,7 @@ Pages = ["regularized/frank_wolfe.jl", "regularized/isregularized.jl", "regulari
 
 ```@autodocs
 Modules = [InferOpt]
-Pages = ["perturbed/abstract_perturbed.jl", "perturbed/additive.jl", "perturbed/composition.jl", "perturbed/multiplicative.jl"]
+Pages = ["perturbed/abstract_perturbed.jl", "perturbed/additive.jl", "perturbed/multiplicative.jl"]
 ```
 
 ## Fenchel-Young losses
@@ -80,5 +77,11 @@ Pages = ["perturbed/abstract_perturbed.jl", "perturbed/additive.jl", "perturbed/
 
 ```@autodocs
 Modules = [InferOpt]
-Pages = ["fenchel_young/fenchel_young.jl"]
+Pages = ["fenchel_young/fenchel_young.jl", "fenchel_young/perturbed.jl"]
+```
+
+## Index
+
+```@index
+Modules = [InferOpt]
 ```

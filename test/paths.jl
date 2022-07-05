@@ -31,6 +31,12 @@ pipelines_imitation_θ = [
 ]
 
 pipelines_imitation_y = [
+    # Interpolation  # TODO: make it work
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=Interpolation(true_maximizer; λ=5.0),
+    #     loss=Flux.Losses.mse,
+    # ),
     # Perturbed + FYL
     (
         encoder=encoder_factory(),

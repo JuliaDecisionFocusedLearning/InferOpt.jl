@@ -11,7 +11,13 @@ For `predictor::P` to comply with this interface, the following methods must exi
 - [`one_hot_argmax`](@ref)
 - [`soft_argmax`](@ref)
 - [`sparse_argmax`](@ref)
+- [`RegularizedGeneric`](@ref)
 """
 @traitdef IsRegularized{P}
 
-@traitfn function compute_regularization(predictor::P, y) where {P; IsRegularized{P}} end
+"""
+    compute_regularization(predictor::P, y)
+
+Compute the convex regularization function `Ω(y)`.
+"""
+function compute_regularization end

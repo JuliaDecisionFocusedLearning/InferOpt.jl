@@ -1,17 +1,22 @@
 """
     RegularizedGeneric{M,RF,RG,F,G,S}
 
-Generic and differentiable regularized prediction function `ŷ(θ) = argmax {θᵀy - Ω(y)}`.
+Differentiable regularized prediction function `ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}`.
 
 Relies on the Frank-Wolfe algorithm to minimize a concave objective on a polytope.
 
 # Fields
-- `maximizer::M`
-- `Ω::RF`
-- `Ω_grad::RG`
-- `f::F`
-- `f_grad1::G`
-- `linear_solver::S`
+- `maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx` which implicitly defines the polytope `C`
+- `Ω::RF`: regularization function `Ω(y)`
+- `Ω_grad::RG`: gradient of the regularization function `∇Ω(y)`
+- `f::F`: objective function `f(x, θ) = Ω(y) - θᵀy` minimized by Frank-Wolfe (computed automatically)
+- `f_grad1::G`: gradient of the objective function `∇ₓf(x, θ) = ∇Ω(y) - θ` with respect to `x` (computed automatically)
+- `linear_solver::S`: solver for linear systems of equations, used during implicit differentiation
+
+# Applicable methods
+
+- [`compute_probability_distribution(regularized::RegularizedGeneric, θ)`](@ref)
+- `(regularized::RegularizedGeneric)(θ)`
 
 See also: [`DifferentiableFrankWolfe`](@ref).
 """
@@ -29,6 +34,11 @@ function Base.show(io::IO, regularized::RegularizedGeneric)
     return print(io, "RegularizedGeneric($maximizer, $Ω, $Ω_grad, $linear_solver)")
 end
 
+"""
+    RegularizedGeneric(maximizer, Ω, Ω_grad[; linear_solver=gmres])
+
+Short form constructor with a default linear solver.
+"""
 function RegularizedGeneric(maximizer, Ω, Ω_grad; linear_solver=gmres)
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
@@ -43,6 +53,14 @@ end
 
 ## Forward pass
 
+"""
+    compute_probability_distribution(regularized::RegularizedGeneric, θ[; maximizer_kwargs=(;), fw_kwargs=(;)])
+
+Construct a [`DifferentiableFrankWolfe`](@ref) struct and call `compute_probability_distribution` on it.
+
+The named tuple `maximizer_kwargs` is passed as keyword arguments to the underlying maximizer, which is wrapped inside a [`LMOWrapper`](@ref).
+The named tuple `fw_kwargs` is passed as keyword arguments to `FrankWolfe.away_frank_wolfe`.
+"""
 function compute_probability_distribution(
     regularized::RegularizedGeneric,
     θ::AbstractArray{<:Real};
@@ -58,8 +76,13 @@ function compute_probability_distribution(
     return probadist
 end
 
+"""
+    (regularized::RegularizedGeneric)(θ[; maximizer_kwargs=(;), fw_kwargs=(;)])
+
+Apply `compute_probability_distribution(regularized, θ)` and return the expectation.
+"""
 function (regularized::RegularizedGeneric)(
-    θ::AbstractArray{<:Real}; maximizer_kwargs=(;), fw_kwargs=(;)
+    θ::AbstractArray{<:Real}; maximizer_kwargs=(;), fw_kwargs=(;), kwargs...
 )
     probadist = compute_probability_distribution(
         regularized, θ; maximizer_kwargs=maximizer_kwargs, fw_kwargs=fw_kwargs

@@ -3,15 +3,19 @@
 """
     DifferentiableFrankWolfe{F,G,M,S}
 
-Parameterized version of the Frank-Wolfe algorithm `θ -> argmin_{x ∈ C} f(x, θ)`.
-
-Compatible with implicit differentiation.
+Parameterized version of the Frank-Wolfe algorithm `θ -> argmin_{x ∈ C} f(x, θ)`, which can be differentiated implicitly wrt `θ`.
 
 # Fields
 - `f::F`: function `f(x, θ)` to minimize wrt `x`
 - `f_grad1::G`: gradient `∇ₓf(x, θ)` of `f` wrt `x`
-- `lmo::M`: linear minimization oracle `θ -> argmin_{x ∈ C} θᵀx`
-- `linear_solver::S`: solver for linear systems of equations
+- `lmo::M`: linear minimization oracle `θ -> argmin_{x ∈ C} θᵀx` which implicitly defines the polytope `C`
+- `linear_solver::S`: solver for linear systems of equations, used during implicit differentiation
+
+# Applicable methods
+
+- [`compute_probability_distribution(dfw::DifferentiableFrankWolfe, θ, x0)`](@ref)
+- `(dfw::DifferentiableFrankWolfe)(θ, x0)`
+
 """
 struct DifferentiableFrankWolfe{F,G,M<:LinearMinimizationOracle,S}
     f::F
@@ -26,11 +30,19 @@ end
 
 ## Forward pass
 
+"""
+    compute_probability_distribution(dfw::DifferentiableFrankWolfe, θ, x0[; fw_kwargs=(;)])
+
+Compute the optimal active set by applying the away-step Frank-Wolfe algorithm with initial point `x0`, then turn it into a probability distribution.
+
+The named tuple `fw_kwargs` is passed as keyword arguments to `FrankWolfe.away_frank_wolfe`.
+"""
 function compute_probability_distribution(
     dfw::DifferentiableFrankWolfe,
     θ::AbstractArray{<:Real},
     x0::AbstractArray{<:Real};
     fw_kwargs=(;),
+    kwargs...,
 )
     (; f, f_grad1, lmo) = dfw
     obj(x) = f(x, θ)
@@ -44,8 +56,13 @@ function compute_probability_distribution(
     return probadist
 end
 
+"""
+    (dfw::DifferentiableFrankWolfe)(θ, x0[; fw_kwargs=(;)])
+
+Apply `compute_probability_distribution(dfw, θ, x0)` and return the expectation.
+"""
 function (dfw::DifferentiableFrankWolfe)(
-    θ::AbstractArray{<:Real}, x0::AbstractArray{<:Real}; fw_kwargs=(;)
+    θ::AbstractArray{<:Real}, x0::AbstractArray{<:Real}; fw_kwargs=(;), kwargs...
 )
     probadist = compute_probability_distribution(dfw, θ, x0; fw_kwargs=fw_kwargs)
     return compute_expectation(probadist)
@@ -74,6 +91,7 @@ function ChainRulesCore.rrule(
     θ::AbstractArray{R1},
     x0::AbstractArray{R2};
     fw_kwargs=(;),
+    kwargs...,
 ) where {R1<:Real,R2<:Real}
     R = promote_type(R1, R2)
     (; linear_solver) = dfw
@@ -88,8 +106,8 @@ function ChainRulesCore.rrule(
     pullback_Aᵀ = last ∘ rrule_via_ad(rc, conditions_p, p)[2]
     pullback_Bᵀ = last ∘ rrule_via_ad(rc, conditions_θ, θ)[2]
 
-    mul_Aᵀ!(res, u::AbstractVector) = res .= vec(pullback_Aᵀ(reshape(u, size(p))))
-    mul_Bᵀ!(res, v::AbstractVector) = res .= vec(pullback_Bᵀ(reshape(v, size(p))))
+    mul_Aᵀ!(res, u::AbstractVector) = res .= vec(pullback_Aᵀ(u))
+    mul_Bᵀ!(res, v::AbstractVector) = res .= vec(pullback_Bᵀ(v))
 
     n, m = length(θ), length(p)
     Aᵀ = LinearOperator(R, m, m, false, false, mul_Aᵀ!)

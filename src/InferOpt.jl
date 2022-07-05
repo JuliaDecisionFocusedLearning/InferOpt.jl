@@ -49,6 +49,7 @@ export compute_probability_distribution
 export Interpolation
 
 export DifferentiableFrankWolfe
+export LMOWrapper
 
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy

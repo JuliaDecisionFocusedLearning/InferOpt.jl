@@ -1,13 +1,15 @@
 """
     ProbabilisticComposition{L,G}
 
-Composition of a probabilistic layer with an arbitrary function (e.g. a cost).
+Differentiable composition of a probabilistic `layer` with an arbitrary function `post_processing`.
 
-Can be used for direct regret minimization (learning by experience).
+`ProbabilisticComposition` can be used for direct regret minimization (aka learning by experience) when the post-processing returns a cost.
 
 # Fields
-- `layer::L`: regularized predictor compatible with [`compute_probability_distribution`](@ref)
-- `post_processing::P`: function taking an array and some `kwargs` as inputs
+- `layer::L`: anything that implements `compute_probability_distribution(layer, θ; kwargs...)`
+- `post_processing::P`: callable
+
+See also: [`FixedAtomsProbabilityDistribution`](@ref).
 """
 struct ProbabilisticComposition{L,P}
     layer::L
@@ -19,15 +21,35 @@ function Base.show(io::IO, composition::ProbabilisticComposition)
     return print(io, "ProbabilisticComposition($layer, $post_processing)")
 end
 
-function compute_probability_distribution(composition::ProbabilisticComposition; kwargs...)
+"""
+    compute_probability_distribution(composition, θ)
+
+Output the distribution of `composition.post_processing(X)`, where `X` follows the distribution defined by `composition.layer` applied to `θ`.
+
+This function is not differentiable if `composition.post_processing` isn't.
+
+See also: [`apply_on_atoms`](@ref).
+"""
+function compute_probability_distribution(
+    composition::ProbabilisticComposition, θ; kwargs...
+)
     (; layer, post_processing) = composition
-    probadist = compute_probability_distribution(layer, θ)
+    probadist = compute_probability_distribution(layer, θ; kwargs...)
     post_processed_probadist = apply_on_atoms(post_processing, probadist; kwargs...)
     return post_processed_probadist
 end
 
+"""
+    (composition::ProbabilisticComposition)(θ)
+
+Output the expectation of `composition.post_processing(X)`, where `X` follows the distribution defined by `composition.layer` applied to `θ`.
+
+Unlike [`compute_probability_distribution(composition, θ)`](@ref), this function is differentiable, even if `composition.post_processing` isn't.
+
+See also: [`compute_expectation`](@ref).
+"""
 function (composition::ProbabilisticComposition)(θ::AbstractArray{<:Real}; kwargs...)
     (; layer, post_processing) = composition
-    probadist = compute_probability_distribution(layer, θ)
+    probadist = compute_probability_distribution(layer, θ; kwargs...)
     return compute_expectation(probadist, post_processing; kwargs...)
 end
