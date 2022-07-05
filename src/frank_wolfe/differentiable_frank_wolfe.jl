@@ -8,7 +8,7 @@ Parameterized version of the Frank-Wolfe algorithm `θ -> argmin_{x ∈ C} f(x, 
 # Fields
 - `f::F`: function `f(x, θ)` to minimize wrt `x`
 - `f_grad1::G`: gradient `∇ₓf(x, θ)` of `f` wrt `x`
-- `lmo::M`: linear minimization oracle `θ -> argmin_{x ∈ C} θᵀx` which implicitly defines the polytope `C`
+- `lmo::M`: linear minimization oracle `θ -> argmin_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
 - `linear_solver::S`: solver for linear systems of equations, used during implicit differentiation
 
 # Applicable methods
@@ -24,7 +24,7 @@ struct DifferentiableFrankWolfe{F,G,M<:LinearMinimizationOracle,S}
     linear_solver::S
 end
 
-function DifferentiableFrankWolfe(f, f_grad1, lmo; linear_solver=gmres)
+function DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver=gmres)
     return DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver)
 end
 

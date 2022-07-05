@@ -1,7 +1,7 @@
 """
     PerturbedAdditive{F}
 
-Differentiable normal perturbation of a black-box optimizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
+Differentiable normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
 See also: [`AbstractPerturbed`](@ref).
 
@@ -10,25 +10,30 @@ Reference: <https://arxiv.org/abs/2002.08676>
 struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
     maximizer::F
     ε::Float64
+    nb_samples::Int
     rng::R
     seed::S
-    nb_samples::Int
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
     return print(
-        io, "PerturbedAdditive($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)"
+        io, "PerturbedAdditive($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)"
     )
 end
 
+"""
+    PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
+
+Shorter constructor with defaults.
+"""
 function PerturbedAdditive(
-    maximizer; ε=1.0, epsilon=nothing, rng=MersenneTwister(0), seed=nothing, nb_samples=2
+    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
 )
     if isnothing(epsilon)
-        return PerturbedAdditive(maximizer, float(ε), rng, seed, nb_samples)
+        return PerturbedAdditive(maximizer, float(ε), nb_samples, rng, seed)
     else
-        return PerturbedAdditive(maximizer, float(epsilon), rng, seed, nb_samples)
+        return PerturbedAdditive(maximizer, float(epsilon), nb_samples, rng, seed)
     end
 end
 

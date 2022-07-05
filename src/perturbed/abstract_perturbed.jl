@@ -17,9 +17,9 @@ These subtypes share the following fields:
 
 - `maximizer`: black box optimizer
 - `ε`: magnitude of the perturbation
+- `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
-- `nb_samples::Int`: number of random samples for Monte-Carlo computations
 """
 abstract type AbstractPerturbed end
 

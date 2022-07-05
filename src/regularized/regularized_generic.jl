@@ -6,7 +6,7 @@ Differentiable regularized prediction function `ŷ(θ) = argmax_{y ∈ C} {θ�
 Relies on the Frank-Wolfe algorithm to minimize a concave objective on a polytope.
 
 # Fields
-- `maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx` which implicitly defines the polytope `C`
+- `maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
 - `Ω::RF`: regularization function `Ω(y)`
 - `Ω_grad::RG`: gradient of the regularization function `∇Ω(y)`
 - `f::F`: objective function `f(x, θ) = Ω(y) - θᵀy` minimized by Frank-Wolfe (computed automatically)
@@ -34,15 +34,30 @@ function Base.show(io::IO, regularized::RegularizedGeneric)
     return print(io, "RegularizedGeneric($maximizer, $Ω, $Ω_grad, $linear_solver)")
 end
 
-"""
-    RegularizedGeneric(maximizer, Ω, Ω_grad[; linear_solver=gmres])
-
-Short form constructor with a default linear solver.
-"""
-function RegularizedGeneric(maximizer, Ω, Ω_grad; linear_solver=gmres)
+function RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver=gmres)
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
     return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
+end
+
+"""
+    RegularizedGeneric(maximizer[; Ω, Ω_grad, linear_solver=gmres])
+
+Shorter constructor with defaults.
+"""
+function RegularizedGeneric(
+    maximizer;
+    Ω=zero_regularization,
+    Ω_grad=zero_gradient,
+    omega=nothing,
+    omega_grad=nothing,
+    linear_solver=gmres,
+)
+    if isnothing(omega) || isnothing(omega_grad)
+        return RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver)
+    else
+        return RegularizedGeneric(maximizer, omega, omega_grad, linear_solver)
+    end
 end
 
 @traitimpl IsRegularized{RegularizedGeneric}

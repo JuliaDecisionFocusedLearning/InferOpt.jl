@@ -1,7 +1,7 @@
 """
     PerturbedMultiplicative{F}
 
-Differentiable log-normal perturbation of a black-box optimizer: the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ N(0, I)`.
+Differentiable log-normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ N(0, I)`.
 
 See also: [`AbstractPerturbed`](@ref).
 
@@ -10,25 +10,30 @@ Reference: preprint coming soon.
 struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
     maximizer::F
     ε::Float64
+    nb_samples::Int
     rng::R
     seed::S
-    nb_samples::Int
 end
 
 function Base.show(io::IO, perturbed::PerturbedMultiplicative)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
     return print(
-        io, "PerturbedMultiplicative($maximizer, $ε, $(typeof(rng)), $seed, $nb_samples)"
+        io, "PerturbedMultiplicative($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)"
     )
 end
 
+"""
+    PerturbedMultiplicative(maximizer[; ε=1.0, nb_samples=1])
+
+Shorter constructor with defaults.
+"""
 function PerturbedMultiplicative(
-    maximizer; ε=1.0, epsilon=nothing, rng=MersenneTwister(0), seed=nothing, nb_samples=2
+    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
 )
     if isnothing(epsilon)
-        return PerturbedMultiplicative(maximizer, float(ε), rng, seed, nb_samples)
+        return PerturbedMultiplicative(maximizer, float(ε), nb_samples, rng, seed)
     else
-        return PerturbedMultiplicative(maximizer, float(epsilon), rng, seed, nb_samples)
+        return PerturbedMultiplicative(maximizer, float(epsilon), nb_samples, rng, seed)
     end
 end
 
