@@ -1,9 +1,9 @@
 """
-    ProbabilisticComposition{L,G}
+    Pushforward{L,G}
 
 Differentiable composition of a probabilistic `layer` with an arbitrary function `post_processing`.
 
-`ProbabilisticComposition` can be used for direct regret minimization (aka learning by experience) when the post-processing returns a cost.
+`Pushforward` can be used for direct regret minimization (aka learning by experience) when the post-processing returns a cost.
 
 # Fields
 - `layer::L`: anything that implements `compute_probability_distribution(layer, θ; kwargs...)`
@@ -11,14 +11,14 @@ Differentiable composition of a probabilistic `layer` with an arbitrary function
 
 See also: [`FixedAtomsProbabilityDistribution`](@ref).
 """
-struct ProbabilisticComposition{L,P}
+struct Pushforward{L,P}
     layer::L
     post_processing::P
 end
 
-function Base.show(io::IO, composition::ProbabilisticComposition)
+function Base.show(io::IO, composition::Pushforward)
     (; layer, post_processing) = composition
-    return print(io, "ProbabilisticComposition($layer, $post_processing)")
+    return print(io, "Pushforward($layer, $post_processing)")
 end
 
 """
@@ -30,9 +30,7 @@ This function is not differentiable if `composition.post_processing` isn't.
 
 See also: [`apply_on_atoms`](@ref).
 """
-function compute_probability_distribution(
-    composition::ProbabilisticComposition, θ; kwargs...
-)
+function compute_probability_distribution(composition::Pushforward, θ; kwargs...)
     (; layer, post_processing) = composition
     probadist = compute_probability_distribution(layer, θ; kwargs...)
     post_processed_probadist = apply_on_atoms(post_processing, probadist; kwargs...)
@@ -40,7 +38,7 @@ function compute_probability_distribution(
 end
 
 """
-    (composition::ProbabilisticComposition)(θ)
+    (composition::Pushforward)(θ)
 
 Output the expectation of `composition.post_processing(X)`, where `X` follows the distribution defined by `composition.layer` applied to `θ`.
 
@@ -48,7 +46,7 @@ Unlike [`compute_probability_distribution(composition, θ)`](@ref), this functio
 
 See also: [`compute_expectation`](@ref).
 """
-function (composition::ProbabilisticComposition)(θ::AbstractArray{<:Real}; kwargs...)
+function (composition::Pushforward)(θ::AbstractArray{<:Real}; kwargs...)
     (; layer, post_processing) = composition
     probadist = compute_probability_distribution(layer, θ; kwargs...)
     return compute_expectation(probadist, post_processing; kwargs...)

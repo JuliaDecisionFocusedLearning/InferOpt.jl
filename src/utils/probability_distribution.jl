@@ -46,11 +46,13 @@ end
 Base.rand(probadist::FixedAtomsProbabilityDistribution) = rand(GLOBAL_RNG, probadist)
 
 """
-    compress!(probadist[; atol])
+    compress_distribution!(probadist[; atol])
 
 Remove duplicated atoms in `probadist` (up to a tolerance on equality).
 """
-function compress!(probadist::FixedAtomsProbabilityDistribution{A,W}; atol=0) where {A,W}
+function compress_distribution!(
+    probadist::FixedAtomsProbabilityDistribution{A,W}; atol=0
+) where {A,W}
     (; atoms, weights) = probadist
     to_delete = Int[]
     for i in length(probadist):-1:1

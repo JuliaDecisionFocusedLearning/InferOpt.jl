@@ -42,8 +42,9 @@ include("ssvm/isbaseloss.jl")
 include("ssvm/zeroone_baseloss.jl")
 include("ssvm/ssvm_loss.jl")
 
-export FixedAtomsProbabilityDistribution, sample, compute_expectation
-export ProbabilisticComposition
+export FixedAtomsProbabilityDistribution
+export compute_expectation, compress_distribution!
+export Pushforward
 export compute_probability_distribution
 
 export Interpolation

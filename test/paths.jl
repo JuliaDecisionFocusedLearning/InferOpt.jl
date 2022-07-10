@@ -79,21 +79,19 @@ pipelines_experience = [
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ProbabilisticComposition(
-            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10), cost
-        ),
+        loss=Pushforward(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10), cost),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ProbabilisticComposition(
+        loss=Pushforward(
             PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10), cost
         ),
     ),
     (
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ProbabilisticComposition(
+        loss=Pushforward(
             RegularizedGeneric(true_maximizer, half_square_norm, identity), cost
         ),
     ),
