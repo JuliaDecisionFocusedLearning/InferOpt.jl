@@ -16,7 +16,7 @@ using StatsBase: StatsBase, sample
 using Test
 
 include("utils/probability_distribution.jl")
-include("utils/composition.jl")
+include("utils/pushforward.jl")
 
 include("interpolation/interpolation.jl")
 
