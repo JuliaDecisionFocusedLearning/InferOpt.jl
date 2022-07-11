@@ -121,7 +121,7 @@ Thanks to this smoothing, we can now train our model with a standard gradient op
 
 ````@example tutorial
 encoder = deepcopy(initial_encoder)
-opt = ADAM();
+opt = Adam();
 losses = Float64[]
 for epoch in 1:200
     l = 0.0
