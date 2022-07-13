@@ -93,7 +93,7 @@ function ChainRulesCore.rrule(
     fw_kwargs=(;),
     kwargs...,
 ) where {R1<:Real,R2<:Real}
-    R = promote_type(R1, R2)
+    R = promote_type(float(R1), float(R2))
     (; linear_solver) = dfw
 
     probadist = compute_probability_distribution(dfw, θ, x0; fw_kwargs=fw_kwargs)
