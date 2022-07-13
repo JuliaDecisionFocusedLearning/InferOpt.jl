@@ -1,7 +1,7 @@
 # Mathematical background
 
 Here we describe the theoretical framework in which `InferOpt.jl` operates.
-Our goal is make machine learning models more expressive by incomporating combinatorial optimization algorithms as layers.
+Our goal is make machine learning models more expressive by incorporating combinatorial optimization algorithms as layers.
 
 For a broader perspective on the interactions between machine learning and combinatorial optimization, please refer to the following review papers:
 
