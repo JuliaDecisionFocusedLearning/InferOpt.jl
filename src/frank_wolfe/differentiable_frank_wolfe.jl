@@ -106,8 +106,8 @@ function ChainRulesCore.rrule(
     pullback_Aᵀ = last ∘ rrule_via_ad(rc, conditions_p, p)[2]
     pullback_Bᵀ = last ∘ rrule_via_ad(rc, conditions_θ, θ)[2]
 
-    mul_Aᵀ!(res, u::AbstractVector) = res .= vec(pullback_Aᵀ(u))
-    mul_Bᵀ!(res, v::AbstractVector) = res .= vec(pullback_Bᵀ(v))
+    mul_Aᵀ!(res::Vector, u::Vector) = res .= vec(pullback_Aᵀ(u))
+    mul_Bᵀ!(res::Vector, v::Vector) = res .= vec(pullback_Bᵀ(v))
 
     n, m = length(θ), length(p)
     Aᵀ = LinearOperator(R, m, m, false, false, mul_Aᵀ!)
@@ -115,7 +115,7 @@ function ChainRulesCore.rrule(
 
     function frank_wolfe_probadist_pullback(probadist_tangent)
         weights_tangent = probadist_tangent.weights
-        dp = convert(Vector, unthunk(weights_tangent))
+        dp = convert(Vector{R}, unthunk(weights_tangent))
         u, stats = linear_solver(Aᵀ, dp)
         stats.solved || error("Linear solver failed to converge")
         dθ_vec = Bᵀ * u

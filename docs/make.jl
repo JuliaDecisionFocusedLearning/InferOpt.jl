@@ -29,7 +29,7 @@ Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
 
 makedocs(;
     modules=[InferOpt],
-    authors="Axel Parmentier, Guillaume Dalle, Léo Baty, Louis Bouvier",
+    authors="Guillaume Dalle, Léo Baty, Louis Bouvier, Axel Parmentier",
     repo="https://github.com/axelparmentier/InferOpt.jl/blob/{commit}{path}#{line}",
     sitename="InferOpt.jl",
     format=Documenter.HTML(;
@@ -40,10 +40,14 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Tutorial" => "tutorial.md",
-        "Mathematical background" => "math.md",
-        "Implementation" => "implementation.md",
+        "Background" => "background.md",
         "Algorithms & API" => "algorithms.md",
     ],
 )
+
+for file in
+    [joinpath(@__DIR__, "src", "index.md"), joinpath(@__DIR__, "src", "tutorial.md")]
+    rm(file)
+end
 
 deploydocs(; repo="github.com/axelparmentier/InferOpt.jl", devbranch="main")
