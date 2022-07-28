@@ -9,9 +9,8 @@
 
 `InferOpt.jl` is a toolbox for using combinatorial optimization algorithms within machine learning pipelines.
 
-It allows you to differentiate through things that should not be differentiable, such as Mixed Integer Linear Programs or graph algorithms.
-
-> This package is at a very early development stage, so proceed with caution!
+It allows you to create differentiable layers from optimization oracles that do not have meaningful derivatives.
+Typical examples include mixed integer linear programs or graph algorithms.
 
 ## Getting started
 
@@ -26,3 +25,9 @@ To install the development version, run this command instead:
 ```julia
 julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
 ```
+
+## Citing us
+
+If you use our package in your research, please cite the following paper:
+
+> [Learning with Combinatorial Optimization Layers: a Probabilistic Approach](https://arxiv.org/abs/2207.13513) - Guillaume Dalle, Léo Baty, Louis Bouvier and Axel Parmentier (2022)

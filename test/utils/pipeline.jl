@@ -37,7 +37,7 @@ function test_pipeline!(
     @info "Testing $setting_name" maximizer loss
 
     ## Optimization
-    opt = Adam()
+    opt = Flux.Adam()
     perf_storage = init_perf()
     prog = Progress(epochs; enabled=verbose)
 

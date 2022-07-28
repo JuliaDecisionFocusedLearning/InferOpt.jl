@@ -4,7 +4,7 @@
 
 ```@autodocs
 Modules = [InferOpt]
-Pages = ["utils/probability_distribution.jl", "utils/composition.jl"]
+Pages = ["utils/probability_distribution.jl", "utils/pushforward.jl"]
 ```
 
 ## Interpolation
