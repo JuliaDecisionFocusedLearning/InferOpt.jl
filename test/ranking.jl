@@ -103,11 +103,11 @@ data_train, data_test = generate_dataset(
 ## Test loop
 
 for pipeline in pipelines_imitation_θ
-    pipeline = deepcopy(pipeline)
-    (; encoder, maximizer, loss) = pipeline
+    pipeline_1 = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
     test_pipeline!(
-        pipeline,
+        pipeline_1,
         pipeline_loss_imitation_θ;
         true_encoder=true_encoder,
         true_maximizer=true_maximizer,
@@ -118,6 +118,23 @@ for pipeline in pipelines_imitation_θ
         epochs=100,
         verbose=true,
         setting_name="ranking - imitation_θ",
+    )
+
+    pipeline_2 = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline_2
+    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
+    test_pipeline!(
+        pipeline_2,
+        pipeline_loss_imitation_θ;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=100,
+        verbose=true,
+        setting_name="ranking - imitation_θ - precomputed_y_true",
     )
 end
 
