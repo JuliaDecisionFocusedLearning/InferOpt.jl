@@ -7,7 +7,7 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: <https://arxiv.org/abs/2002.08676>
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
+struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
     maximizer::F
     ε::Float64
     nb_samples::Int

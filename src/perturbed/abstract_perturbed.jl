@@ -21,7 +21,7 @@ These subtypes share the following fields:
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
 """
-abstract type AbstractPerturbed end
+abstract type AbstractPerturbed{F} end
 
 """
     sample_perturbations(perturbed::AbstractPerturbed, θ)

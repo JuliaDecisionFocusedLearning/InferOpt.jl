@@ -54,6 +54,19 @@ function fenchel_young_loss_and_grad(
     return l, g
 end
 
+function fenchel_young_loss_and_grad(
+    fyl::FenchelYoungLoss{P},
+    θ::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
+) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
+    (; predictor) = fyl
+    F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(predictor, θ; kwargs...)
+    l = F - objective_value(predictor.maximizer, θ, y_true; kwargs...)
+    g = predictor.maximizer.g(almost_ŷ) - predictor.maximizer.g(y_true)
+    return l, g
+end
+
 ## Backward pass
 
 function ChainRulesCore.rrule(

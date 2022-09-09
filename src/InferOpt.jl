@@ -29,6 +29,7 @@ include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
 include("regularized/regularized_generic.jl")
 
+include("perturbed/generalized_maximizer.jl")
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
@@ -69,5 +70,7 @@ export SPOPlusLoss
 export IsBaseLoss
 export ZeroOneBaseLoss
 export StructuredSVMLoss
+
+export GeneralizedMaximizer, objective_value
 
 end

@@ -23,6 +23,19 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
+    perturbed::PerturbedAdditive{<:GeneralizedMaximizer},
+    θ::AbstractArray{<:Real},
+    Z::AbstractArray{<:Real};
+    kwargs...,
+)
+    (; maximizer, ε) = perturbed
+    θ_perturbed = θ .+ ε .* Z
+    y = maximizer(θ_perturbed; kwargs...)
+    F = objective_value(maximizer, θ_perturbed, y; kwargs...)
+    return F, y
+end
+
+function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedMultiplicative,
     θ::AbstractArray{<:Real},
     Z::AbstractArray{<:Real};
