@@ -4,12 +4,12 @@ using InferOpt
 using JuliaFormatter
 using Test
 
-format(InferOpt; verbose=true)
-
 includet("utils/dataset.jl")
 includet("utils/error.jl")
 includet("utils/perf.jl")
 includet("utils/pipeline.jl")
+
+format(InferOpt; verbose=true)
 
 @testset verbose = true "InferOpt.jl" begin
     @testset verbose = true "Code quality (Aqua.jl)" begin

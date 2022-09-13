@@ -11,7 +11,7 @@ function max_pricing(θ::AbstractVector; instance::AbstractMatrix)
 end
 
 g(y; kwargs...) = vec(sum(y; dims=2))
-h(y; instance) = sum(dij * yij for (dij, yij) in zip(instance, y))
+h(y; instance) = -sum(dij * yij for (dij, yij) in zip(instance, y))
 
 @testset "Generalized maximizer basics" begin
     instance = [
@@ -39,13 +39,32 @@ end
 end
 
 nb_features = 5
-encoder_factory() = Chain(Dense(nb_features => 1; bias=false), dropfirstdim, make_positive)
+encoder_factory() = Chain(Dense(nb_features => 1; bias=false), dropfirstdim)#, make_positive)
 true_encoder = encoder_factory()
 true_maximizer = GeneralizedMaximizer(max_pricing, g, h)
-# max_pricing(θ; kwargs...)
+
+data_train, data_test = generate_dataset(
+    true_encoder,
+    true_maximizer;
+    nb_features=nb_features,
+    instance_dim=5,
+    nb_instances=100,
+    noise_std=0.0,
+);
+
 cost(y; instance) = -objective_value(true_maximizer, true_encoder(instance), y; instance)
-#cost(y; instance) = 0.0
 error_function(ŷ, y) = hamming_distance(ŷ, y)
+
+# x, θ, y = data_train[1][1], data_train[2][1], data_train[3][1]
+# x
+# θ
+# y
+# cost(y; instance=x)
+# cost(zero(y); instance=x)
+# true_maximizer(θ; instance=x)
+
+# θ
+# dot(θ, true_maximizer.g(y; instance=x)) .+ true_maximizer.h(y; instance=x)
 
 pipelines_imitation_y = [
     # Interpolation  # TODO: make it work
@@ -60,47 +79,37 @@ pipelines_imitation_y = [
         maximizer=identity,
         loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
     ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
-    ),
-    # Perturbed + other loss
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
-        loss=Flux.Losses.mse,
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
-        loss=Flux.Losses.mse,
-    ),
-    # Generic regularized + FYL
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(
-            RegularizedGeneric(true_maximizer, half_square_norm, identity)
-        ),
-    ),
-    # Generic regularized + other loss
-    (
-        encoder=encoder_factory(),
-        maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
-        loss=Flux.Losses.mse,
-    ),
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=identity,
+    #     loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
+    # ),
+    # # Perturbed + other loss
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
+    #     loss=Flux.Losses.mse,
+    # ),
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
+    #     loss=Flux.Losses.mse,
+    # ),
+    # # Generic regularized + FYL
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=identity,
+    #     loss=FenchelYoungLoss(
+    #         RegularizedGeneric(true_maximizer, half_square_norm, identity)
+    #     ),
+    # ),
+    # # Generic regularized + other loss
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
+    #     loss=Flux.Losses.mse,
+    # ),
 ]
-
-
-data_train, data_test = generate_dataset(
-    true_encoder,
-    true_maximizer;
-    nb_features=nb_features,
-    instance_dim=5,
-    nb_instances=100,
-    noise_std=0.0,
-);
 
 for pipeline in pipelines_imitation_y
     pipeline = deepcopy(pipeline)
@@ -120,5 +129,33 @@ for pipeline in pipelines_imitation_y
         setting_name="paths - imitation_y",
     )
 end
+
+data_train2 = (data_train[1], data_train[2], g.(data_train[3]));
+data_test2 = (data_test[1], data_test[2], g.(data_test[3]));
+
+maximizer2(θ; instance) = g(max_pricing(θ; instance))
+
+pipeline = (
+    encoder=encoder_factory(),
+    maximizer=identity,
+    loss=FenchelYoungLoss(PerturbedAdditive(maximizer2; ε=1.0, nb_samples=5)),
+)
+
+pipeline = deepcopy(pipeline)
+(; encoder, maximizer, loss) = pipeline
+pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y; instance=x)
+test_pipeline!(
+    pipeline,
+    pipeline_loss_imitation_y;
+    true_encoder=true_encoder,
+    true_maximizer=maximizer2,
+    data_train=data_train2,
+    data_test=data_test2,
+    error_function=error_function,
+    cost=cost,
+    epochs=200,
+    verbose=true,
+    setting_name="paths - imitation_y",
+)
 
 # TODO: benchmark with usual workaround with g(y) directly as labels and output of true_maximizer
