@@ -49,3 +49,18 @@ function fenchel_young_F_and_first_part_of_grad(
     y_scaled = y .* eZ
     return F, y_scaled
 end
+
+function fenchel_young_F_and_first_part_of_grad(
+    perturbed::PerturbedMultiplicative{<:GeneralizedMaximizer},
+    θ::AbstractArray{<:Real},
+    Z::AbstractArray{<:Real};
+    kwargs...,
+)
+    (; maximizer, ε) = perturbed
+    eZ = exp.(ε .* Z .- ε^2)
+    θ_perturbed = θ .* eZ
+    y = maximizer(θ_perturbed; kwargs...)
+    F = objective_value(maximizer, θ_perturbed, y; kwargs...)
+    y_scaled = y .* eZ
+    return F, y_scaled
+end
