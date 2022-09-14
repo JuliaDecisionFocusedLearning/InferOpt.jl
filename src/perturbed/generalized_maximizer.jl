@@ -7,7 +7,7 @@ struct GeneralizedMaximizer{F,G,H}
     h::H
 end
 
-GeneralizedMaximizer(f; g=identity, h=identity) = GeneralizedMaximizer(f, g, h)
+GeneralizedMaximizer(f; g=identity, h=zero) = GeneralizedMaximizer(f, g, h)
 
 """
 """
