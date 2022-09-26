@@ -38,8 +38,8 @@ To ensure acyclicity, we only allow the user to move right, down or both.
 Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its cost matrix ``\theta \in \mathbb{R}^{h \times w}``.
 =#
 
-h, w = 50, 100
-g = AcyclicGridGraph(rand(h, w));
+height, width = 50, 100
+g = AcyclicGridGraph(rand(height, width));
 
 #=
 For convenience, `GridGraphs.jl` also provides custom functions to compute shortest paths efficiently.
@@ -77,7 +77,7 @@ We now have everything we need to build our dataset.
 
 nb_instances = 30
 
-X_train = [randn(nb_features, h, w) for n in 1:nb_instances];
+X_train = [randn(nb_features, height, width) for n in 1:nb_instances];
 θ_train = [true_encoder(x) for x in X_train];
 Y_train = [linear_maximizer(θ) for θ in θ_train];
 

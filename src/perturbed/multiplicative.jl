@@ -7,7 +7,8 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: preprint coming soon.
 """
-struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed{F}
+struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <:
+       AbstractPerturbed{F}
     maximizer::F
     ε::Float64
     nb_samples::Int
