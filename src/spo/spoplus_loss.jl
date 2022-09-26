@@ -24,17 +24,22 @@ SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, float(α))
 ## Forward pass
 
 function (spol::SPOPlusLoss)(
-    θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}
+    θ::AbstractArray{<:Real},
+    θ_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
 )
     (; maximizer, α) = spol
     θ_α = α * θ - θ_true
-    y_α = maximizer(θ_α)
+    y_α = maximizer(θ_α; kwargs...)
     l = dot(θ_α, y_α) - dot(θ_α, y_true)
     return l
 end
 
-function (spol::SPOPlusLoss)(θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real})
-    y_true = spol.maximizer(θ_true)
+function (spol::SPOPlusLoss)(
+    θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}; kwargs...
+)
+    y_true = spol.maximizer(θ_true; kwargs...)
     return spol(θ, θ_true, y_true)
 end
 
@@ -44,11 +49,12 @@ function compute_loss_and_gradient(
     spol::SPOPlusLoss,
     θ::AbstractArray{<:Real},
     θ_true::AbstractArray{<:Real},
-    y_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
 )
     (; maximizer, α) = spol
     θ_α = α * θ - θ_true
-    y_α = maximizer(θ_α)
+    y_α = maximizer(θ_α; kwargs...)
     l = dot(θ_α, y_α) - dot(θ_α, y_true)
     return l, α .* (y_α .- y_true)
 end
@@ -57,18 +63,19 @@ function ChainRulesCore.rrule(
     spol::SPOPlusLoss,
     θ::AbstractArray{<:Real},
     θ_true::AbstractArray{<:Real},
-    y_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
 )
-    l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
+    l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true; kwargs...)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent(), NoTangent()
     return l, spol_pullback
 end
 
 function ChainRulesCore.rrule(
-    spol::SPOPlusLoss, θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}
+    spol::SPOPlusLoss, θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}; kwargs...
 )
-    y_true = spol.maximizer(θ_true)
-    l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true)
+    y_true = spol.maximizer(θ_true; kwargs...)
+    l, g = compute_loss_and_gradient(spol, θ, θ_true, y_true; kwargs...)
     spol_pullback(dl) = NoTangent(), dl * g, NoTangent()
     return l, spol_pullback
 end
