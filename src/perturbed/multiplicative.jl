@@ -7,7 +7,8 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: preprint coming soon.
 """
-struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
+struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int},B} <:
+       AbstractPerturbed{B}
     maximizer::F
     ε::Float64
     nb_samples::Int
@@ -28,12 +29,22 @@ end
 Shorter constructor with defaults.
 """
 function PerturbedMultiplicative(
-    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
-)
+    maximizer::F;
+    ε=1.0,
+    epsilon=nothing,
+    nb_samples=1,
+    rng::R=MersenneTwister(0),
+    seed::S=nothing,
+    is_parallel=false,
+) where {F,R,S}
     if isnothing(epsilon)
-        return PerturbedMultiplicative(maximizer, float(ε), nb_samples, rng, seed)
+        return PerturbedMultiplicative{F,R,S,is_parallel}(
+            maximizer, float(ε), nb_samples, rng, seed
+        )
     else
-        return PerturbedMultiplicative(maximizer, float(epsilon), nb_samples, rng, seed)
+        return PerturbedMultiplicative{F,R,S,is_parallel}(
+            maximizer, float(epsilon), nb_samples, rng, seed
+        )
     end
 end
 

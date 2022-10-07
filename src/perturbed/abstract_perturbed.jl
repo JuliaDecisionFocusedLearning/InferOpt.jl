@@ -1,7 +1,8 @@
 """
-    AbstractPerturbed
+    AbstractPerturbed{B}
 
 Differentiable perturbation of a black box optimizer.
+The parameter B is a boolean value, equal to true if the perturbations are run in parallel.
 
 # Applicable functions
 
@@ -21,7 +22,7 @@ These subtypes share the following fields:
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
 """
-abstract type AbstractPerturbed end
+abstract type AbstractPerturbed{B} end
 
 """
     sample_perturbations(perturbed::AbstractPerturbed, θ)
@@ -35,13 +36,31 @@ function sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray{<:
     return Z_samples
 end
 
+function compute_atoms(
+    perturbed::AbstractPerturbed{false},
+    θ::AbstractArray{<:Real},
+    Z_samples::Vector{<:AbstractArray{<:Real}};
+    kwargs...,
+)
+    return [perturb_and_optimize(perturbed, θ, Z; kwargs...) for Z in Z_samples]
+end
+
+function compute_atoms(
+    perturbed::AbstractPerturbed{true},
+    θ::AbstractArray{<:Real},
+    Z_samples::Vector{<:AbstractArray{<:Real}};
+    kwargs...,
+)
+    return ThreadsX.map(Z -> perturb_and_optimize(perturbed, θ, Z; kwargs...), Z_samples)
+end
+
 function compute_probability_distribution(
     perturbed::AbstractPerturbed,
     θ::AbstractArray{<:Real},
     Z_samples::Vector{<:AbstractArray{<:Real}};
     kwargs...,
 )
-    atoms = [perturb_and_optimize(perturbed, θ, Z; kwargs...) for Z in Z_samples]
+    atoms = compute_atoms(perturbed, θ, Z_samples; kwargs...)
     weights = ones(length(atoms)) ./ length(atoms)
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
