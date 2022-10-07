@@ -14,6 +14,13 @@ struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int},B} <:
     nb_samples::Int
     rng::R
     seed::S
+
+    function PerturbedMultiplicative{F,R,S,B}(
+        maximizer::F, ε::Float64, nb_samples::Int, rng::R, seed::S
+    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},B}
+        @assert B isa Bool
+        return new{F,R,S,B}(maximizer, ε, nb_samples, rng, seed)
+    end
 end
 
 function Base.show(io::IO, perturbed::PerturbedMultiplicative)
