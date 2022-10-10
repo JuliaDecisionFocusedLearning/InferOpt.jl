@@ -7,18 +7,19 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: <https://arxiv.org/abs/2002.08676>
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},B} <: AbstractPerturbed{B}
+struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
+       AbstractPerturbed{parallel}
     maximizer::F
     ε::Float64
     nb_samples::Int
     rng::R
     seed::S
 
-    function PerturbedAdditive{F,R,S,B}(
+    function PerturbedAdditive{F,R,S,parallel}(
         maximizer::F, ε::Float64, nb_samples::Int, rng::R, seed::S
-    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},B}
-        @assert B isa Bool
-        return new{F,R,S,B}(maximizer, ε, nb_samples, rng, seed)
+    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
+        @assert parallel isa Bool
+        return new{F,R,S,parallel}(maximizer, ε, nb_samples, rng, seed)
     end
 end
 
