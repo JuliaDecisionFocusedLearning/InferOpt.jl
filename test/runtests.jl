@@ -16,7 +16,7 @@ includet("utils/pipeline.jl")
         Aqua.test_all(InferOpt; ambiguities=false)
     end
     @testset verbose = true "Code formatting (JuliaFormatter.jl)" begin
-        @test format(InferOpt; overwrite=false)
+        @test format(InferOpt; verbose=false, overwrite=false)
     end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
