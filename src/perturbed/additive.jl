@@ -7,12 +7,20 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: <https://arxiv.org/abs/2002.08676>
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
+struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
+       AbstractPerturbed{parallel}
     maximizer::F
     ε::Float64
     nb_samples::Int
     rng::R
     seed::S
+
+    function PerturbedAdditive{F,R,S,parallel}(
+        maximizer::F, ε::Float64, nb_samples::Int, rng::R, seed::S
+    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
+        @assert parallel isa Bool
+        return new{F,R,S,parallel}(maximizer, ε, nb_samples, rng, seed)
+    end
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
@@ -28,12 +36,22 @@ end
 Shorter constructor with defaults.
 """
 function PerturbedAdditive(
-    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
-)
+    maximizer::F;
+    ε=1.0,
+    epsilon=nothing,
+    nb_samples=1,
+    rng::R=MersenneTwister(0),
+    seed::S=nothing,
+    is_parallel=false,
+) where {F,R,S}
     if isnothing(epsilon)
-        return PerturbedAdditive(maximizer, float(ε), nb_samples, rng, seed)
+        return PerturbedAdditive{F,R,S,is_parallel}(
+            maximizer, float(ε), nb_samples, rng, seed
+        )
     else
-        return PerturbedAdditive(maximizer, float(epsilon), nb_samples, rng, seed)
+        return PerturbedAdditive{F,R,S,is_parallel}(
+            maximizer, float(epsilon), nb_samples, rng, seed
+        )
     end
 end
 

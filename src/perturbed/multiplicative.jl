@@ -7,12 +7,20 @@ See also: [`AbstractPerturbed`](@ref).
 
 Reference: preprint coming soon.
 """
-struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int}} <: AbstractPerturbed
+struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
+       AbstractPerturbed{parallel}
     maximizer::F
     ε::Float64
     nb_samples::Int
     rng::R
     seed::S
+
+    function PerturbedMultiplicative{F,R,S,parallel}(
+        maximizer::F, ε::Float64, nb_samples::Int, rng::R, seed::S
+    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
+        @assert parallel isa Bool
+        return new{F,R,S,parallel}(maximizer, ε, nb_samples, rng, seed)
+    end
 end
 
 function Base.show(io::IO, perturbed::PerturbedMultiplicative)
@@ -28,12 +36,22 @@ end
 Shorter constructor with defaults.
 """
 function PerturbedMultiplicative(
-    maximizer; ε=1.0, epsilon=nothing, nb_samples=1, rng=MersenneTwister(0), seed=nothing
-)
+    maximizer::F;
+    ε=1.0,
+    epsilon=nothing,
+    nb_samples=1,
+    rng::R=MersenneTwister(0),
+    seed::S=nothing,
+    is_parallel=false,
+) where {F,R,S}
     if isnothing(epsilon)
-        return PerturbedMultiplicative(maximizer, float(ε), nb_samples, rng, seed)
+        return PerturbedMultiplicative{F,R,S,is_parallel}(
+            maximizer, float(ε), nb_samples, rng, seed
+        )
     else
-        return PerturbedMultiplicative(maximizer, float(epsilon), nb_samples, rng, seed)
+        return PerturbedMultiplicative{F,R,S,is_parallel}(
+            maximizer, float(epsilon), nb_samples, rng, seed
+        )
     end
 end
 
