@@ -17,7 +17,7 @@ cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(ŷ, y) = half_square_norm(ŷ - y)
 
 function true_maximizer(θ::AbstractMatrix{R}; kwargs...) where {R<:Real}
-    g = AcyclicGridGraph{Int,R}(-θ)
+    g = GridGraph{Int,R}(-θ; directions=GridGraphs.QUEEN_ACYCLIC_DIRECTIONS)
     path = grid_topological_sort(g, 1, nv(g))
     y = path_to_matrix(g, path)
     return y
