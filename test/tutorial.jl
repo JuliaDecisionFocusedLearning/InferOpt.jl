@@ -39,7 +39,7 @@ Since the cost of a move is defined as the cost of the arrival vertex, any grid 
 =#
 
 h, w = 50, 100
-g = AcyclicGridGraph(rand(h, w));
+g = GridGraph(rand(h, w); directions=GridGraphs.QUEEN_ACYCLIC_DIRECTIONS);
 
 #=
 For convenience, `GridGraphs.jl` also provides custom functions to compute shortest paths efficiently.
@@ -66,7 +66,7 @@ To be consistent with the literature, we frame this problem as a linear maximiza
 =#
 
 function linear_maximizer(θ)
-    g = AcyclicGridGraph(-θ)
+    g = GridGraph(-θ; directions=GridGraphs.QUEEN_ACYCLIC_DIRECTIONS)
     path = grid_topological_sort(g, 1, nv(g))
     return path_to_matrix(g, path)
 end;
