@@ -16,8 +16,8 @@ true_encoder = encoder_factory()
 cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(ŷ, y) = half_square_norm(ŷ - y)
 
-function true_maximizer(θ::AbstractMatrix{R}; kwargs...) where {R<:Real}
-    g = AcyclicGridGraph{Int,R}(-θ)
+function true_maximizer(θ::AbstractMatrix; kwargs...)
+    g = GridGraph(-θ; directions=GridGraphs.QUEEN_ACYCLIC_DIRECTIONS)
     path = grid_topological_sort(g, 1, nv(g))
     y = path_to_matrix(g, path)
     return y
@@ -48,6 +48,20 @@ pipelines_imitation_y = [
         maximizer=identity,
         loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
     ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5, is_parallel=true)
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5, is_parallel=true)
+        ),
+    ),
     # Perturbed + other loss
     (
         encoder=encoder_factory(),
@@ -57,6 +71,18 @@ pipelines_imitation_y = [
     (
         encoder=encoder_factory(),
         maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
+        loss=Flux.Losses.mse,
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true),
+        loss=Flux.Losses.mse,
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=PerturbedMultiplicative(
+            true_maximizer; ε=1.0, nb_samples=10, is_parallel=true
+        ),
         loss=Flux.Losses.mse,
     ),
     # Generic regularized + FYL
@@ -86,6 +112,21 @@ pipelines_experience = [
         maximizer=identity,
         loss=Pushforward(
             PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10), cost
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true), cost
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true),
+            cost,
         ),
     ),
     (

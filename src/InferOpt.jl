@@ -14,6 +14,7 @@ using SparseArrays
 using Statistics
 using StatsBase: StatsBase, sample
 using Test
+using ThreadsX
 
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
