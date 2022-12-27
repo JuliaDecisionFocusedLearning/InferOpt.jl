@@ -22,7 +22,7 @@ format(InferOpt; verbose=true)
         include("jacobian_approx.jl")
     end
     @testset verbose = true "Generalized maximizer" begin
-        include("maximizer.jl")
+        include("generalized_maximizer.jl")
     end
     @testset verbose = true "Argmax" begin
         include("argmax.jl")

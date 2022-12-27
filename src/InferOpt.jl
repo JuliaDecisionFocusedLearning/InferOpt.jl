@@ -18,6 +18,7 @@ using ThreadsX
 
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
+include("utils/generalized_maximizer.jl")
 
 include("interpolation/interpolation.jl")
 
@@ -30,7 +31,6 @@ include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
 include("regularized/regularized_generic.jl")
 
-include("perturbed/generalized_maximizer.jl")
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
