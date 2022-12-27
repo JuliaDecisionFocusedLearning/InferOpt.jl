@@ -1,7 +1,7 @@
 """
     AbstractPerturbed{F, parallel}
 
-Differentiable perturbation of a black box optimizer.
+Differentiable perturbation of a black box optimizer of typ e `F`.
 The parameter `parallel` is a boolean value, equal to true if the perturbations are run in parallel.
 
 # Applicable functions
@@ -16,8 +16,8 @@ The parameter `parallel` is a boolean value, equal to true if the perturbations 
 
 These subtypes share the following fields:
 
-- `maximizer`: black box optimizer
-- `ε`: magnitude of the perturbation
+- `maximizer::F`: black box optimizer
+- `ε::Float64`: magnitude of the perturbation
 - `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
@@ -36,6 +36,7 @@ function sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray{<:
     return Z_samples
 end
 
+# Non parallelized version
 function compute_atoms(
     perturbed::AbstractPerturbed{F,false},
     θ::AbstractArray{<:Real},
@@ -45,6 +46,7 @@ function compute_atoms(
     return [perturb_and_optimize(perturbed, θ, Z; kwargs...) for Z in Z_samples]
 end
 
+# Parallelized version
 function compute_atoms(
     perturbed::AbstractPerturbed{F,true},
     θ::AbstractArray{<:Real},

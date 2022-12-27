@@ -5,7 +5,7 @@ Differentiable log-normal perturbation of a black-box optimizer of type `F`: the
 
 See also: [`AbstractPerturbed`](@ref).
 
-Reference: preprint coming soon.
+Reference: <https://arxiv.org/abs/2207.13513>
 """
 struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{F,parallel}
@@ -81,8 +81,8 @@ function ChainRulesCore.rrule(
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_multiplicative_probadist_pullback(probadist_tangent)
-        weigths_tangent = probadist_tangent.weights
-        dθ = inv.(ε .* θ) .* sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        weights_tangent = probadist_tangent.weights
+        dθ = inv.(ε .* θ) .* sum(wt * Z for (wt, Z) in zip(weights_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_multiplicative_probadist_pullback

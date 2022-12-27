@@ -39,10 +39,10 @@ function PerturbedAdditive(
     maximizer::F;
     ε=1.0,
     epsilon=nothing,
-    nb_samples=1,
+    nb_samples::Int=1,
     rng::R=MersenneTwister(0),
     seed::S=nothing,
-    is_parallel=false,
+    is_parallel::Bool=false,
 ) where {F,R,S}
     if isnothing(epsilon)
         return PerturbedAdditive{F,R,S,is_parallel}(
@@ -78,11 +78,12 @@ function ChainRulesCore.rrule(
     kwargs...,
 )
     (; ε) = perturbed
+    # Seems equivalent to compute_probability_distribution(perturbed, θ; kwargs...) ?
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_additive_probadist_pullback(probadist_tangent)
-        weigths_tangent = probadist_tangent.weights
-        dθ = inv(ε) * sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        weights_tangent = probadist_tangent.weights
+        dθ = inv(ε) * sum(wt * Z for (wt, Z) in zip(weights_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_additive_probadist_pullback
