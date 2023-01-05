@@ -108,7 +108,7 @@ function ChainRulesCore.rrule(
     post_processing=identity;
     kwargs...,
 )
-    @info "Hi !"
+    # @info "Hi !"
     e = compute_expectation(probadist, post_processing; kwargs...)
     function expectation_pullback(de)
         d_atoms = NoTangent()

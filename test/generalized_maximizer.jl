@@ -79,16 +79,16 @@ pipelines_imitation_y = [
         ),
     ),
     # Perturbed + other loss
-    # (
-    #     encoder=encoder_factory(),
-    #     maximizer=PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10),
-    #     loss=mse_loss,
-    # ),
-    # (
-    #     encoder=encoder_factory(),
-    #     maximizer=PerturbedMultiplicative(generalized_maximizer; ε=1.0, nb_samples=10),
-    #     loss=mse_loss,
-    # ),
+    (
+        encoder=encoder_factory(),
+        maximizer=PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10),
+        loss=mse_loss,
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=PerturbedMultiplicative(generalized_maximizer; ε=1.0, nb_samples=50), # more samples were needed here
+        loss=mse_loss,
+    ),
     # # Generic regularized + FYL
     # (
     #     encoder=encoder_factory(),
@@ -120,7 +120,7 @@ for pipeline in pipelines_imitation_y
         data_test=data_test,
         error_function=error_function,
         cost=cost,
-        epochs=200,
+        epochs=400,
         verbose=true,
         setting_name="generalized maximizer - imitation_y",
     )
