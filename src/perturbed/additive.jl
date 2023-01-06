@@ -77,7 +77,6 @@ function ChainRulesCore.rrule(
     θ::AbstractArray{<:Real};
     kwargs...,
 )
-    # @info "Hello !"
     (; ε) = perturbed
     # Seems equivalent to compute_probability_distribution(perturbed, θ; kwargs...) ?
     Z_samples = sample_perturbations(perturbed, θ)

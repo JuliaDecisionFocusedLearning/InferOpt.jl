@@ -3,6 +3,7 @@ using LinearAlgebra
 
 Random.seed!(67)
 
+CC = 10
 function max_pricing(θ::AbstractVector; instance::AbstractMatrix)
     @assert length(θ) == size(instance, 1)
     @assert length(θ) == size(instance, 2)
@@ -111,17 +112,7 @@ pipelines_imitation_θ = [
         encoder=encoder_factory(),
         maximizer=identity_maximizer,
         loss=SPOPlusLoss(generalized_maximizer),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity_maximizer,
-        loss=SPOPlusLoss(generalized_maximizer; α=1.0),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity_maximizer,
-        loss=SPOPlusLoss(generalized_maximizer; α=3.0),
-    ),
+    )
 ]
 
 pipelines_experience = [
