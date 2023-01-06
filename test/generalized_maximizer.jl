@@ -56,13 +56,6 @@ error_function(ŷ, y) = hamming_distance(ŷ, y)
 mse_loss(y1, y2; kwargs...) = Flux.Losses.mse(y1, y2)
 identity_maximizer(θ; kwargs...) = identity(θ)
 
-pipelines_imitation_θ = [
-    # SPO+
-    (encoder=encoder_factory(), maximizer=identity_maximizer, loss=SPOPlusLoss(generalized_maximizer)),
-    (encoder=encoder_factory(), maximizer=identity_maximizer, loss=SPOPlusLoss(generalized_maximizer; α=1.0)),
-    (encoder=encoder_factory(), maximizer=identity_maximizer, loss=SPOPlusLoss(generalized_maximizer; α=3.0)),
-]
-
 pipelines_imitation_y = [
     # Interpolation
     # (
@@ -112,6 +105,69 @@ pipelines_imitation_y = [
     # ),
 ]
 
+pipelines_imitation_θ = [
+    # SPO+
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=SPOPlusLoss(generalized_maximizer),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=SPOPlusLoss(generalized_maximizer; α=1.0),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=SPOPlusLoss(generalized_maximizer; α=3.0),
+    ),
+]
+
+pipelines_experience = [
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=Pushforward(
+            PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=50), cost
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=Pushforward(
+            PerturbedMultiplicative(generalized_maximizer; ε=1.0, nb_samples=50), cost
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=Pushforward(
+            PerturbedAdditive(
+                generalized_maximizer; ε=1.0, nb_samples=50, is_parallel=true
+            ),
+            cost,
+        ),
+    ),
+    (
+        encoder=encoder_factory(),
+        maximizer=identity_maximizer,
+        loss=Pushforward(
+            PerturbedMultiplicative(
+                generalized_maximizer; ε=1.0, nb_samples=50, is_parallel=true
+            ),
+            cost,
+        ),
+    ),
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=identity,
+    #     loss=Pushforward(
+    #         RegularizedGeneric(true_maximizer, half_square_norm, identity), cost
+    #     ),
+    # ),
+]
+
 for pipeline in pipelines_imitation_y
     pipeline = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline
@@ -127,7 +183,7 @@ for pipeline in pipelines_imitation_y
         data_test=data_test,
         error_function=error_function,
         cost=cost,
-        epochs=400,
+        epochs=500,
         verbose=true,
         setting_name="generalized maximizer - imitation_y",
     )
@@ -136,7 +192,9 @@ end
 for pipeline in pipelines_imitation_θ
     pipeline_1 = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline_1
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x); instance=x), θ; instance=x)
+    function pipeline_loss_imitation_θ(x, θ, y)
+        return loss(maximizer(encoder(x); instance=x), θ; instance=x)
+    end
     test_pipeline!(
         pipeline_1,
         pipeline_loss_imitation_θ;
@@ -148,12 +206,14 @@ for pipeline in pipelines_imitation_θ
         cost=cost,
         epochs=100,
         verbose=true,
-        setting_name="paths - imitation_θ",
+        setting_name="generalized maximizer - imitation_θ",
     )
 
     pipeline_2 = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline_2
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x); instance=x), θ, y; instance=x)
+    function pipeline_loss_imitation_θ(x, θ, y)
+        return loss(maximizer(encoder(x); instance=x), θ, y; instance=x)
+    end
     test_pipeline!(
         pipeline_2,
         pipeline_loss_imitation_θ;
@@ -165,6 +225,25 @@ for pipeline in pipelines_imitation_θ
         cost=cost,
         epochs=100,
         verbose=true,
-        setting_name="paths - imitation_θ - precomputed y_true",
+        setting_name="generalized maximizer - imitation_θ - precomputed y_true",
+    )
+end
+
+for pipeline in pipelines_experience
+    pipeline = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline
+    pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
+    test_pipeline!(
+        pipeline,
+        pipeline_loss_experience;
+        true_encoder=true_encoder,
+        true_maximizer=generalized_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=1000,
+        verbose=true,
+        setting_name="generalized maximizer - experience",
     )
 end

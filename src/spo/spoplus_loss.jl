@@ -46,7 +46,9 @@ function (spol::SPOPlusLoss{<:GeneralizedMaximizer})(
     θ_α = α * θ - θ_true
     y_α = maximizer(θ_α; kwargs...)
     # Seems to only work if α = 2 in theory
-    l = objective_value(maximizer, θ_α, y_α; kwargs...) - objective_value(maximizer, θ_α, y_true; kwargs...)
+    l =
+        objective_value(maximizer, θ_α, y_α; kwargs...) -
+        objective_value(maximizer, θ_α, y_true; kwargs...)
     return l
 end
 
@@ -83,7 +85,9 @@ function compute_loss_and_gradient(
     (; maximizer, α) = spol
     θ_α = α * θ - θ_true
     y_α = maximizer(θ_α; kwargs...)
-    l = objective_value(maximizer, θ_α, y_α; kwargs...) - objective_value(maximizer, θ_α, y_true; kwargs...)
+    l =
+        objective_value(maximizer, θ_α, y_α; kwargs...) -
+        objective_value(maximizer, θ_α, y_true; kwargs...)
     g = α .* (maximizer.g(y_α; kwargs...) - maximizer.g(y_true; kwargs...))
     return l, α .* g
 end
