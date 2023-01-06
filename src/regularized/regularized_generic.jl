@@ -22,8 +22,8 @@ See also: [`DifferentiableFrankWolfe`](@ref).
 """
 struct RegularizedGeneric{M,RF,RG,F,G,S}
     maximizer::M
-    Ω::RF
-    Ω_grad::RG
+    Ω::RF  # ! is is needed ?
+    Ω_grad::RG # ! is it needed ?
     f::F
     f_grad1::G
     linear_solver::S
@@ -40,11 +40,11 @@ function RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver=gmres)
     return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
 end
 
-function RegularizedGeneric(maximizer::GeneralizedMaximizer, Ω, Ω_grad, linear_solver=gmres)
-    f(y, θ) = Ω(y) - objective_value(maximizer, θ, y)
-    f_grad1(y, θ) = Ω_grad(y) - θ
-    return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
-end
+# function RegularizedGeneric(maximizer::GeneralizedMaximizer, Ω, Ω_grad, linear_solver=gmres)
+#     f(y, θ) = Ω(y) - objective_value(maximizer, θ, y)
+#     f_grad1(y, θ) = Ω_grad(y) - θ
+#     return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
+# end
 
 """
     RegularizedGeneric(maximizer[; Ω, Ω_grad, linear_solver=gmres])

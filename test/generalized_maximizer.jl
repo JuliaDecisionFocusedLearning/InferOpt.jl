@@ -107,13 +107,12 @@ pipelines_imitation_y = [
 ]
 
 pipelines_imitation_θ = [
-    # SPO+
-    (
-        encoder=encoder_factory(),
-        maximizer=identity_maximizer,
-        loss=SPOPlusLoss(generalized_maximizer),
-    )
-]
+# SPO+
+(
+    encoder=encoder_factory(),
+    maximizer=identity_maximizer,
+    loss=SPOPlusLoss(generalized_maximizer),
+)]
 
 pipelines_experience = [
     (

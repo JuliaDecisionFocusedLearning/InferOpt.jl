@@ -89,7 +89,7 @@ function compute_loss_and_gradient(
         objective_value(maximizer, θ_α, y_α; kwargs...) -
         objective_value(maximizer, θ_α, y_true; kwargs...)
     g = α .* (maximizer.g(y_α; kwargs...) - maximizer.g(y_true; kwargs...))
-    return l, α .* g
+    return l, g
 end
 
 function ChainRulesCore.rrule(
