@@ -171,7 +171,7 @@ for pipeline in pipelines_imitation_θ
 
     pipeline_2 = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline_2
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
+    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
     test_pipeline!(
         pipeline_2,
         pipeline_loss_imitation_θ;

@@ -36,6 +36,20 @@ function (spol::SPOPlusLoss)(
     return l
 end
 
+function (spol::SPOPlusLoss{<:GeneralizedMaximizer})(
+    θ::AbstractArray{<:Real},
+    θ_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
+)
+    (; maximizer, α) = spol
+    θ_α = α * θ - θ_true
+    y_α = maximizer(θ_α; kwargs...)
+    # Seems to only work if α = 2 in theory
+    l = objective_value(maximizer, θ_α, y_α; kwargs...) - objective_value(maximizer, θ_α, y_true; kwargs...)
+    return l
+end
+
 function (spol::SPOPlusLoss)(
     θ::AbstractArray{<:Real}, θ_true::AbstractArray{<:Real}; kwargs...
 )
@@ -57,6 +71,21 @@ function compute_loss_and_gradient(
     y_α = maximizer(θ_α; kwargs...)
     l = dot(θ_α, y_α) - dot(θ_α, y_true)
     return l, α .* (y_α .- y_true)
+end
+
+function compute_loss_and_gradient(
+    spol::SPOPlusLoss{<:GeneralizedMaximizer},
+    θ::AbstractArray{<:Real},
+    θ_true::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
+)
+    (; maximizer, α) = spol
+    θ_α = α * θ - θ_true
+    y_α = maximizer(θ_α; kwargs...)
+    l = objective_value(maximizer, θ_α, y_α; kwargs...) - objective_value(maximizer, θ_α, y_true; kwargs...)
+    g = α .* (maximizer.g(y_α; kwargs...) - maximizer.g(y_true; kwargs...))
+    return l, α .* g
 end
 
 function ChainRulesCore.rrule(
