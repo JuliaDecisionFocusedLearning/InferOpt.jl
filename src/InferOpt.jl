@@ -43,6 +43,8 @@ include("ssvm/isbaseloss.jl")
 include("ssvm/zeroone_baseloss.jl")
 include("ssvm/ssvm_loss.jl")
 
+include("imitation_loss/imitation_loss.jl")
+
 export FixedAtomsProbabilityDistribution
 export compute_expectation, compress_distribution!
 export Pushforward
@@ -70,5 +72,7 @@ export SPOPlusLoss
 export IsBaseLoss
 export ZeroOneBaseLoss
 export StructuredSVMLoss
+
+export ImitationLoss
 
 end

@@ -71,6 +71,12 @@ pipelines_imitation_y = [
         maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
         loss=Flux.Losses.mse,
     ),
+    # ImitationLoss
+    (
+        encoder=encoder_factory(),
+        maximizer=identity,
+        loss=ImitationLoss((y1, y2) -> 0.0, half_square_norm, (θ, y_true) -> sparse_argmax(θ)),
+    ),
 ]
 
 pipelines_experience = [
