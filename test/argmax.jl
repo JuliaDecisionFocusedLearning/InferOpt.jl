@@ -75,17 +75,25 @@ pipelines_imitation_y = [
     (  # Equivalent to FenchelYoungLoss(sparse_argmax)
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ImitationLoss((y1, y2) -> 0.0, half_square_norm, (θ, y_true) -> sparse_argmax(θ)),
+        loss=ImitationLoss(
+            (y1, y2) -> 0.0, half_square_norm, (θ, y_true) -> sparse_argmax(θ)
+        ),
     ),
     (  # Equivalent to FenchelYoungLoss(soft_argmax)
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ImitationLoss((y1, y2) -> 0.0, negative_shannon_entropy, (θ, y_true) -> soft_argmax(θ)),
+        loss=ImitationLoss(
+            (y1, y2) -> 0.0, negative_shannon_entropy, (θ, y_true) -> soft_argmax(θ)
+        ),
     ),
     (  # Equivalent to StructuredSVMLoss(ZeroOneBaseLoss())
         encoder=encoder_factory(),
         maximizer=identity,
-        loss=ImitationLoss(ZeroOneBaseLoss(), y -> 0.0, (θ, y_true) -> InferOpt.compute_maximizer(ZeroOneBaseLoss(), θ, 1.0, y_true)),
+        loss=ImitationLoss(
+            ZeroOneBaseLoss(),
+            y -> 0.0,
+            (θ, y_true) -> InferOpt.compute_maximizer(ZeroOneBaseLoss(), θ, 1.0, y_true),
+        ),
     ),
 ]
 
