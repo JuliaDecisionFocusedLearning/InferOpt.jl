@@ -19,7 +19,6 @@ cost(y; instance) = dot(y, -true_encoder(instance))
 error_function(ŷ, y) = hamming_distance(ŷ, y)
 
 ## Pipelines
-# TODO SPO = (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer))
 
 pipelines = [
     # SSVM
@@ -68,6 +67,28 @@ pipelines = [
     ),
 ]
 
+spo_pipeline = (
+    encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer; α=1.0)
+)
+
+function spo_base_loss(y, t_true)
+    (; θ_true, y_true) = t_true
+    return dot(θ_true, y_true) - dot(θ_true, y)
+end
+
+function spo_predictor(θ, t_true; kwargs...)
+    (; θ_true) = t_true
+    θ_α = 1 .* (θ - θ_true)
+    y_α = true_maximizer(θ_α; kwargs...)
+    return y_α
+end
+
+imitation_spo_pipeline = (
+    encoder=encoder_factory(),
+    maximizer=identity,
+    loss=ImitationLoss(spo_base_loss, y -> 0.0, spo_predictor),
+)
+
 ## Dataset generation
 
 data_train, data_test = generate_dataset(
@@ -80,43 +101,6 @@ data_train, data_test = generate_dataset(
 );
 
 ## Test loop
-
-# TODO
-# for pipeline in pipelines_imitation_θ
-#     pipeline_1 = deepcopy(pipeline)
-#     (; encoder, maximizer, loss) = pipeline_1
-#     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
-#     test_pipeline!(
-#         pipeline_1,
-#         pipeline_loss_imitation_θ;
-#         true_encoder=true_encoder,
-#         true_maximizer=true_maximizer,
-#         data_train=data_train,
-#         data_test=data_test,
-#         error_function=error_function,
-#         cost=cost,
-#         epochs=100,
-#         verbose=true,
-#         setting_name="argmax - imitation_θ",
-#     )
-
-#     pipeline_2 = deepcopy(pipeline)
-#     (; encoder, maximizer, loss) = pipeline_2
-#     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
-#     test_pipeline!(
-#         pipeline_2,
-#         pipeline_loss_imitation_θ;
-#         true_encoder=true_encoder,
-#         true_maximizer=true_maximizer,
-#         data_train=data_train,
-#         data_test=data_test,
-#         error_function=error_function,
-#         cost=cost,
-#         epochs=100,
-#         verbose=true,
-#         setting_name="argmax - imitation_θ - precomputed y_true",
-#     )
-# end
 
 function get_perf(pipelinei)
     pipelinei = deepcopy(pipelinei)
@@ -147,5 +131,48 @@ for (pipeline1, pipeline2) in pipelines
     @testset "Imitation loss - $(pipeline1.loss)" begin
         @test all(train_losses1 .≈ train_losses2)
         @test all(test_losses1 .≈ test_losses2)
+    end
+end
+
+begin
+    (; encoder, maximizer, loss) = spo_pipeline
+    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
+    spo_storage = test_pipeline!(
+        spo_pipeline,
+        pipeline_loss_imitation_θ;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=100,
+        verbose=false,
+        setting_name="argmax - imitation_θ",
+    )
+
+    (; encoder, maximizer, loss) = imitation_spo_pipeline
+    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), (; θ_true=θ, y_true=y))
+    imitation_storage = test_pipeline!(
+        imitation_spo_pipeline,
+        pipeline_loss_imitation_θ;
+        true_encoder=true_encoder,
+        true_maximizer=true_maximizer,
+        data_train=data_train,
+        data_test=data_test,
+        error_function=error_function,
+        cost=cost,
+        epochs=100,
+        verbose=false,
+        setting_name="argmax - imitation_θ - precomputed y_true",
+    )
+
+    spo_train_losses = spo_storage.train_losses
+    spo_test_losses = spo_storage.test_losses
+    imitation_spo_train_losses = imitation_storage.train_losses
+    imitation_spo_test_losses = imitation_storage.test_losses
+    @testset "Imitation loss - SPO - $(imitation_spo_pipeline.loss)" begin
+        @test all(spo_train_losses .≈ imitation_spo_train_losses)
+        @test all(spo_test_losses .≈ imitation_spo_test_losses)
     end
 end
