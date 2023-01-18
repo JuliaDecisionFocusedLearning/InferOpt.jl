@@ -65,7 +65,7 @@ function test_pipeline!(
         for plt in plts
             println(plt)
         end
-        test_perf(perf_storage; test_name="$setting_name - $maximizer - $loss")
     end
+    test_perf(perf_storage; test_name="$setting_name - $maximizer - $loss")
     return perf_storage
 end
