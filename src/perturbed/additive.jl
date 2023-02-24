@@ -78,7 +78,6 @@ function ChainRulesCore.rrule(
     kwargs...,
 )
     (; ε) = perturbed
-    # Seems equivalent to compute_probability_distribution(perturbed, θ; kwargs...) ?
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_additive_probadist_pullback(probadist_tangent)

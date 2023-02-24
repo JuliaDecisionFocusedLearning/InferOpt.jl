@@ -61,9 +61,10 @@ function fenchel_young_loss_and_grad(
     kwargs...,
 ) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
     (; predictor) = fyl
-    F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(predictor, θ; kwargs...)
+    F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(predictor, θ; kwargs...)
     l = F - objective_value(predictor.maximizer, θ, y_true; kwargs...)
-    g = predictor.maximizer.g(almost_ŷ) - predictor.maximizer.g(y_true)
+    # @info size(almost_g_of_ŷ), size(y_true), size(predictor.maximizer.g(y_true))
+    g = almost_g_of_ŷ - predictor.maximizer.g(y_true)
     return l, g
 end
 

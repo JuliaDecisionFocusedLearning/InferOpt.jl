@@ -47,7 +47,7 @@ function fenchel_young_F_and_first_part_of_grad(
     θ_perturbed = θ .+ ε .* Z
     y = maximizer(θ_perturbed; kwargs...)
     F = objective_value(maximizer, θ_perturbed, y; kwargs...)
-    return F, y
+    return F, maximizer.g(y)
 end
 
 function fenchel_young_F_and_first_part_of_grad(
@@ -77,5 +77,5 @@ function fenchel_young_F_and_first_part_of_grad(
     y = maximizer(θ_perturbed; kwargs...)
     F = objective_value(maximizer, θ_perturbed, y; kwargs...)
     y_scaled = y .* eZ
-    return F, y_scaled
+    return F, maximizer.g(y_scaled)
 end
