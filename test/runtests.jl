@@ -4,8 +4,6 @@ using InferOpt
 using JuliaFormatter
 using Test
 
-format(InferOpt; verbose=true)
-
 includet("utils/dataset.jl")
 includet("utils/error.jl")
 includet("utils/perf.jl")

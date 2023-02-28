@@ -1,3 +1,4 @@
+using Base.Threads
 using Flux
 using InferOpt
 using LinearAlgebra
@@ -5,6 +6,9 @@ using Random
 using Test
 
 Random.seed!(63)
+
+# verbose = get(ENV, "CI", "false") == "false"
+verbose = false
 
 ## Main functions
 
@@ -102,8 +106,8 @@ data_train, data_test = generate_dataset(
 
 ## Test loop
 
-for pipeline in pipelines_imitation_θ
-    pipeline_1 = deepcopy(pipeline)
+@threads for k in eachindex(pipelines_imitation_θ)
+    pipeline_1 = deepcopy(pipelines_imitation_θ[k])
     (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
     test_pipeline!(
@@ -116,16 +120,16 @@ for pipeline in pipelines_imitation_θ
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=true,
+        verbose=verbose,
         setting_name="ranking - imitation_θ",
     )
 
-    pipeline_2 = deepcopy(pipeline)
+    pipeline_2 = deepcopy(pipelines_imitation_θ[k])
     (; encoder, maximizer, loss) = pipeline_2
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
+    pipeline_loss_imitation_θy(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
     test_pipeline!(
         pipeline_2,
-        pipeline_loss_imitation_θ;
+        pipeline_loss_imitation_θy;
         true_encoder=true_encoder,
         true_maximizer=true_maximizer,
         data_train=data_train,
@@ -133,13 +137,13 @@ for pipeline in pipelines_imitation_θ
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=true,
+        verbose=verbose,
         setting_name="ranking - imitation_θ - precomputed_y_true",
     )
 end
 
-for pipeline in pipelines_imitation_y
-    pipeline = deepcopy(pipeline)
+@threads for k in eachindex(pipelines_imitation_y)
+    pipeline = deepcopy(pipelines_imitation_y[k])
     (; encoder, maximizer, loss) = pipeline
     pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
     test_pipeline!(
@@ -152,13 +156,13 @@ for pipeline in pipelines_imitation_y
         error_function=error_function,
         cost=cost,
         epochs=200,
-        verbose=true,
+        verbose=verbose,
         setting_name="ranking - imitation_y",
     )
 end
 
-for pipeline in pipelines_experience
-    pipeline = deepcopy(pipeline)
+@threads for k in eachindex(pipelines_experience)
+    pipeline = deepcopy(pipelines_experience[k])
     (; encoder, maximizer, loss) = pipeline
     pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
     test_pipeline!(
@@ -171,7 +175,7 @@ for pipeline in pipelines_experience
         error_function=error_function,
         cost=cost,
         epochs=500,
-        verbose=true,
+        verbose=verbose,
         setting_name="ranking - experience",
     )
 end

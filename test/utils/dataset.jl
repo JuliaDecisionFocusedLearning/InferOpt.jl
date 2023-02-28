@@ -17,7 +17,7 @@ function generate_dataset(
     nb_instances::Integer,
     noise_std::Real,
 )
-    X = [randn(nb_features, instance_dim...) for n in 1:nb_instances]
+    X = [randn(Float32, nb_features, instance_dim...) for n in 1:nb_instances]
     thetas = [true_encoder(x) for x in X]
     noiseless_Y = [true_maximizer(θ) for θ in thetas]
     noisy_Y = [true_maximizer(θ + noise_std * randn(instance_dim...)) for θ in thetas]
