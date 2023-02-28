@@ -155,7 +155,7 @@ data_train, data_test = generate_dataset(
 
 ## Test loop
 
-@threads for k in eachindex(pipelines_imitation_θ)
+for k in eachindex(pipelines_imitation_θ)
     pipeline_1 = deepcopy(pipelines_imitation_θ[k])
     (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
@@ -191,7 +191,7 @@ data_train, data_test = generate_dataset(
     )
 end
 
-@threads for k in eachindex(pipelines_imitation_y)
+for k in eachindex(pipelines_imitation_y)
     pipeline = deepcopy(pipelines_imitation_y[k])
     (; encoder, maximizer, loss) = pipeline
     pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
@@ -210,7 +210,7 @@ end
     )
 end
 
-@threads for k in eachindex(pipelines_experience)
+for k in eachindex(pipelines_experience)
     pipeline = deepcopy(pipelines_experience[k])
     (; encoder, maximizer, loss) = pipeline
     pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
