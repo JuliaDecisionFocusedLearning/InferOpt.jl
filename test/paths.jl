@@ -175,10 +175,10 @@ data_train, data_test = generate_dataset(
 
     pipeline_2 = deepcopy(pipelines_imitation_θ[k])
     (; encoder, maximizer, loss) = pipeline_2
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
+    pipeline_loss_imitation_θy(x, θ, y) = loss(maximizer(encoder(x)), θ)
     test_pipeline!(
         pipeline_2,
-        pipeline_loss_imitation_θ;
+        pipeline_loss_imitation_θy;
         true_encoder=true_encoder,
         true_maximizer=true_maximizer,
         data_train=data_train,
