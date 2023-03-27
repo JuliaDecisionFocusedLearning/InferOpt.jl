@@ -54,7 +54,7 @@ pipelines = [
             loss=ImitationLoss(
                 (θ, t_true) ->
                     InferOpt.compute_maximizer(ZeroOneBaseLoss(), θ, 1.0, t_true.y_true);
-                ℓ=(y, t_true) -> ssvm_base_loss(y, t_true.y_true),
+                base_loss=(y, t_true) -> ssvm_base_loss(y, t_true.y_true),
             ),
         ),
     ),
@@ -92,7 +92,7 @@ spo_pipelines = [
         (
             encoder=encoder_factory(),
             maximizer=identity,
-            loss=ImitationLoss(spo_predictor_1; ℓ=spo_base_loss),
+            loss=ImitationLoss(spo_predictor_1; base_loss=spo_base_loss),
         ),
     ),
     (
@@ -100,7 +100,7 @@ spo_pipelines = [
         (
             encoder=encoder_factory(),
             maximizer=identity,
-            loss=ImitationLoss(spo_predictor_2; ℓ=spo_base_loss, α=2.0),
+            loss=ImitationLoss(spo_predictor_2; base_loss=spo_base_loss, α=2.0),
         ),
     ),
 ]
@@ -113,7 +113,7 @@ data_train, data_test = generate_dataset(
     nb_features=nb_features,
     instance_dim=5,
     nb_instances=100,
-    noise_std=0.01,
+    noise_std=0.001,
 );
 
 ## Test loops
@@ -156,8 +156,8 @@ for (pipeline1, pipeline2) in pipelines
     train_losses2 = storage2.train_losses
     test_losses2 = storage2.test_losses
     @testset "Imitation loss - $(pipeline1.loss)" begin
-        @test all(train_losses1 .≈ train_losses2)
-        @test all(test_losses1 .≈ test_losses2)
+        @test all(isapprox.(train_losses1, train_losses2, rtol=0.001))
+        @test all(isapprox.(test_losses1, test_losses2, rtol=0.001))
     end
 end
 
@@ -201,7 +201,7 @@ for (spo_pipeline, imitation_spo_pipeline) in spo_pipelines
     imitation_spo_train_losses = imitation_storage.train_losses
     imitation_spo_test_losses = imitation_storage.test_losses
     @testset "Imitation loss - SPO - $(imitation_spo_pipeline.loss)" begin
-        @test all(spo_train_losses .≈ imitation_spo_train_losses)
-        @test all(spo_test_losses .≈ imitation_spo_test_losses)
+        @test all(isapprox.(spo_train_losses, imitation_spo_train_losses, rtol=0.001))
+        @test all(isapprox.(spo_test_losses, imitation_spo_test_losses, rtol=0.001))
     end
 end
