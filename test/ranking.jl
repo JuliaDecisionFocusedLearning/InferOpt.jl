@@ -1,4 +1,3 @@
-using Base.Threads
 using Flux
 using InferOpt
 using LinearAlgebra
@@ -106,8 +105,8 @@ data_train, data_test = generate_dataset(
 
 ## Test loop
 
-for k in eachindex(pipelines_imitation_θ)
-    pipeline_1 = deepcopy(pipelines_imitation_θ[k])
+for pipeline in pipelines_imitation_θ
+    pipeline_1 = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
     test_pipeline!(
@@ -124,7 +123,7 @@ for k in eachindex(pipelines_imitation_θ)
         setting_name="ranking - imitation_θ",
     )
 
-    pipeline_2 = deepcopy(pipelines_imitation_θ[k])
+    pipeline_2 = deepcopy(pipeline)
     (; encoder, maximizer, loss) = pipeline_2
     pipeline_loss_imitation_θy(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
     test_pipeline!(
@@ -142,12 +141,12 @@ for k in eachindex(pipelines_imitation_θ)
     )
 end
 
-for k in eachindex(pipelines_imitation_y)
-    pipeline = deepcopy(pipelines_imitation_y[k])
-    (; encoder, maximizer, loss) = pipeline
+for pipeline in pipelines_imitation_y
+    pipeline_1 = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
     test_pipeline!(
-        pipeline,
+        pipeline_1,
         pipeline_loss_imitation_y;
         true_encoder=true_encoder,
         true_maximizer=true_maximizer,
@@ -161,12 +160,12 @@ for k in eachindex(pipelines_imitation_y)
     )
 end
 
-for k in eachindex(pipelines_experience)
-    pipeline = deepcopy(pipelines_experience[k])
-    (; encoder, maximizer, loss) = pipeline
+for pipeline in pipelines_experience
+    pipeline_1 = deepcopy(pipeline)
+    (; encoder, maximizer, loss) = pipeline_1
     pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
     test_pipeline!(
-        pipeline,
+        pipeline_1,
         pipeline_loss_experience;
         true_encoder=true_encoder,
         true_maximizer=true_maximizer,
