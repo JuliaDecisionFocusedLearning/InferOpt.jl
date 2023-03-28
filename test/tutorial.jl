@@ -77,7 +77,7 @@ We now have everything we need to build our dataset.
 
 nb_instances = 30
 
-X_train = [randn(nb_features, h, w) for n in 1:nb_instances];
+X_train = [randn(Float32, nb_features, h, w) for n in 1:nb_instances];
 θ_train = [true_encoder(x) for x in X_train];
 Y_train = [linear_maximizer(θ) for θ in θ_train];
 
