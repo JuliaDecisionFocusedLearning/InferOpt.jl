@@ -6,6 +6,8 @@ using Test
 
 Random.seed!(63)
 
+verbose = false
+
 ## Main functions
 
 nb_features = 5
@@ -131,7 +133,7 @@ for (pipeline1, pipeline2) in pipelines
         error_function=error_function,
         cost=cost,
         epochs=200,
-        verbose=false,
+        verbose=verbose,
         setting_name="argmax - imitation_y",
     )
 
@@ -147,7 +149,7 @@ for (pipeline1, pipeline2) in pipelines
         error_function=error_function,
         cost=cost,
         epochs=200,
-        verbose=false,
+        verbose=verbose,
         setting_name="argmax - imitation_y",
     )
 
@@ -174,7 +176,7 @@ for (spo_pipeline, imitation_spo_pipeline) in spo_pipelines
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=false,
+        verbose=verbose,
         setting_name="argmax - imitation_θ",
     )
 
@@ -192,7 +194,7 @@ for (spo_pipeline, imitation_spo_pipeline) in spo_pipelines
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=false,
+        verbose=verbose,
         setting_name="argmax - imitation_θ - precomputed y_true",
     )
 
