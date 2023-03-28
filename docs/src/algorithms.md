@@ -80,6 +80,16 @@ Modules = [InferOpt]
 Pages = ["fenchel_young/fenchel_young.jl", "fenchel_young/perturbed.jl"]
 ```
 
+## Generalized imitation losses
+
+!!! note "Reference"
+    [Learning with Combinatorial Optimization Layers: a Probabilistic Approach](https://arxiv.org/abs/2207.13513)
+
+```@autodocs
+Modules = [InferOpt]
+Pages = ["imitation_loss/imitation_loss.jl"]
+```
+
 ## Index
 
 ```@index

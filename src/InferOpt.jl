@@ -73,6 +73,6 @@ export IsBaseLoss
 export ZeroOneBaseLoss
 export StructuredSVMLoss
 
-export ImitationLoss
+export ImitationLoss, get_y_true
 
 end
