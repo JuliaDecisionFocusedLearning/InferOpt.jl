@@ -28,6 +28,15 @@ function DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver=gmres)
     return DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver)
 end
 
+struct SolverFailureException{S} <: Exception
+    msg::String
+    stats::S
+end
+
+function Base.show(io::IO, sfe::SolverFailureException)
+    return println(io, "SolverFailureException: $(sfe.msg)\nSolver stats: $(sfe.stats)")
+end
+
 ## Forward pass
 
 """
@@ -117,7 +126,9 @@ function ChainRulesCore.rrule(
         weights_tangent = probadist_tangent.weights
         dp = convert(Vector{R}, unthunk(weights_tangent))
         u, stats = linear_solver(Aᵀ, dp)
-        stats.solved || error("Linear solver failed to converge")
+        if !stats.solved
+            throw(SolverFailureException("Linear solver failed to converge", stats))
+        end
         dθ_vec = Bᵀ * u
         dθ = reshape(dθ_vec, size(θ))
         return (NoTangent(), NoTangent(), dθ, NoTangent())

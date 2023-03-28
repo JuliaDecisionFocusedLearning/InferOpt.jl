@@ -2,7 +2,7 @@ module InferOpt
 
 using ChainRulesCore
 using FrankWolfe: FrankWolfe
-using FrankWolfe: ActiveSet, Adaptive, LinearMinimizationOracle
+using FrankWolfe: ActiveSet, Agnostic, LinearMinimizationOracle
 using FrankWolfe: away_frank_wolfe, compute_extreme_point
 using Krylov: gmres
 using LinearAlgebra

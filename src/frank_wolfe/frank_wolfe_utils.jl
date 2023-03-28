@@ -5,18 +5,18 @@ Default configuration for the Frank-Wolfe wrapper.
 
 # Parameters
 - `away_steps=true`: activate away steps to avoid zig-zagging
-- `epsilon=1e-2`: precision
+- `epsilon=1e-4`: precision
 - `lazy=true`: caching strategy
-- `line_search=FrankWolfe.Adaptive()`: step size selection
+- `line_search=FrankWolfe.Agnostic()`: step size selection
 - `max_iteration=10`: number of iterations
 - `timeout=1.0`: maximum time in seconds
 - `verbose=false`: console output
 """
 const DEFAULT_FRANK_WOLFE_KWARGS = (
     away_steps=true,
-    epsilon=1e-2,
+    epsilon=1e-4,
     lazy=true,
-    line_search=Adaptive(),
+    line_search=Agnostic(),
     max_iteration=10,
     timeout=1.0,
     verbose=false,
