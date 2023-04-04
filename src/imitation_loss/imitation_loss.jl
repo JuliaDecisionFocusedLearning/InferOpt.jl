@@ -53,7 +53,6 @@ Retrieve `y_true` from `t_true`. `t_true` must contain an `y_true` field.
 """
 get_y_true(t_true::NamedTuple) = t_true.y_true
 
-# t_true must contain an `y_true` field
 function prediction_and_loss(l::ImitationLoss, θ::AbstractArray{<:Real}, t_true; kwargs...)
     (; base_loss, Ω, maximizer, α) = l
     y_true = get_y_true(t_true)
