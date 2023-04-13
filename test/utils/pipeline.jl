@@ -34,7 +34,9 @@ function test_pipeline!(
     setting_name="???",
 )
     (; encoder, maximizer, loss) = pipeline
-    @info "Testing $setting_name" maximizer loss
+    if verbose
+        @info "Testing $setting_name" maximizer loss
+    end
 
     ## Optimization
     opt = Flux.Adam()
@@ -64,5 +66,6 @@ function test_pipeline!(
             println(plt)
         end
     end
-    return test_perf(perf_storage; test_name="$setting_name - $maximizer - $loss")
+    test_perf(perf_storage; test_name="$setting_name - $maximizer - $loss")
+    return perf_storage
 end
