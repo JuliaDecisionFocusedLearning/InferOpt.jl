@@ -2,7 +2,7 @@ module InferOpt
 
 using ChainRulesCore
 using FrankWolfe: FrankWolfe
-using FrankWolfe: ActiveSet, Adaptive, LinearMinimizationOracle
+using FrankWolfe: ActiveSet, Agnostic, LinearMinimizationOracle
 using FrankWolfe: away_frank_wolfe, compute_extreme_point
 using Krylov: gmres
 using LinearAlgebra
@@ -44,6 +44,8 @@ include("ssvm/isbaseloss.jl")
 include("ssvm/zeroone_baseloss.jl")
 include("ssvm/ssvm_loss.jl")
 
+include("imitation_loss/imitation_loss.jl")
+
 export FixedAtomsProbabilityDistribution
 export compute_expectation, compress_distribution!
 export Pushforward
@@ -73,5 +75,6 @@ export ZeroOneBaseLoss
 export StructuredSVMLoss
 
 export GeneralizedMaximizer, objective_value
+export ImitationLoss, get_y_true
 
 end

@@ -3,6 +3,8 @@ using LinearAlgebra
 
 Random.seed!(67)
 
+verbose = false
+
 CC = 10
 function max_pricing(θ::AbstractVector; instance::AbstractMatrix)
     @assert length(θ) == size(instance, 1)
@@ -173,8 +175,8 @@ for pipeline in pipelines_imitation_y
         data_test=data_test,
         error_function=error_function,
         cost=cost,
-        epochs=500,
-        verbose=true,
+        epochs=1000,
+        verbose=verbose,
         setting_name="generalized maximizer - imitation_y",
     )
 end
@@ -195,7 +197,7 @@ for pipeline in pipelines_imitation_θ
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=true,
+        verbose=verbose,
         setting_name="generalized maximizer - imitation_θ",
     )
 
@@ -214,7 +216,7 @@ for pipeline in pipelines_imitation_θ
         error_function=error_function,
         cost=cost,
         epochs=100,
-        verbose=true,
+        verbose=verbose,
         setting_name="generalized maximizer - imitation_θ - precomputed y_true",
     )
 end
@@ -233,7 +235,7 @@ for pipeline in pipelines_experience
         error_function=error_function,
         cost=cost,
         epochs=1000,
-        verbose=true,
+        verbose=verbose,
         setting_name="generalized maximizer - experience",
     )
 end

@@ -1,6 +1,6 @@
 # Background
 
-The goal of `InferOpt.jl` is to make machine learning pipelines more expressive by incorporating combinatorial optimization layers.
+The goal of InferOpt.jl is to make machine learning pipelines more expressive by incorporating combinatorial optimization layers.
 
 ## How the math works
 
@@ -12,9 +12,9 @@ where $\mathcal{V} \subset \mathbb{R}^d$ is a finite set of feasible solutions, 
 Note that any linear program (LP) or mixed integer linear program (MILP) can be formulated this way.
 
 Unfortunately, the optimal solution $f(\theta)$ is a piecewise constant function of $\theta$, which means its derivative is either zero or undefined.
-Starting with an oracle for $f$, `InferOpt.jl` approximates it with a differentiable "layer", whose derivatives convey meaningful slope information.
+Starting with an oracle for $f$, InferOpt.jl approximates it with a differentiable "layer", whose derivatives convey meaningful slope information.
 Such a layer can then be used within a machine learning pipeline, and gradient descent will succeed.
-`InferOpt.jl` also provides adequate loss functions for structured learning.
+InferOpt.jl also provides adequate loss functions for structured learning.
 
 For more details on the theoretical aspects, you can check out our paper:
 

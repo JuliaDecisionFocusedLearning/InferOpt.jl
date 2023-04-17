@@ -33,6 +33,9 @@ format(InferOpt; verbose=true)
     @testset verbose = true "Paths" begin
         include("paths.jl")
     end
+    @testset verbose = true "Imitation loss" begin
+        include("imitation_loss.jl")
+    end
     @testset verbose = true "Frank-Wolfe" begin
         include("frank_wolfe.jl")
     end

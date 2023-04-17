@@ -3,7 +3,7 @@
 
 Loss associated with the Structured Support Vector Machine.
 
-`ℓ(θ, y_true) = max_y {δ(y, y_true) + α θᵀ(y - y_true)}`
+`SSVM(θ, y_true) = max_y {base_loss(y, y_true) + α θᵀ(y - y_true)}`
 
 # Fields
 - `base_loss::L`:  of the `IsBaseLoss` trait
