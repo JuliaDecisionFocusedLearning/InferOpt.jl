@@ -13,6 +13,11 @@ end
 
 GeneralizedMaximizer(f; g=identity, h=zero) = GeneralizedMaximizer(f, g, h)
 
+function Base.show(io::IO, f::GeneralizedMaximizer)
+    (; maximizer, g, h) = f
+    return print(io, "GeneralizedMaximizer($maximizer, $g, $h)")
+end
+
 # Callable calls the wrapped maximizer
 function (f::GeneralizedMaximizer)(θ::AbstractArray{<:Real}; kwargs...)
     return f.maximizer(θ; kwargs...)
