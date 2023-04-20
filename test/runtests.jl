@@ -19,7 +19,7 @@ includet("utils/pipeline.jl")
         @test format(InferOpt; verbose=false, overwrite=false)
     end
     @testset verbose = true "Code correctness (JET.jl)" begin
-        JET.test_package("InferOpt"; verbose=false, overwrite=false)
+        JET.test_package("InferOpt"; toplevel_logger=nothing)
     end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
