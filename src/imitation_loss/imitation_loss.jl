@@ -44,7 +44,7 @@ end
 Retrieve `y_true` from `t_true`.
 This method should be implemented when using a custom data structure for `t_true` other than a `NamedTuple`.
 """
-get_y_true(t_true) = error("not implemented")
+function get_y_true end
 
 """
     get_y_true(t_true::NamedTuple)

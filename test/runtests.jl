@@ -1,8 +1,10 @@
 using Revise
 using Aqua
 using InferOpt
+using JET
 using JuliaFormatter
 using Test
+using Zygote
 
 includet("utils/dataset.jl")
 includet("utils/error.jl")
@@ -15,6 +17,9 @@ includet("utils/pipeline.jl")
     end
     @testset verbose = true "Code formatting (JuliaFormatter.jl)" begin
         @test format(InferOpt; verbose=false, overwrite=false)
+    end
+    @testset verbose = true "Code correctness (JET.jl)" begin
+        JET.test_package("InferOpt"; verbose=false, overwrite=false)
     end
     @testset verbose = true "Jacobian approx" begin
         include("jacobian_approx.jl")
