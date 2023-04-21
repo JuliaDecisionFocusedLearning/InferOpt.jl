@@ -12,12 +12,6 @@ includet("utils/error.jl")
 includet("utils/perf.jl")
 includet("utils/pipeline.jl")
 
-function get_pkg_version(name::AbstractString)
-    deps = Pkg.dependencies()
-    p = only(x for x in values(deps) if x.name == name)
-    return p.version
-end
-
 @testset verbose = true "InferOpt.jl" begin
     @testset verbose = true "Code quality (Aqua.jl)" begin
         Aqua.test_all(InferOpt; ambiguities=false)
@@ -26,10 +20,8 @@ end
         @test format(InferOpt; verbose=false, overwrite=false)
     end
     @testset verbose = true "Code correctness (JET.jl)" begin
-        if get_pkg_version("JET") >= v"0.7.11"
-            JET.test_package("InferOpt"; toplevel_logger=nothing)
-        else
-            @test string(JET.report_package(InferOpt)) == "No errors detected\n"
+        if VERSION >= v"1.8"
+            JET.test_package(InferOpt; toplevel_logger=nothing)
         end
     end
     @testset verbose = true "Jacobian approx" begin
