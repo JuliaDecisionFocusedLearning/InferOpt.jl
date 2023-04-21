@@ -21,7 +21,7 @@ includet("utils/pipeline.jl")
     end
     @testset verbose = true "Code correctness (JET.jl)" begin
         if VERSION >= v"1.8"
-            JET.test_package(InferOpt; toplevel_logger=nothing)
+            JET.test_package(InferOpt; toplevel_logger=nothing, mode=:typo)
         end
     end
     @testset verbose = true "Jacobian approx" begin
