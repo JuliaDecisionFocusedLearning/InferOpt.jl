@@ -17,6 +17,4 @@ For `δ::L` to comply with this interface, the following methods must exist:
 
 Compute `argmax_y {δ(y, y_true) + α θᵀ(y - y_true)}` to deduce the gradient of a `StructuredSVMLoss`.
 """
-@traitfn function compute_maximizer(δ::L, θ, α, y_true; kwargs...) where {L; IsBaseLoss{L}}
-    return error("not implemented")
-end
+function compute_maximizer end
