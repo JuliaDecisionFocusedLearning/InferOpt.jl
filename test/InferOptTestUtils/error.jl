@@ -1,5 +1,3 @@
-using Statistics
-
 function mape(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     return 100 * mean(abs((x[i] - y[i]) / x[i]) for i in eachindex(x))
 end

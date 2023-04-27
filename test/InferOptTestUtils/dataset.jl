@@ -1,5 +1,3 @@
-using Flux
-
 function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     N = length(X)
     N_train = floor(Int, N * train_percentage)
@@ -13,7 +11,7 @@ function generate_dataset(
     true_encoder,
     true_maximizer;
     nb_features::Integer,
-    instance_dim,
+    instance_dim::Tuple,
     nb_instances::Integer,
     noise_std::Real,
 )

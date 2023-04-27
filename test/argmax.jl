@@ -6,7 +6,7 @@ using Test
 
 Random.seed!(63)
 
-# verbose = get(ENV, "CI", "false") == "false"
+verbose = get(ENV, "CI", "false") == "false"
 verbose = false
 
 ## Main functions

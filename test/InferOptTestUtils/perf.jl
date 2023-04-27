@@ -1,7 +1,3 @@
-using Statistics
-using Test
-using UnicodePlots
-
 ## Performance metrics
 
 function init_perf()
@@ -78,7 +74,7 @@ function update_perf!(
     return nothing
 end
 
-function test_perf(perf_storage::NamedTuple; test_name::String)
+function test_perf(perf_storage::NamedTuple; test_name::String; decrease=0.7)
     (;
         train_losses,
         test_losses,
@@ -99,21 +95,21 @@ function test_perf(perf_storage::NamedTuple; test_name::String)
         end
         # Prediction errors
         if length(train_errors) > 0
-            @test train_errors[end] < 0.7 * train_errors[1]
+            @test train_errors[end] < decrease * train_errors[1]
         end
         if length(test_errors) > 0
-            @test test_errors[end] < 0.7 * test_errors[1]
+            @test test_errors[end] < decrease * test_errors[1]
         end
         # Cost
         if length(train_cost_gaps) > 0
-            @test train_cost_gaps[end] < 0.7 * train_cost_gaps[1]
+            @test train_cost_gaps[end] < decrease * train_cost_gaps[1]
         end
         if length(test_cost_gaps) > 0
-            @test test_cost_gaps[end] < 0.7 * test_cost_gaps[1]
+            @test test_cost_gaps[end] < decrease * test_cost_gaps[1]
         end
         # Parameter errors
         if length(parameter_errors) > 0
-            @test parameter_errors[end] < 0.7 * parameter_errors[1]
+            @test parameter_errors[end] < decrease * parameter_errors[1]
         end
     end
 end
