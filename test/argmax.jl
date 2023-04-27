@@ -26,6 +26,18 @@ pipelines_imitation_θ = [
 ]
 
 pipelines_imitation_y = [
+    # PlusIdentity
+    (
+        encoder=encoder_factory(),
+        maximizer=normalize ∘ PlusIdentity(true_maximizer),
+        loss=Flux.Losses.mse,
+    ),
+    # Interpolation
+    (
+        encoder=encoder_factory(),
+        maximizer=Interpolation(true_maximizer; λ=5.0),
+        loss=Flux.Losses.mse,
+    ),
     # Structured SVM
     (
         encoder=encoder_factory(),
