@@ -1,8 +1,8 @@
 module InferOpt
 
-using ChainRulesCore: NoTangent, ZeroTangent, rrule_via_ad
-using FrankWolfe: FrankWolfe
-using FrankWolfe: ActiveSet, Agnostic, LinearMinimizationOracle
+using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
+using ChainRulesCore: rrule, rrule_via_ad, unthunk
+using FrankWolfe: FrankWolfe, ActiveSet, Agnostic, LinearMinimizationOracle
 using FrankWolfe: away_frank_wolfe, compute_extreme_point
 using Krylov: gmres
 using LinearAlgebra: dot

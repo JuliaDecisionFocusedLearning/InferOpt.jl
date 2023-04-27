@@ -1,23 +1,26 @@
 dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
 make_positive(z::AbstractArray) = softplus.(z)
 
-function test_pipeline!(
-    pipeline,
-    pipeline_loss;
+function test_pipeline!(;
+    instance_dim,
+    pipeline_loss,
     true_encoder,
+    encoder,
     true_maximizer,
-    data_train,
-    data_test,
+    maximizer,
+    loss,
     error_function,
     cost,
-    epochs,
-    verbose,
+    epochs=EPOCHS,
+    verbose=false,
     setting_name="???",
 )
-    (; encoder, maximizer, loss) = pipeline
     if verbose
         @info "Testing $setting_name" maximizer loss
     end
+
+    ## Data generation
+    data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
 
     ## Optimization
     opt = Flux.Adam()
@@ -28,14 +31,14 @@ function test_pipeline!(
         next!(prog)
         update_perf!(
             perf_storage;
-            data_train=data_train,
-            data_test=data_test,
-            true_encoder=true_encoder,
-            encoder=encoder,
-            true_maximizer=true_maximizer,
-            pipeline_loss=pipeline_loss,
-            error_function=error_function,
-            cost=cost,
+            data_train,
+            data_test,
+            true_encoder,
+            encoder,
+            true_maximizer,
+            pipeline_loss,
+            error_function,
+            cost,
         )
         Flux.train!(pipeline_loss, Flux.params(encoder), zip(data_train...), opt)
     end

@@ -74,7 +74,7 @@ function update_perf!(
     return nothing
 end
 
-function test_perf(perf_storage::NamedTuple; test_name::String; decrease=0.7)
+function test_perf(perf_storage::NamedTuple; test_name::String, decrease=0.9)
     (;
         train_losses,
         test_losses,

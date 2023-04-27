@@ -10,10 +10,10 @@ end
 function generate_dataset(
     true_encoder,
     true_maximizer;
-    nb_features::Integer,
-    instance_dim::Tuple,
-    nb_instances::Integer,
-    noise_std::Real,
+    instance_dim,
+    nb_features::Integer=NB_FEATURES,
+    nb_instances::Integer=NB_INSTANCES,
+    noise_std::Real=NOISE_STD,
 )
     X = [randn(Float32, nb_features, instance_dim...) for n in 1:nb_instances]
     thetas = [true_encoder(x) for x in X]
