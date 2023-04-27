@@ -7,6 +7,16 @@ Modules = [InferOpt]
 Pages = ["utils/probability_distribution.jl", "utils/pushforward.jl"]
 ```
 
+## Plus identity
+
+!!! note "Reference"
+    [Backpropagation through Combinatorial Algorithms: Identity with Projection Works](https://arxiv.org/abs/2205.15213)
+
+```@autodocs
+Modules = [InferOpt]
+Pages = ["plus_identity/plus_identity.jl"]
+```
+
 ## Interpolation
 
 !!! note "Reference"
