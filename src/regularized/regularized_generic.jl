@@ -52,18 +52,9 @@ end
 Shorter constructor with defaults.
 """
 function RegularizedGeneric(
-    maximizer;
-    Ω=zero_regularization,
-    Ω_grad=zero_gradient,
-    omega=nothing,
-    omega_grad=nothing,
-    linear_solver=gmres,
+    maximizer; Ω=zero_regularization, Ω_grad=zero_gradient, linear_solver=gmres
 )
-    if isnothing(omega) || isnothing(omega_grad)
-        return RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver)
-    else
-        return RegularizedGeneric(maximizer, omega, omega_grad, linear_solver)
-    end
+    return RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver)
 end
 
 @traitimpl IsRegularized{RegularizedGeneric}

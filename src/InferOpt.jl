@@ -20,6 +20,8 @@ include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
 include("utils/generalized_maximizer.jl")
 
+include("plus_identity/plus_identity.jl")
+
 include("interpolation/interpolation.jl")
 
 include("frank_wolfe/frank_wolfe_utils.jl")
@@ -50,6 +52,8 @@ export FixedAtomsProbabilityDistribution
 export compute_expectation, compress_distribution!
 export Pushforward
 export compute_probability_distribution
+
+export PlusIdentity
 
 export Interpolation
 

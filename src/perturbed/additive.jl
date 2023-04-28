@@ -38,21 +38,12 @@ Shorter constructor with defaults.
 function PerturbedAdditive(
     maximizer::F;
     ε=1.0,
-    epsilon=nothing,
-    nb_samples::Int=1,
+    nb_samples=1,
     rng::R=MersenneTwister(0),
     seed::S=nothing,
     is_parallel::Bool=false,
 ) where {F,R,S}
-    if isnothing(epsilon)
-        return PerturbedAdditive{F,R,S,is_parallel}(
-            maximizer, float(ε), nb_samples, rng, seed
-        )
-    else
-        return PerturbedAdditive{F,R,S,is_parallel}(
-            maximizer, float(epsilon), nb_samples, rng, seed
-        )
-    end
+    return PerturbedAdditive{F,R,S,is_parallel}(maximizer, float(ε), nb_samples, rng, seed)
 end
 
 ## Forward pass

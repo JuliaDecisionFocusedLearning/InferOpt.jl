@@ -34,6 +34,12 @@ pipelines_imitation_θ = [
 ]
 
 pipelines_imitation_y = [
+    # PlusIdentity # TODO: make it work
+    # (
+    #     encoder=encoder_factory(),
+    #     maximizer=normalize ∘ PlusIdentity(true_maximizer),
+    #     loss=Flux.Losses.mse,
+    # ),
     # Interpolation  # TODO: make it work
     # (
     #     encoder=encoder_factory(),
