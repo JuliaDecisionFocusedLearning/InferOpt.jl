@@ -1,10 +1,5 @@
-function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
-    N = length(X)
-    N_train = floor(Int, N * train_percentage)
-    N_test = N - N_train
-    train_ind, test_ind = 1:N_train, (N_train + 1):(N_train + N_test)
-    X_train, X_test = X[train_ind], X[test_ind]
-    return X_train, X_test
+function encoder_factory(nb_features=NB_FEATURES)
+    return Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
 end
 
 function generate_dataset(
@@ -30,7 +25,11 @@ function generate_dataset(
     return data_train, data_test
 end
 
-function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
-    return Y_pred
+function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
+    N = length(X)
+    N_train = floor(Int, N * train_percentage)
+    N_test = N - N_train
+    train_ind, test_ind = 1:N_train, (N_train + 1):(N_train + N_test)
+    X_train, X_test = X[train_ind], X[test_ind]
+    return X_train, X_test
 end

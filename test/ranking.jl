@@ -1,193 +1,211 @@
-@testitem "Ranking" begin
-    using Flux
-    using InferOpt
-    using LinearAlgebra
-    using Random
-    using Test
-
+@testitem "Ranking - imit - SPO+ (θ)" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using .InferOptTestUtils
-
+    using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
-    # verbose = get(ENV, "CI", "false") == "false"
-    verbose = false
-
-    ## Main functions
-
-    nb_features = 5
-    encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
-    true_encoder = encoder_factory()
-    true_maximizer(θ; kwargs...) = ranking(θ; kwargs...)
-    cost(y; instance) = dot(y, -true_encoder(instance))
-    error_function(ŷ, y) = hamming_distance(ŷ, y)
-
-    ## Pipelines
-
-    pipelines_imitation_θ = [
-        # SPO+
-        (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)),
-    ]
-
-    pipelines_imitation_y = [
-        # PlusIdentity
-        (
-            encoder=encoder_factory(),
-            maximizer=normalize ∘ PlusIdentity(true_maximizer),
-            loss=Flux.Losses.mse,
-        ),
-        # Interpolation
-        (
-            encoder=encoder_factory(),
-            maximizer=Interpolation(true_maximizer; λ=5.0),
-            loss=Flux.Losses.mse,
-        ),
-        # Perturbed + FYL
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
-        ),
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=FenchelYoungLoss(
-                PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)
-            ),
-        ),
-        # Perturbed + other loss
-        (
-            encoder=encoder_factory(),
-            maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
-            loss=Flux.Losses.mse,
-        ),
-        (
-            encoder=encoder_factory(),
-            maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
-            loss=Flux.Losses.mse,
-        ),
-        # Generic regularized + FYL
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=FenchelYoungLoss(
-                RegularizedGeneric(true_maximizer, half_square_norm, identity)
-            ),
-        ),
-        # Generic regularized + other loss
-        (
-            encoder=encoder_factory(),
-            maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
-            loss=Flux.Losses.mse,
-        ),
-    ]
-
-    pipelines_experience = [
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=Pushforward(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10), cost),
-        ),
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=Pushforward(
-                PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10), cost
-            ),
-        ),
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=Pushforward(
-                RegularizedGeneric(true_maximizer, half_square_norm, identity), cost
-            ),
-        ),
-    ]
-
-    ## Dataset generation
-
-    data_train, data_test = generate_dataset(
-        true_encoder,
-        true_maximizer;
-        nb_features=nb_features,
+    test_pipeline!(
+        PipelineLossImitationθ;
         instance_dim=5,
-        nb_instances=100,
-        noise_std=0.01,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=SPOPlusLoss(ranking),
+        error_function=hamming_distance,
     )
+end
 
-    ## Test loop
+@testitem "Ranking - imit - SPO+ (θ & y)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
 
-    for pipeline in pipelines_imitation_θ
-        pipeline_1 = deepcopy(pipeline)
-        (; encoder, maximizer, loss) = pipeline_1
-        pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
-        test_pipeline!(
-            pipeline_1,
-            pipeline_loss_imitation_θ;
-            true_encoder=true_encoder,
-            true_maximizer=true_maximizer,
-            data_train=data_train,
-            data_test=data_test,
-            error_function=error_function,
-            cost=cost,
-            epochs=100,
-            verbose=verbose,
-            setting_name="ranking - imitation_θ",
-        )
+    test_pipeline!(
+        PipelineLossImitationθy;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=SPOPlusLoss(ranking),
+        error_function=hamming_distance,
+    )
+end
 
-        pipeline_2 = deepcopy(pipeline)
-        (; encoder, maximizer, loss) = pipeline_2
-        pipeline_loss_imitation_θy(x, θ, y) = loss(maximizer(encoder(x)), θ, y)
-        test_pipeline!(
-            pipeline_2,
-            pipeline_loss_imitation_θy;
-            true_encoder=true_encoder,
-            true_maximizer=true_maximizer,
-            data_train=data_train,
-            data_test=data_test,
-            error_function=error_function,
-            cost=cost,
-            epochs=100,
-            verbose=verbose,
-            setting_name="ranking - imitation_θ - precomputed_y_true",
-        )
-    end
+@testitem "Ranking - imit - MSE PlusIdentity" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
 
-    for pipeline in pipelines_imitation_y
-        pipeline_1 = deepcopy(pipeline)
-        (; encoder, maximizer, loss) = pipeline_1
-        pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
-        test_pipeline!(
-            pipeline_1,
-            pipeline_loss_imitation_y;
-            true_encoder=true_encoder,
-            true_maximizer=true_maximizer,
-            data_train=data_train,
-            data_test=data_test,
-            error_function=error_function,
-            cost=cost,
-            epochs=200,
-            verbose=verbose,
-            setting_name="ranking - imitation_y",
-        )
-    end
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=normalize ∘ PlusIdentity(ranking),
+        loss=mse,
+        error_function=hamming_distance,
+    )
+end
 
-    for pipeline in pipelines_experience
-        pipeline_1 = deepcopy(pipeline)
-        (; encoder, maximizer, loss) = pipeline_1
-        pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
-        test_pipeline!(
-            pipeline_1,
-            pipeline_loss_experience;
-            true_encoder=true_encoder,
-            true_maximizer=true_maximizer,
-            data_train=data_train,
-            data_test=data_test,
-            error_function=error_function,
-            cost=cost,
-            epochs=500,
-            verbose=verbose,
-            setting_name="ranking - experience",
-        )
-    end
+@testitem "Ranking - imit - MSE Interpolation" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=Interpolation(ranking; λ=5.0),
+        loss=mse,
+        error_function=hamming_distance,
+    )
+end
+
+@testitem "Ranking - imit - MSE PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=PerturbedAdditive(ranking; ε=1.0, nb_samples=10),
+        loss=mse,
+        error_function=hamming_distance,
+    )
+end
+
+@testitem "Ranking - imit - MSE PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=PerturbedMultiplicative(ranking; ε=1.0, nb_samples=10),
+        loss=mse,
+        error_function=hamming_distance,
+    )
+end
+
+@testitem "Ranking - imit - MSE RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=RegularizedGeneric(ranking, half_square_norm, identity),
+        loss=mse,
+        error_function=hamming_distance,
+    )
+end
+
+@testitem "Ranking - imit - FYL PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(PerturbedAdditive(ranking; ε=1.0, nb_samples=5)),
+        error_function=hamming_distance,
+    )
+end
+
+@testitem "Ranking - imit - FYL PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(PerturbedMultiplicative(ranking; ε=1.0, nb_samples=5)),
+        error_function=hamming_distance,
+        epochs=100,
+    )
+end
+
+@testitem "Ranking - imit - FYL RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(RegularizedGeneric(ranking, half_square_norm, identity)),
+        error_function=hamming_distance,
+        epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(PerturbedAdditive(ranking; ε=1.0, nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(PerturbedMultiplicative(ranking; ε=1.0, nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(RegularizedGeneric(ranking, half_square_norm, identity), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=100,
+    )
 end

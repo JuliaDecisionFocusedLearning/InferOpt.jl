@@ -13,6 +13,11 @@ function init_perf()
     return perf_storage
 end
 
+function generate_predictions(encoder, maximizer, X)
+    Y_pred = [maximizer(encoder(x)) for x in X]
+    return Y_pred
+end
+
 function update_perf!(
     perf_storage::NamedTuple;
     data_train,
@@ -74,7 +79,7 @@ function update_perf!(
     return nothing
 end
 
-function test_perf(perf_storage::NamedTuple; test_name::String, decrease=0.9)
+function test_perf(perf_storage::NamedTuple; decrease::Real)
     (;
         train_losses,
         test_losses,
@@ -85,32 +90,30 @@ function test_perf(perf_storage::NamedTuple; test_name::String, decrease=0.9)
         parameter_errors,
     ) = perf_storage
 
-    @testset "$test_name" begin
-        # Losses
-        if length(train_losses) > 0
-            @test train_losses[end] < train_losses[1]
-        end
-        if length(test_losses) > 0
-            @test test_losses[end] < test_losses[1]
-        end
-        # Prediction errors
-        if length(train_errors) > 0
-            @test train_errors[end] < decrease * train_errors[1]
-        end
-        if length(test_errors) > 0
-            @test test_errors[end] < decrease * test_errors[1]
-        end
-        # Cost
-        if length(train_cost_gaps) > 0
-            @test train_cost_gaps[end] < decrease * train_cost_gaps[1]
-        end
-        if length(test_cost_gaps) > 0
-            @test test_cost_gaps[end] < decrease * test_cost_gaps[1]
-        end
-        # Parameter errors
-        if length(parameter_errors) > 0
-            @test parameter_errors[end] < decrease * parameter_errors[1]
-        end
+    # Losses
+    if length(train_losses) > 0
+        @test train_losses[end] < train_losses[1]
+    end
+    if length(test_losses) > 0
+        @test test_losses[end] < test_losses[1]
+    end
+    # Prediction errors
+    if length(train_errors) > 0
+        @test train_errors[end] < decrease * train_errors[1]
+    end
+    if length(test_errors) > 0
+        @test test_errors[end] < decrease * test_errors[1]
+    end
+    # Cost
+    if length(train_cost_gaps) > 0
+        @test train_cost_gaps[end] < decrease * train_cost_gaps[1]
+    end
+    if length(test_cost_gaps) > 0
+        @test test_cost_gaps[end] < decrease * test_cost_gaps[1]
+    end
+    # Parameter errors
+    if length(parameter_errors) > 0
+        @test parameter_errors[end] < decrease * parameter_errors[1]
     end
 end
 
@@ -187,4 +190,11 @@ function plot_perf(perf_storage::NamedTuple)
     end
 
     return plts
+end
+
+function print_plot_perf(perf_storage)
+    plts = plot_perf(perf_storage)
+    for plt in plts
+        println(plt)
+    end
 end

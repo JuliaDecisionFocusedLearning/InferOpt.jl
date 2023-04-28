@@ -1,41 +1,33 @@
 dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
 make_positive(z::AbstractArray) = softplus.(z)
 
-function test_pipeline!(;
+function test_pipeline!(
+    ::Type{PL};
     instance_dim,
-    pipeline_loss,
-    true_encoder,
-    encoder,
     true_maximizer,
     maximizer,
     loss,
     error_function,
-    cost,
+    true_encoder=encoder_factory(),
+    cost=(y; instance) -> -dot(y, true_encoder(instance)),
     epochs=EPOCHS,
-    verbose=false,
-    setting_name="???",
-)
-    if verbose
-        @info "Testing $setting_name" maximizer loss
-    end
-
-    ## Data generation
+    decrease=DECREASE,
+) where {PL<:PipelineLoss}
     data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
 
-    ## Optimization
+    encoder = encoder_factory()
+    pipeline_loss = PL(encoder, maximizer, loss)
     opt = Flux.Adam()
     perf_storage = init_perf()
-    prog = Progress(epochs; enabled=verbose)
 
     for _ in 1:epochs
-        next!(prog)
         update_perf!(
             perf_storage;
             data_train,
             data_test,
             true_encoder,
-            encoder,
             true_maximizer,
+            encoder,
             pipeline_loss,
             error_function,
             cost,
@@ -43,13 +35,7 @@ function test_pipeline!(;
         Flux.train!(pipeline_loss, Flux.params(encoder), zip(data_train...), opt)
     end
 
-    ## Evaluation
-    if verbose
-        plts = plot_perf(perf_storage)
-        for plt in plts
-            println(plt)
-        end
-    end
-    test_perf(perf_storage; test_name="$setting_name - $maximizer - $loss")
+    test_perf(perf_storage; decrease=decrease)
+    plot_perf(perf_storage)
     return perf_storage
 end
