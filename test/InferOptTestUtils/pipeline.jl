@@ -36,6 +36,6 @@ function test_pipeline!(
     end
 
     test_perf(perf_storage; decrease=decrease)
-    plot_perf(perf_storage)
+    print_plot_perf(perf_storage)
     return perf_storage
 end
