@@ -12,6 +12,7 @@ function test_pipeline!(
     cost=(y; instance) -> -dot(y, true_encoder(instance)),
     epochs=EPOCHS,
     decrease=DECREASE,
+    verbose=VERBOSE,
 ) where {PL<:PipelineLoss}
     data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
 
@@ -36,6 +37,6 @@ function test_pipeline!(
     end
 
     test_perf(perf_storage; decrease=decrease)
-    print_plot_perf(perf_storage)
+    verbose && print_plot_perf(perf_storage)
     return perf_storage
 end

@@ -17,7 +17,7 @@ include("perf.jl")
 include("loss.jl")
 include("pipeline.jl")
 
-export DECREASE, EPOCHS, NB_FEATURES, NB_INSTANCES, NOISE_STD
+export DECREASE, EPOCHS, NB_FEATURES, NB_INSTANCES, NOISE_STD, VERBOSE
 export shortest_path_maximizer
 export encoder_factory, generate_dataset
 export mse, mape, normalized_mape, hamming_distance, normalized_hamming_distance
