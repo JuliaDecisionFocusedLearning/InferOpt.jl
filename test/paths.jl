@@ -174,7 +174,7 @@ end
         error_function=mse,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=200,
+        epochs=500,
     )
 end
 
