@@ -1,235 +1,223 @@
-using Flux
-using Graphs
-using GridGraphs
-using InferOpt
-using LinearAlgebra
-using Random
-using Test
+@testitem "Paths - imit - SPO+ (θ)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
 
-Random.seed!(63)
-
-# verbose = get(ENV, "CI", "false") == "false"
-verbose = false
-
-## Main functions
-
-nb_features = 5
-encoder_factory() = Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
-true_encoder = encoder_factory()
-cost(y; instance) = dot(y, -true_encoder(instance))
-error_function(ŷ, y) = half_square_norm(ŷ - y)
-
-function true_maximizer(θ::AbstractMatrix; kwargs...)
-    g = GridGraph(-θ; directions=GridGraphs.QUEEN_ACYCLIC_DIRECTIONS)
-    path = grid_topological_sort(g, 1, nv(g))
-    y = path_to_matrix(g, path)
-    return y
-end
-
-## Pipelines
-
-pipelines_imitation_θ = [
-    # SPO+
-    (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)),
-]
-
-pipelines_imitation_y = [
-    # PlusIdentity # TODO: make it work
-    # (
-    #     encoder=encoder_factory(),
-    #     maximizer=normalize ∘ PlusIdentity(true_maximizer),
-    #     loss=Flux.Losses.mse,
-    # ),
-    # Interpolation  # TODO: make it work
-    # (
-    #     encoder=encoder_factory(),
-    #     maximizer=Interpolation(true_maximizer; λ=5.0),
-    #     loss=Flux.Losses.mse,
-    # ),
-    # Perturbed + FYL
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5)),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5)),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(
-            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=5, is_parallel=true)
-        ),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(
-            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=5, is_parallel=true)
-        ),
-    ),
-    # Perturbed + other loss
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10),
-        loss=Flux.Losses.mse,
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10),
-        loss=Flux.Losses.mse,
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true),
-        loss=Flux.Losses.mse,
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=PerturbedMultiplicative(
-            true_maximizer; ε=1.0, nb_samples=10, is_parallel=true
-        ),
-        loss=Flux.Losses.mse,
-    ),
-    # Generic regularized + FYL
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=FenchelYoungLoss(
-            RegularizedGeneric(true_maximizer, half_square_norm, identity)
-        ),
-    ),
-    # Generic regularized + other loss
-    (
-        encoder=encoder_factory(),
-        maximizer=RegularizedGeneric(true_maximizer, half_square_norm, identity),
-        loss=Flux.Losses.mse,
-    ),
-]
-
-pipelines_experience = [
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=Pushforward(PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10), cost),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=Pushforward(
-            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10), cost
-        ),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=Pushforward(
-            PerturbedAdditive(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true), cost
-        ),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=Pushforward(
-            PerturbedMultiplicative(true_maximizer; ε=1.0, nb_samples=10, is_parallel=true),
-            cost,
-        ),
-    ),
-    (
-        encoder=encoder_factory(),
-        maximizer=identity,
-        loss=Pushforward(
-            RegularizedGeneric(true_maximizer, half_square_norm, identity), cost
-        ),
-    ),
-]
-
-## Dataset generation
-
-data_train, data_test = generate_dataset(
-    true_encoder,
-    true_maximizer;
-    nb_features=nb_features,
-    instance_dim=(10, 10),
-    nb_instances=100,
-    noise_std=0.01,
-);
-
-## Test loop
-
-for pipeline in pipelines_imitation_θ
-    pipeline_1 = deepcopy(pipeline)
-    (; encoder, maximizer, loss) = pipeline_1
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
     test_pipeline!(
-        pipeline_1,
-        pipeline_loss_imitation_θ;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=100,
-        verbose=verbose,
-        setting_name="paths - imitation_θ",
-    )
-
-    pipeline_2 = deepcopy(pipeline)
-    (; encoder, maximizer, loss) = pipeline_2
-    pipeline_loss_imitation_θy(x, θ, y) = loss(maximizer(encoder(x)), θ)
-    test_pipeline!(
-        pipeline_2,
-        pipeline_loss_imitation_θy;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=100,
-        verbose=verbose,
-        setting_name="paths - imitation_θ - precomputed y_true",
+        PipelineLossImitationθ;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=SPOPlusLoss(shortest_path_maximizer),
+        error_function=mse,
     )
 end
 
-for pipeline in pipelines_imitation_y
-    pipeline_1 = deepcopy(pipeline)
-    (; encoder, maximizer, loss) = pipeline_1
-    pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
+@testitem "Paths - imit - SPO+ (θ & y)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
     test_pipeline!(
-        pipeline_1,
-        pipeline_loss_imitation_y;
+        PipelineLossImitationθy;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=SPOPlusLoss(shortest_path_maximizer),
+        error_function=mse,
+    )
+end
+
+@testitem "Paths - imit - MSE PlusIdentity" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=normalize ∘ PlusIdentity(shortest_path_maximizer),
+        loss=mse,
+        error_function=mse,
+    )
+end
+
+# @testitem "Paths - imit - MSE Interpolation" default_imports = false begin
+#     include("InferOptTestUtils/InferOptTestUtils.jl")
+#     using InferOpt, .InferOptTestUtils, Random
+#     Random.seed!(63)
+
+#     test_pipeline!(
+#         PipelineLossImitation;
+#         instance_dim=(5, 5),
+#         true_maximizer=shortest_path_maximizer,
+#         maximizer=Interpolation(shortest_path_maximizer; λ=5.0),
+#         loss=mse,
+#         error_function=mse,
+#     )
+# end  # TODO: make it work (doesn't seem to depend on λ)
+
+@testitem "Paths - imit - MSE PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=10),
+        loss=mse,
+        error_function=mse,
+    )
+end
+
+@testitem "Paths - imit - MSE PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=10),
+        loss=mse,
+        error_function=mse,
+    )
+end
+
+@testitem "Paths - imit - MSE RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity),
+        loss=mse,
+        error_function=mse,
+    )
+end
+
+@testitem "Paths - imit - FYL PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=5)
+        ),
+        error_function=mse,
+    )
+end
+
+@testitem "Paths - imit - FYL PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=5)
+        ),
+        error_function=mse,
+        epochs=100,
+    )
+end
+
+@testitem "Paths - imit - FYL RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity)
+        ),
+        error_function=mse,
+        epochs=100,
+    )
+end
+
+@testitem "Paths - exp - Pushforward PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=10), cost
+        ),
+        error_function=mse,
         true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
         cost=cost,
         epochs=200,
-        verbose=verbose,
-        setting_name="paths - imitation_y",
     )
 end
 
-for pipeline in pipelines_experience
-    pipeline_1 = deepcopy(pipeline)
-    (; encoder, maximizer, loss) = pipeline_1
-    pipeline_loss_experience(x, θ, y) = loss(maximizer(encoder(x)); instance=x)
+@testitem "Paths - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        pipeline_1,
-        pipeline_loss_experience;
+        PipelineLossExperience;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=10), cost
+        ),
+        error_function=mse,
         true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
         cost=cost,
-        epochs=1000,
-        verbose=verbose,
-        setting_name="paths - experience",
+        epochs=500,
+    )
+end
+
+@testitem "Paths - exp - Pushforward RegularizedGeneric" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=Pushforward(
+            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity), cost
+        ),
+        error_function=mse,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=200,
     )
 end

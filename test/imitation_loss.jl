@@ -1,209 +1,204 @@
-using Flux
-using InferOpt
-using LinearAlgebra
-using Random
-using Test
+@testitem "ImitationLoss vs SSVM" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Test
+    Random.seed!(63)
 
-Random.seed!(63)
+    true_encoder = encoder_factory()
 
-verbose = false
+    ssvm_base_loss = ZeroOneBaseLoss()
 
-## Main functions
-
-nb_features = 5
-function encoder_factory(seed=67)
-    Random.seed!(seed)
-    return Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
-end
-true_encoder = encoder_factory(63)
-true_maximizer(θ; kwargs...) = one_hot_argmax(θ; kwargs...)
-cost(y; instance) = dot(y, -true_encoder(instance))
-error_function(ŷ, y) = hamming_distance(ŷ, y)
-ssvm_base_loss = ZeroOneBaseLoss()
-
-function spo_base_loss(y, t_true)
-    (; θ_true, y_true) = t_true
-    return dot(θ_true, y_true) - dot(θ_true, y)
-end
-
-function spo_predictor_1(θ, t_true; kwargs...)
-    (; θ_true) = t_true
-    θ_α = 1 .* θ - θ_true
-    y_α = true_maximizer(θ_α; kwargs...)
-    return y_α
-end
-
-function spo_predictor_2(θ, t_true; kwargs...)
-    (; θ_true) = t_true
-    θ_α = 2 .* θ - θ_true
-    y_α = true_maximizer(θ_α; kwargs...)
-    return y_α
-end
-
-## Pipelines
-
-pipelines = [
-    # SSVM
-    (
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=StructuredSVMLoss(ZeroOneBaseLoss()),
+    Random.seed!(67)
+    perf = test_pipeline!(
+        PipelineLossImitationLoss;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=ImitationLoss(
+            (θ, t_true) ->
+                InferOpt.compute_maximizer(ssvm_base_loss, θ, 1.0, get_y_true(t_true));
+            base_loss=(y, t_true) -> ssvm_base_loss(y, t_true.y_true),
         ),
-        (  # Equivalent to StructuredSVMLoss(ZeroOneBaseLoss())
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=ImitationLoss(
-                (θ, t_true) ->
-                    InferOpt.compute_maximizer(ZeroOneBaseLoss(), θ, 1.0, t_true.y_true);
-                base_loss=(y, t_true) -> ssvm_base_loss(y, t_true.y_true),
-            ),
-        ),
-    ),
-    # FYL sparsemax
-    (
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=FenchelYoungLoss(sparse_argmax),
-        ),
-        (  # Equivalent to FenchelYoungLoss(sparse_argmax)
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=ImitationLoss((θ, t_true) -> sparse_argmax(θ); Ω=half_square_norm),
-        ),
-    ),
-    # FYL softmax
-    (
-        (encoder=encoder_factory(), maximizer=identity, loss=FenchelYoungLoss(soft_argmax)),
-        (  # Equivalent to FenchelYoungLoss(soft_argmax)
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=ImitationLoss((θ, t_true) -> soft_argmax(θ); Ω=negative_shannon_entropy),
-        ),
-    ),
-]
-
-spo_pipelines = [
-    (
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=SPOPlusLoss(true_maximizer; α=1.0),
-        ),
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=ImitationLoss(spo_predictor_1; base_loss=spo_base_loss),
-        ),
-    ),
-    (
-        (encoder=encoder_factory(), maximizer=identity, loss=SPOPlusLoss(true_maximizer)),
-        (
-            encoder=encoder_factory(),
-            maximizer=identity,
-            loss=ImitationLoss(spo_predictor_2; base_loss=spo_base_loss, α=2.0),
-        ),
-    ),
-]
-
-## Dataset generation
-
-data_train, data_test = generate_dataset(
-    true_encoder,
-    true_maximizer;
-    nb_features=nb_features,
-    instance_dim=5,
-    nb_instances=100,
-    noise_std=0.001,
-);
-
-## Test loops
-
-for (pipeline1, pipeline2) in pipelines
-    (; encoder, maximizer, loss) = pipeline1
-    pipeline_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), y)
-    storage1 = test_pipeline!(
-        pipeline1,
-        pipeline_loss_imitation_y;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=200,
-        verbose=verbose,
-        setting_name="argmax - imitation_y",
+        error_function=hamming_distance,
+        true_encoder,
     )
 
-    (; encoder, maximizer, loss) = pipeline2
-    pipeline2_loss_imitation_y(x, θ, y) = loss(maximizer(encoder(x)), (; y_true=y))
-    storage2 = test_pipeline!(
-        pipeline2,
-        pipeline2_loss_imitation_y;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=200,
-        verbose=verbose,
-        setting_name="argmax - imitation_y",
+    Random.seed!(67)
+    benchmark_perf = test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=StructuredSVMLoss(ZeroOneBaseLoss()),
+        error_function=hamming_distance,
+        true_encoder,
+        verbose=false,
     )
 
-    train_losses1 = storage1.train_losses
-    test_losses1 = storage1.test_losses
-    train_losses2 = storage2.train_losses
-    test_losses2 = storage2.test_losses
-    @testset "Imitation loss - $(pipeline1.loss)" begin
-        @test all(isapprox.(train_losses1, train_losses2, rtol=0.001))
-        @test all(isapprox.(test_losses1, test_losses2, rtol=0.001))
+    # Both performances should be equivalent
+    @test all(isapprox.(perf.train_losses, benchmark_perf.train_losses, rtol=0.001))
+    @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
+end
+
+@testitem "ImitationLoss vs FYL sparsemax" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    Random.seed!(67)
+    perf = test_pipeline!(
+        PipelineLossImitationLoss;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=ImitationLoss((θ, t_true) -> sparse_argmax(θ); Ω=half_square_norm),
+        error_function=hamming_distance,
+        true_encoder,
+    )
+
+    Random.seed!(67)
+    benchmark_perf = test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=FenchelYoungLoss(sparse_argmax),
+        error_function=hamming_distance,
+        true_encoder,
+        verbose=false,
+    )
+
+    # Both performances should be equivalent
+    @test all(isapprox.(perf.train_losses, benchmark_perf.train_losses, rtol=0.001))
+    @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
+end
+
+@testitem "ImitationLoss vs FYL softmax" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    Random.seed!(67)
+    perf = test_pipeline!(
+        PipelineLossImitationLoss;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=ImitationLoss((θ, t_true) -> soft_argmax(θ); Ω=negative_shannon_entropy),
+        error_function=hamming_distance,
+        true_encoder,
+    )
+
+    Random.seed!(67)
+    benchmark_perf = test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=FenchelYoungLoss(soft_argmax),
+        error_function=hamming_distance,
+        true_encoder,
+        verbose=false,
+    )
+
+    # Both performances should be equivalent
+    @test all(isapprox.(perf.train_losses, benchmark_perf.train_losses, rtol=0.001))
+    @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
+end
+
+@testitem "ImitationLoss vs SPO+ (α = 1)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    function spo_predictor(θ, t_true; kwargs...)
+        (; θ_true) = t_true
+        θ_α = θ - θ_true
+        y_α = one_hot_argmax(θ_α; kwargs...)
+        return y_α
     end
+
+    function spo_base_loss(y, t_true)
+        (; θ_true, y_true) = t_true
+        return dot(θ_true, y_true) - dot(θ_true, y)
+    end
+
+    Random.seed!(67)
+    perf = test_pipeline!(
+        PipelineLossImitationLoss;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=ImitationLoss(spo_predictor; base_loss=spo_base_loss),
+        error_function=hamming_distance,
+        true_encoder,
+    )
+
+    Random.seed!(67)
+    benchmark_perf = test_pipeline!(
+        PipelineLossImitationθy;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=SPOPlusLoss(one_hot_argmax; α=1.0),
+        error_function=hamming_distance,
+        true_encoder,
+        verbose=false,
+    )
+
+    # Both performances should be equivalent
+    @test all(isapprox.(perf.train_losses, benchmark_perf.train_losses, rtol=0.001))
+    @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
 
-for (spo_pipeline, imitation_spo_pipeline) in spo_pipelines
-    (; encoder, maximizer, loss) = spo_pipeline
-    pipeline_loss_imitation_θ(x, θ, y) = loss(maximizer(encoder(x)), θ)
-    spo_storage = test_pipeline!(
-        spo_pipeline,
-        pipeline_loss_imitation_θ;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=100,
-        verbose=verbose,
-        setting_name="argmax - imitation_θ",
+@testitem "ImitationLoss vs SPO+ (α = 2)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    function spo_predictor(θ, t_true; kwargs...)
+        (; θ_true) = t_true
+        θ_α = 2 .* θ - θ_true
+        y_α = one_hot_argmax(θ_α; kwargs...)
+        return y_α
+    end
+
+    function spo_base_loss(y, t_true)
+        (; θ_true, y_true) = t_true
+        return dot(θ_true, y_true) - dot(θ_true, y)
+    end
+
+    Random.seed!(67)
+    perf = test_pipeline!(
+        PipelineLossImitationLoss;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=ImitationLoss(spo_predictor; base_loss=spo_base_loss, α=2.0),
+        error_function=hamming_distance,
+        true_encoder,
     )
 
-    (; encoder, maximizer, loss) = imitation_spo_pipeline
-    function pipeline_loss_imitation_θ_2(x, θ, y)
-        return loss(maximizer(encoder(x)), (; θ_true=θ, y_true=y))
-    end
-    imitation_storage = test_pipeline!(
-        imitation_spo_pipeline,
-        pipeline_loss_imitation_θ_2;
-        true_encoder=true_encoder,
-        true_maximizer=true_maximizer,
-        data_train=data_train,
-        data_test=data_test,
-        error_function=error_function,
-        cost=cost,
-        epochs=100,
-        verbose=verbose,
-        setting_name="argmax - imitation_θ - precomputed y_true",
+    Random.seed!(67)
+    benchmark_perf = test_pipeline!(
+        PipelineLossImitationθy;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity,
+        loss=SPOPlusLoss(one_hot_argmax),
+        error_function=hamming_distance,
+        true_encoder,
+        verbose=false,
     )
 
-    spo_train_losses = spo_storage.train_losses
-    spo_test_losses = spo_storage.test_losses
-    imitation_spo_train_losses = imitation_storage.train_losses
-    imitation_spo_test_losses = imitation_storage.test_losses
-    @testset "Imitation loss - SPO - $(imitation_spo_pipeline.loss)" begin
-        @test all(isapprox.(spo_train_losses, imitation_spo_train_losses, rtol=0.001))
-        @test all(isapprox.(spo_test_losses, imitation_spo_test_losses, rtol=0.001))
-    end
+    # Both performances should be equivalent
+    @test all(isapprox.(perf.train_losses, benchmark_perf.train_losses, rtol=0.001))
+    @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
