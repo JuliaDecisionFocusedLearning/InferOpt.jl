@@ -25,6 +25,7 @@ export init_perf, update_perf!
 export dropfirstdim, make_positive
 export PipelineLossImitation, PipelineLossImitationθ, PipelineLossImitationθy
 export PipelineLossExperience
+export PipelineLossImitationLoss
 export test_pipeline!
 
 end

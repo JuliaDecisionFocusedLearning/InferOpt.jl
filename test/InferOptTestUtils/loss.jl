@@ -24,6 +24,12 @@ struct PipelineLossImitationθy{E,M,L} <: PipelineLoss
     loss::L
 end
 
+struct PipelineLossImitationLoss{E,M,L} <: PipelineLoss
+    encoder::E
+    maximizer::M
+    loss::L
+end
+
 function (pl::PipelineLossExperience)(x, θ, y)
     (; encoder, loss, maximizer) = pl
     return loss(maximizer(encoder(x)); instance=x)
@@ -42,4 +48,9 @@ end
 function (pl::PipelineLossImitationθy)(x, θ, y)
     (; encoder, loss, maximizer) = pl
     return loss(maximizer(encoder(x)), θ, y)
+end
+
+function (pl::PipelineLossImitationLoss)(x, θ, y)
+    (; encoder, loss, maximizer) = pl
+    return loss(maximizer(encoder(x)), (; y_true=y, θ_true=θ))
 end
