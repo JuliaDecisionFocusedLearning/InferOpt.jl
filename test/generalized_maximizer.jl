@@ -1,3 +1,5 @@
+# TODO: update to new setup
+
 using Random
 using LinearAlgebra
 
