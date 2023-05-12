@@ -1,15 +1,11 @@
 module InferOpt
 
-using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
-using ChainRulesCore: rrule, rrule_via_ad, unthunk
-using FrankWolfe: FrankWolfe, ActiveSet, Agnostic, LinearMinimizationOracle
-using FrankWolfe: away_frank_wolfe, compute_extreme_point
-using Krylov: gmres
+using ChainRulesCore: ChainRulesCore, NoTangent, Tangent, ZeroTangent, rrule, unthunk
+using DifferentiableFrankWolfe: DiffFW, simplex_projection
+using FrankWolfe: FrankWolfe, LinearMinimizationOracle, compute_extreme_point
 using LinearAlgebra: dot
-using LinearOperators: LinearOperator
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
-using SimpleTraits: SimpleTraits
-using SimpleTraits: @traitdef, @traitfn, @traitimpl
+using SimpleTraits: SimpleTraits, @traitdef, @traitfn, @traitimpl
 using Statistics: mean
 using StatsBase: StatsBase, sample
 using ThreadsX: ThreadsX
@@ -20,9 +16,6 @@ include("utils/pushforward.jl")
 include("plus_identity/plus_identity.jl")
 
 include("interpolation/interpolation.jl")
-
-include("frank_wolfe/frank_wolfe_utils.jl")
-include("frank_wolfe/differentiable_frank_wolfe.jl")
 
 include("regularized/isregularized.jl")
 include("regularized/regularized_utils.jl")
@@ -54,15 +47,12 @@ export PlusIdentity
 
 export Interpolation
 
-export DifferentiableFrankWolfe
-export LMOWrapper
-
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
 export IsRegularized
 export soft_argmax, sparse_argmax
-export RegularizedGeneric
+export RegularizedGeneric, DEFAULT_FRANK_WOLFE_KWARGS
 
 export PerturbedAdditive
 export PerturbedMultiplicative

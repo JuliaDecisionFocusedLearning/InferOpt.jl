@@ -67,3 +67,48 @@ end
 
 zero_regularization(y) = zero(eltype(y))
 zero_gradient(y) = zero(y)
+
+## Wrapper for linear maximizers to use them within Frank-Wolfe
+
+"""
+    LinearMaximizationOracle{F,K}
+
+Wraps a linear maximizer as a `FrankWolfe.LinearMinimizationOracle` with a sign switch.
+
+# Fields
+- `maximizer::F`: black box linear maximizer
+- `maximizer_kwargs::K`: keyword arguments passed to the maximizer whenever it is called
+"""
+struct LinearMaximizationOracle{F,K} <: LinearMinimizationOracle
+    maximizer::F
+    maximizer_kwargs::K
+end
+
+LinearMaximizationOracle(maximizer) = LinearMaximizationOracle(maximizer, NamedTuple())
+
+"""
+    FrankWolfe.compute_extreme_point(lmo_wrapper::LMOWrapper, direction)
+"""
+function FrankWolfe.compute_extreme_point(
+    lmo::LinearMaximizationOracle, direction; kwargs...
+)
+    (; maximizer, maximizer_kwargs) = lmo
+    opposite_direction = -direction
+    v = maximizer(opposite_direction; maximizer_kwargs...)
+    return v
+end
+
+"""
+    DEFAULT_FRANK_WOLFE_KWARGS
+
+Default configuration for the Frank-Wolfe wrapper.
+"""
+const DEFAULT_FRANK_WOLFE_KWARGS = (
+    away_steps=true,
+    epsilon=1e-4,
+    lazy=true,
+    line_search=FrankWolfe.Agnostic(),
+    max_iteration=10,
+    timeout=1.0,
+    verbose=false,
+)

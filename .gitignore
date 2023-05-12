@@ -3,7 +3,7 @@
 *.jl.mem
 /Manifest.toml
 /docs/build/
-/test/profiling.jl
+/test/scratchpad.jl
 
 *.tar.gz
 *.zip
