@@ -35,9 +35,9 @@ end
 ## Forward pass
 
 function compute_probability_distribution(
-    dfw::DiffFW, θ::AbstractArray{<:Real}; frank_wolfe_kwargs=NamedTuple(), kwargs...
+    dfw::DiffFW, θ::AbstractArray{<:Real}; frank_wolfe_kwargs=NamedTuple()
 )
-    weights, atoms = dfw.implicit(θ; frank_wolfe_kwargs)
+    weights, atoms = dfw.implicit(θ; frank_wolfe_kwargs=frank_wolfe_kwargs)
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
 end
@@ -65,23 +65,28 @@ function compute_probability_distribution(
     f_grad1(y, θ) = Ω_grad(y) - θ
     lmo = LinearMaximizationOracle(maximizer, maximizer_kwargs)
     dfw = DiffFW(f, f_grad1, lmo)
-    probadist = compute_probability_distribution(dfw, θ; frank_wolfe_kwargs)
+    probadist = compute_probability_distribution(
+        dfw, θ; frank_wolfe_kwargs=frank_wolfe_kwargs
+    )
     return probadist
 end
 
 """
-    (regularized::RegularizedGeneric)(θ; maximizer_kwargs=(;), fw_kwargs=(;))
+    (regularized::RegularizedGeneric)(θ; maximizer_kwargs=(;), frank_wolfe_kwargs=(;))
 
 Apply `compute_probability_distribution(regularized, θ)` and return the expectation.
 """
 function (regularized::RegularizedGeneric)(
     θ::AbstractArray{<:Real};
     maximizer_kwargs=NamedTuple(),
-    fw_kwargs=NamedTuple(),
+    frank_wolfe_kwargs=NamedTuple(),
     kwargs...,
 )
     probadist = compute_probability_distribution(
-        regularized, θ; maximizer_kwargs=maximizer_kwargs, fw_kwargs=fw_kwargs
+        regularized,
+        θ;
+        maximizer_kwargs=maximizer_kwargs,
+        frank_wolfe_kwargs=frank_wolfe_kwargs,
     )
     return compute_expectation(probadist)
 end

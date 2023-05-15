@@ -90,7 +90,7 @@ end
 
 @testitem "Paths - imit - MSE RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -100,6 +100,9 @@ end
         maximizer=RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity),
         loss=mse,
         error_function=mse,
+        maximizer_kwargs=(
+            frank_wolfe_kwargs=(line_search=FrankWolfe.Agnostic(), max_iteration=10),
+        ),
     )
 end
 
@@ -140,7 +143,7 @@ end
 
 @testitem "Paths - imit - FYL RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -153,6 +156,9 @@ end
         ),
         error_function=mse,
         epochs=100,
+        loss_kwargs=(
+            frank_wolfe_kwargs=(line_search=FrankWolfe.Agnostic(), max_iteration=10),
+        ),
     )
 end
 
@@ -202,11 +208,11 @@ end
 
 @testitem "Paths - exp - Pushforward RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    using FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
-    cost(y; instance) = dot(y, -true_encoder(instance))
+    cost(y; instance, kwargs...) = dot(y, -true_encoder(instance))
     test_pipeline!(
         PipelineLossExperience;
         instance_dim=(5, 5),
@@ -219,5 +225,8 @@ end
         true_encoder=true_encoder,
         cost=cost,
         epochs=200,
+        loss_kwargs=(
+            frank_wolfe_kwargs=(line_search=FrankWolfe.Agnostic(), max_iteration=10),
+        ),
     )
 end

@@ -1,56 +1,68 @@
 abstract type PipelineLoss end
 
-struct PipelineLossExperience{E,M,L} <: PipelineLoss
+struct PipelineLossExperience{E,M,L,MK,LK} <: PipelineLoss
     encoder::E
     maximizer::M
     loss::L
+    maximizer_kwargs::MK
+    loss_kwargs::LK
 end
 
-struct PipelineLossImitation{E,M,L} <: PipelineLoss
+struct PipelineLossImitation{E,M,L,MK,LK} <: PipelineLoss
     encoder::E
     maximizer::M
     loss::L
+    maximizer_kwargs::MK
+    loss_kwargs::LK
 end
 
-struct PipelineLossImitationθ{E,M,L} <: PipelineLoss
+struct PipelineLossImitationθ{E,M,L,MK,LK} <: PipelineLoss
     encoder::E
     maximizer::M
     loss::L
+    maximizer_kwargs::MK
+    loss_kwargs::LK
 end
 
-struct PipelineLossImitationθy{E,M,L} <: PipelineLoss
+struct PipelineLossImitationθy{E,M,L,MK,LK} <: PipelineLoss
     encoder::E
     maximizer::M
     loss::L
+    maximizer_kwargs::MK
+    loss_kwargs::LK
 end
 
-struct PipelineLossImitationLoss{E,M,L} <: PipelineLoss
+struct PipelineLossImitationLoss{E,M,L,MK,LK} <: PipelineLoss
     encoder::E
     maximizer::M
     loss::L
+    maximizer_kwargs::MK
+    loss_kwargs::LK
 end
 
 function (pl::PipelineLossExperience)(x, θ, y)
-    (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)); instance=x)
+    (; encoder, loss, maximizer, maximizer_kwargs, loss_kwargs) = pl
+    return loss(maximizer(encoder(x); maximizer_kwargs...); instance=x, loss_kwargs...)
 end
 
 function (pl::PipelineLossImitation)(x, θ, y)
-    (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), y)
+    (; encoder, loss, maximizer, maximizer_kwargs, loss_kwargs) = pl
+    return loss(maximizer(encoder(x); maximizer_kwargs...), y; loss_kwargs...)
 end
 
 function (pl::PipelineLossImitationθ)(x, θ, y)
-    (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), θ)
+    (; encoder, loss, maximizer, maximizer_kwargs, loss_kwargs) = pl
+    return loss(maximizer(encoder(x); maximizer_kwargs...), θ; loss_kwargs...)
 end
 
 function (pl::PipelineLossImitationθy)(x, θ, y)
-    (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), θ, y)
+    (; encoder, loss, maximizer, maximizer_kwargs, loss_kwargs) = pl
+    return loss(maximizer(encoder(x); maximizer_kwargs...), θ, y; loss_kwargs...)
 end
 
 function (pl::PipelineLossImitationLoss)(x, θ, y)
-    (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), (; y_true=y, θ_true=θ))
+    (; encoder, loss, maximizer, maximizer_kwargs, loss_kwargs) = pl
+    return loss(
+        maximizer(encoder(x); maximizer_kwargs...), (; y_true=y, θ_true=θ); loss_kwargs...
+    )
 end

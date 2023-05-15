@@ -10,6 +10,8 @@ function test_pipeline!(
     error_function,
     true_encoder=encoder_factory(),
     cost=(y; instance) -> -dot(y, true_encoder(instance)),
+    maximizer_kwargs=NamedTuple(),
+    loss_kwargs=NamedTuple(),
     epochs=EPOCHS,
     decrease=DECREASE,
     verbose=VERBOSE,
@@ -17,7 +19,7 @@ function test_pipeline!(
     data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
 
     encoder = encoder_factory()
-    pipeline_loss = PL(encoder, maximizer, loss)
+    pipeline_loss = PL(encoder, maximizer, loss, maximizer_kwargs, loss_kwargs)
     opt = Flux.Adam()
     perf_storage = init_perf()
 
