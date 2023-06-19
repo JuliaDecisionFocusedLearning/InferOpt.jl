@@ -37,6 +37,9 @@ function test_pipeline!(
     end
 
     test_perf(perf_storage; decrease=decrease)
-    verbose && print_plot_perf(perf_storage)
+    if verbose
+        @info "Testing" maximizer loss
+        print_plot_perf(perf_storage)
+    end
     return perf_storage
 end
