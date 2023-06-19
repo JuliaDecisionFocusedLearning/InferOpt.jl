@@ -1,4 +1,4 @@
-name: CI
+name: CI-nightly
 on:
   push:
     branches:
@@ -17,10 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.7', '1']
+        version: ['nightly']
         os: [ubuntu-latest]
         arch: [x64]
-        allow_failure: [false]
+        allow_failure: [true]
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
