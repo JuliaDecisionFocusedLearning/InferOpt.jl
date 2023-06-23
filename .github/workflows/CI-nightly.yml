@@ -1,4 +1,4 @@
-name: CI
+name: CI-nightly
 on:
   push:
     branches:
@@ -17,10 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.7', '1']
+        version: ['nightly']
         os: [ubuntu-latest]
         arch: [x64]
-        allow_failure: [false]
+        allow_failure: [true]
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
@@ -34,22 +34,3 @@ jobs:
       - uses: codecov/codecov-action@v3
         with:
           files: lcov.info
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: julia-actions/setup-julia@v1
-        with:
-          version: '1'
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-docdeploy@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-      - run: |
-          julia --project=docs -e '
-            using Documenter: DocMeta, doctest
-            using InferOpt
-            DocMeta.setdocmeta!(InferOpt, :DocTestSetup, :(using InferOpt); recursive=true)
-            doctest(InferOpt)'
