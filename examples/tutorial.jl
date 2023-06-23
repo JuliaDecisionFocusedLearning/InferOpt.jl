@@ -15,18 +15,20 @@ The question is: how should we combine these features?
 We will use `InferOpt` to learn the appropriate weights, so that we may propose relevant paths to the user in the future.
 =#
 
-using Flux
-using Graphs
-using GridGraphs
+using Graphs: nv
+using GridGraphs: GridGraphs, GridGraph, grid_topological_sort, path_to_matrix
 using InferOpt
-using LinearAlgebra
-using ProgressMeter
-using Random
-using Statistics
-using Test
-using UnicodePlots
+using LinearAlgebra: dot, norm
+using Lux: Lux, Chain, Dense, setup
+using Optimisers: Optimisers, Adam
+using Random: Random
+using Statistics: mean
+using Test: @test
+using UnicodePlots: lineplot, spy
+using Zygote: withgradient
 
-Random.seed!(63);
+rng = Random.default_rng()
+Random.seed!(rng, 63);
 
 # ## Grid graphs
 
@@ -58,7 +60,8 @@ Let us assume that the user combines them using a shallow neural network.
 
 nb_features = 5
 
-true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
+encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
+true_ps, true_st = Lux.setup(rng, encoder)
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
@@ -77,8 +80,8 @@ We now have everything we need to build our dataset.
 
 nb_instances = 30
 
-X_train = [randn(Float32, nb_features, h, w) for n in 1:nb_instances];
-θ_train = [true_encoder(x) for x in X_train];
+X_train = [randn(rng, Float32, nb_features, h, w) for n in 1:nb_instances];
+θ_train = [encoder(x, true_ps, true_st)[1] for x in X_train];
 Y_train = [linear_maximizer(θ) for θ in θ_train];
 
 # ## Learning
@@ -87,7 +90,8 @@ Y_train = [linear_maximizer(θ) for θ in θ_train];
 We create a trainable model with the same structure as the true encoder but another set of randomly-initialized weights.
 =#
 
-initial_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
+ps, st = Lux.setup(rng, encoder);
+initial_ps = deepcopy(ps)
 
 #=
 Here is the crucial part where `InferOpt` intervenes: the choice of a clever loss function that enables us to
@@ -110,18 +114,16 @@ Instead of choosing just one path, it spreads over several possible paths, allow
 Thanks to this smoothing, we can now train our model with a standard gradient optimizer.
 =#
 
-encoder = deepcopy(initial_encoder)
-opt = Flux.Adam();
+opt = Adam(Float32(0.01))
+opt_state = Optimisers.setup(opt, ps)
+
 losses = Float64[]
-for epoch in 1:200
-    l = 0.0
-    for (x, y) in zip(X_train, Y_train)
-        grads = gradient(Flux.params(encoder)) do
-            l += loss(encoder(x), y)
-        end
-        Flux.update!(opt, Flux.params(encoder), grads)
+for epoch in 1:100
+    l, gs = withgradient(ps) do ps
+        sum(loss(encoder(x, ps, st)[1], y) for (x, y) in zip(X_train, Y_train))
     end
     push!(losses, l)
+    opt_state, ps = Optimisers.update(opt_state, ps, gs[1])
 end;
 
 # ## Results
@@ -136,9 +138,9 @@ lineplot(losses; xlabel="Epoch", ylabel="Loss")
 To assess performance, we can compare the learned weights with their true (hidden) values
 =#
 
-learned_weight = encoder[1].weight / norm(encoder[1].weight)
-true_weight = true_encoder[1].weight / norm(true_encoder[1].weight)
-hcat(learned_weight, true_weight)
+learned_weight = ps.layer_1.weight / norm(ps.layer_1.weight)
+true_weight = true_ps.layer_1.weight / norm(true_ps.layer_1.weight)
+vcat(learned_weight, true_weight)
 
 #=
 We are quite close to recovering the exact user weights.
@@ -150,7 +152,7 @@ normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x))
 
 #-
 
-Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
+Y_train_pred = [linear_maximizer(encoder(x, ps, st)[1]) for x in X_train];
 
 train_error = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
@@ -158,7 +160,7 @@ train_error = mean(
 
 # Not too bad, at least compared with our random initial encoder.
 
-Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
+Y_train_pred_initial = [linear_maximizer(encoder(x, initial_ps, st)[1]) for x in X_train];
 
 train_error_initial = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)

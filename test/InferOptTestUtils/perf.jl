@@ -13,8 +13,8 @@ function init_perf()
     return perf_storage
 end
 
-function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
+function generate_predictions(; encoder, encoder_ps, encoder_st, maximizer, X)
+    Y_pred = [maximizer(encoder(x, encoder_ps, encoder_st)[1]) for x in X]
     return Y_pred
 end
 

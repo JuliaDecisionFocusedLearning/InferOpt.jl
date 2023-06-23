@@ -1,19 +1,11 @@
-function encoder_factory(nb_features=NB_FEATURES)
-    return Chain(Dense(nb_features, 1), dropfirstdim, make_positive)
-end
-
-function generate_dataset(
-    true_encoder,
-    true_maximizer;
-    instance_dim,
-    nb_features::Integer=NB_FEATURES,
-    nb_instances::Integer=NB_INSTANCES,
-    noise_std::Real=NOISE_STD,
+function generate_dataset(;
+    encoder, encoder_ps, encoder_st, maximizer, instance_dim, nb_instances, noise_std
 )
+    nb_features = encoder.layers[1].in_dims
     X = [randn(Float32, nb_features, instance_dim...) for n in 1:nb_instances]
-    thetas = [true_encoder(x) for x in X]
-    noiseless_Y = [true_maximizer(θ) for θ in thetas]
-    noisy_Y = [true_maximizer(θ + noise_std * randn(instance_dim...)) for θ in thetas]
+    thetas = [encoder(x, encoder_ps, encoder_st)[1] for x in X]
+    noiseless_Y = [maximizer(θ) for θ in thetas]
+    noisy_Y = [maximizer(θ .+ noise_std .* randn(instance_dim...)) for θ in thetas]
 
     X_train, X_test = train_test_split(X)
     thetas_train, thetas_test = train_test_split(thetas)
