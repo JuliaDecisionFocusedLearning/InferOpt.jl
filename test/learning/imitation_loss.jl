@@ -1,12 +1,15 @@
-@testitem "ImitationLoss vs SSVM" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random, Test
-    Random.seed!(63)
+include("../InferOptTestUtils/InferOptTestUtils.jl")
+using InferOpt
+using .InferOptTestUtils
+using Random
+using Test
 
+Random.seed!(63)
+
+@testset "ImitationLoss vs SSVM" begin
     true_encoder = encoder_factory()
-
     ssvm_base_loss = ZeroOneBaseLoss()
-
+    
     Random.seed!(67)
     perf = test_pipeline!(
         PipelineLossImitationLoss;
@@ -39,11 +42,7 @@
     @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
 
-@testitem "ImitationLoss vs FYL sparsemax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random, Test
-    Random.seed!(63)
-
+@testset "ImitationLoss vs FYL sparsemax" begin
     true_encoder = encoder_factory()
 
     Random.seed!(67)
@@ -74,11 +73,7 @@ end
     @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
 
-@testitem "ImitationLoss vs FYL softmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random, Test
-    Random.seed!(63)
-
+@testset "ImitationLoss vs FYL softmax" begin
     true_encoder = encoder_factory()
 
     Random.seed!(67)
@@ -109,11 +104,7 @@ end
     @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
 
-@testitem "ImitationLoss vs SPO+ (α = 1)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
-    Random.seed!(63)
-
+@testset "ImitationLoss vs SPO+ (α = 1)" begin
     true_encoder = encoder_factory()
 
     function spo_predictor(θ, t_true; kwargs...)
@@ -156,11 +147,7 @@ end
     @test all(isapprox.(perf.test_losses, benchmark_perf.test_losses, rtol=0.001))
 end
 
-@testitem "ImitationLoss vs SPO+ (α = 2)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
-    Random.seed!(63)
-
+@testset "ImitationLoss vs SPO+ (α = 2)" begin
     true_encoder = encoder_factory()
 
     function spo_predictor(θ, t_true; kwargs...)

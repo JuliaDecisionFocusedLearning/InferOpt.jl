@@ -1,5 +1,5 @@
 function mape(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
-    return 100 * mean(abs((x[i] - y[i]) / x[i]) for i in eachindex(x))
+    return 100 * mean(abs((x[i] - y[i]) / x[i]) for i in eachindex(x, y))
 end
 
 function normalized_mape(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
@@ -11,9 +11,9 @@ function normalized_mape(x::AbstractArray{<:Real}, y::AbstractArray{<:Real})
 end
 
 function hamming_distance(x::AbstractArray{<:Real}, y::AbstractArray{<:Real})
-    return sum(x[i] != y[i] for i in eachindex(x))
+    return sum(x[i] != y[i] for i in eachindex(x, y))
 end
 
 function normalized_hamming_distance(x::AbstractArray{<:Real}, y::AbstractArray{<:Real})
-    return mean(x[i] != y[i] for i in eachindex(x))
+    return mean(x[i] != y[i] for i in eachindex(x, y))
 end

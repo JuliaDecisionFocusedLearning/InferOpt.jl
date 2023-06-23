@@ -1,11 +1,11 @@
 function test_pipeline!(
     ::Type{PL};
     instance_dim,
+    encoder,
     true_maximizer,
     maximizer,
     loss,
     error_function,
-    true_encoder=encoder_factory(),
     cost=(y; instance) -> -dot(y, true_encoder(instance)),
     maximizer_kwargs=NamedTuple(),
     loss_kwargs=NamedTuple(),
@@ -16,11 +16,10 @@ function test_pipeline!(
     data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
     (X_train, thetas_train, Y_train) = data_train
 
-    encoder = encoder_factory()
     pipeline_loss = PL(encoder, maximizer, loss)
     opt_state = Flux.setup(Flux.Adam(), encoder)
     perf_storage = init_perf()
-    
+
     for _ in 1:epochs
         update_perf!(
             perf_storage;

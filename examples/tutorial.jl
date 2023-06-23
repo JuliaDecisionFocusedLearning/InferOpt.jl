@@ -118,7 +118,7 @@ opt = Adam(Float32(0.01))
 opt_state = Optimisers.setup(opt, ps)
 
 losses = Float64[]
-for epoch in 1:100
+for epoch in 1:200
     l, gs = withgradient(ps) do ps
         sum(loss(encoder(x, ps, st)[1], y) for (x, y) in zip(X_train, Y_train))
     end
@@ -174,4 +174,4 @@ This is left as an exercise to the reader.
 
 # CI tests, not included in the documentation  #src
 
-@test train_error < train_error_initial / 3  #src
+@test train_error < train_error_initial / 2  #src

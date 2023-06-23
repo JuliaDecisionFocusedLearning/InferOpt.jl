@@ -1,8 +1,13 @@
-@testitem "Ranking - imit - SPO+ (θ)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
+include("../InferOptTestUtils/InferOptTestUtils.jl")
+using FrankWolfe
+using InferOpt
+using .InferOptTestUtils
+using Random
+using Test
 
+Random.seed!(63)
+
+@testset "Ranking - imit - SPO+ (θ)" begin
     test_pipeline!(
         PipelineLossImitationθ;
         instance_dim=5,
@@ -13,11 +18,7 @@
     )
 end
 
-@testitem "Ranking - imit - SPO+ (θ & y)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - SPO+ (θ & y)" begin
     test_pipeline!(
         PipelineLossImitationθy;
         instance_dim=5,
@@ -28,11 +29,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PlusIdentity" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - MSE PlusIdentity" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -43,11 +40,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE Interpolation" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - MSE Interpolation" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -58,11 +51,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - MSE PerturbedAdditive" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -73,11 +62,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - MSE PerturbedMultiplicative" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -88,11 +73,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - MSE RegularizedGeneric" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -106,11 +87,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - FYL PerturbedAdditive" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -121,11 +98,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - FYL PerturbedMultiplicative" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -137,11 +110,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Ranking - imit - FYL RegularizedGeneric" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -156,11 +125,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Ranking - exp - Pushforward PerturbedAdditive" begin
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
@@ -176,11 +141,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Ranking - exp - Pushforward PerturbedMultiplicative" begin
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
@@ -196,11 +157,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Ranking - exp - Pushforward RegularizedGeneric" begin
     true_encoder = encoder_factory()
     cost(y; instance, kwargs...) = dot(y, -true_encoder(instance))
     test_pipeline!(

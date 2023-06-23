@@ -1,8 +1,13 @@
-@testitem "Argmax - imit - SPO+ (θ)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
+include("../InferOptTestUtils/InferOptTestUtils.jl")
+using FrankWolfe
+using InferOpt
+using .InferOptTestUtils
+using Random
+using Test
 
+Random.seed!(63)
+
+@testset "Argmax - imit - SPO+ (θ)" begin
     test_pipeline!(
         PipelineLossImitationθ;
         instance_dim=5,
@@ -13,11 +18,7 @@
     )
 end
 
-@testitem "Argmax - imit - SPO+ (θ & y)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - SPO+ (θ & y)" begin
     test_pipeline!(
         PipelineLossImitationθy;
         instance_dim=5,
@@ -28,11 +29,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - SSVM" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - SSVM" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -43,11 +40,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE sparse argmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - MSE sparse argmax" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -58,11 +51,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE soft argmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - MSE soft argmax" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -73,11 +62,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - MSE PerturbedAdditive" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -88,11 +73,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - MSE PerturbedMultiplicative" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -103,11 +84,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - MSE RegularizedGeneric" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -121,11 +98,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL sparse argmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - FYL sparse argmax" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -136,11 +109,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL soft argmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - FYL soft argmax" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -151,11 +120,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - FYL PerturbedAdditive" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -166,11 +131,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - FYL PerturbedMultiplicative" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -181,11 +142,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, Random
-    Random.seed!(63)
-
+@testset "Argmax - imit - FYL RegularizedGeneric" begin
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
@@ -201,11 +158,7 @@ end
     )
 end
 
-@testitem "Argmax - exp - Pushforward PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Argmax - exp - Pushforward PerturbedAdditive" begin
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
@@ -220,11 +173,7 @@ end
     )
 end
 
-@testitem "Argmax - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Argmax - exp - Pushforward PerturbedMultiplicative" begin
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
@@ -241,11 +190,7 @@ end
     )
 end
 
-@testitem "Argmax - exp - Pushforward RegularizedGeneric" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
-    using FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
-    Random.seed!(63)
-
+@testset "Argmax - exp - Pushforward RegularizedGeneric" begin
     true_encoder = encoder_factory()
     cost(y; instance, kwargs...) = dot(y, -true_encoder(instance))
     test_pipeline!(

@@ -13,7 +13,7 @@ function init_perf()
     return perf_storage
 end
 
-function generate_predictions(; encoder, encoder_ps, encoder_st, maximizer, X)
+function (; encoder, encoder_ps, encoder_st, maximizer, X)
     Y_pred = [maximizer(encoder(x, encoder_ps, encoder_st)[1]) for x in X]
     return Y_pred
 end
@@ -22,8 +22,11 @@ function update_perf!(
     perf_storage::NamedTuple;
     data_train,
     data_test,
-    true_encoder,
     encoder,
+    encoder_ps,
+    encoder_st,
+    true_encoder_ps,
+    true_encoder_st,
     true_maximizer,
     pipeline_loss,
     error_function,

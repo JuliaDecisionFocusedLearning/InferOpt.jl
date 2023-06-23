@@ -21,7 +21,6 @@ const EPOCHS = 100
 const DECREASE = 0.75
 const ENCODER = Chain(Dense(NB_FEATURES, 1), dropfirstdim, make_positive)
 
-include("const.jl")
 include("maximizers.jl")
 include("dataset.jl")
 include("error.jl")
