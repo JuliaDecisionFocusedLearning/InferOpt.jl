@@ -90,14 +90,19 @@ end
 
 @testitem "Ranking - imit - MSE RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=RegularizedGeneric(ranking, half_square_norm, identity),
+        maximizer=RegularizedGeneric(
+            ranking,
+            half_square_norm,
+            identity,
+            (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+        ),
         loss=mse,
         error_function=hamming_distance,
     )
@@ -136,7 +141,7 @@ end
 
 @testitem "Ranking - imit - FYL RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -144,7 +149,14 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=FenchelYoungLoss(RegularizedGeneric(ranking, half_square_norm, identity)),
+        loss=FenchelYoungLoss(
+            RegularizedGeneric(
+                ranking,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
+        ),
         error_function=hamming_distance,
         epochs=100,
     )
@@ -192,7 +204,8 @@ end
 
 @testitem "Ranking - exp - Pushforward RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
@@ -202,7 +215,15 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=Pushforward(RegularizedGeneric(ranking, half_square_norm, identity), cost),
+        loss=Pushforward(
+            RegularizedGeneric(
+                ranking,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
+            cost,
+        ),
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,

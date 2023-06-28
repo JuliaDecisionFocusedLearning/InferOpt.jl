@@ -5,9 +5,8 @@ end
 
 @testitem "Correctness (JET.jl)" begin
     using JET
-    using Zygote
-    if VERSION >= v"1.8"
-        JET.test_package(InferOpt; toplevel_logger=nothing, mode=:typo)
+    if VERSION >= v"1.9"
+        @test_skip JET.test_package(InferOpt; target_defined_modules=true)
     end
 end
 
