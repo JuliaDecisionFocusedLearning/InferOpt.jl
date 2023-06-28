@@ -105,14 +105,19 @@ end
 
 @testitem "Argmax - imit - MSE RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=RegularizedGeneric(one_hot_argmax, half_square_norm, identity),
+        maximizer=RegularizedGeneric(
+            one_hot_argmax,
+            half_square_norm,
+            identity,
+            (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+        ),
         loss=mse,
         error_function=hamming_distance,
     )
@@ -180,7 +185,7 @@ end
 
 @testitem "Argmax - imit - FYL RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -189,7 +194,12 @@ end
         true_maximizer=one_hot_argmax,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(one_hot_argmax, half_square_norm, identity)
+            RegularizedGeneric(
+                one_hot_argmax,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
         ),
         error_function=hamming_distance,
     )
@@ -237,7 +247,8 @@ end
 
 @testitem "Argmax - exp - Pushforward RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
@@ -248,7 +259,13 @@ end
         true_maximizer=one_hot_argmax,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(one_hot_argmax, half_square_norm, identity), cost
+            RegularizedGeneric(
+                one_hot_argmax,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
+            cost,
         ),
         error_function=hamming_distance,
         true_encoder=true_encoder,
