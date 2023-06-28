@@ -21,13 +21,11 @@ end
 
 Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, float(λ))
 
-function (interpolation::Interpolation)(θ::AbstractArray{<:Real}; kwargs...)
+function (interpolation::Interpolation)(θ::AbstractArray; kwargs...)
     return interpolation.maximizer(θ; kwargs...)
 end
 
-function ChainRulesCore.rrule(
-    interpolation::Interpolation, θ::AbstractArray{<:Real}; kwargs...
-)
+function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractArray; kwargs...)
     (; maximizer, λ) = interpolation
     y = maximizer(θ; kwargs...)
     function interpolation_pullback(dy)

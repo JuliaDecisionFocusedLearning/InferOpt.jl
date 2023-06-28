@@ -8,7 +8,7 @@ using LinearAlgebra: dot
 ## Forward pass
 
 function InferOpt.compute_probability_distribution(
-    dfw::DiffFW, θ::AbstractArray{<:Real}; frank_wolfe_kwargs=NamedTuple()
+    dfw::DiffFW, θ::AbstractArray; frank_wolfe_kwargs=NamedTuple()
 )
     weights, atoms = dfw.implicit(θ; frank_wolfe_kwargs=frank_wolfe_kwargs)
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
@@ -23,7 +23,7 @@ Construct a `DifferentiableFrankWolfe.DiffFW` struct and call `compute_probabili
 Keyword arguments are passed to the underlying linear maximizer.
 """
 function InferOpt.compute_probability_distribution(
-    regularized::RegularizedGeneric, θ::AbstractArray{<:Real}; kwargs...
+    regularized::RegularizedGeneric, θ::AbstractArray; kwargs...
 )
     (; maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized
     f(y, θ) = Ω(y) - dot(θ, y)
@@ -41,7 +41,7 @@ Apply `compute_probability_distribution(regularized, θ)` and return the expecta
 
 Keyword arguments are passed to the underlying linear maximizer.
 """
-function (regularized::RegularizedGeneric)(θ::AbstractArray{<:Real}; kwargs...)
+function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
     probadist = compute_probability_distribution(regularized, θ; kwargs...)
     return compute_expectation(probadist)
 end

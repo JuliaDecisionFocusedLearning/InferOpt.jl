@@ -46,7 +46,7 @@ Unlike [`compute_probability_distribution(pushforward, θ)`](@ref), this functio
 
 See also: [`compute_expectation`](@ref).
 """
-function (pushforward::Pushforward)(θ::AbstractArray{<:Real}; kwargs...)
+function (pushforward::Pushforward)(θ::AbstractArray; kwargs...)
     (; layer, post_processing) = pushforward
     probadist = compute_probability_distribution(layer, θ; kwargs...)
     return compute_expectation(probadist, post_processing; kwargs...)

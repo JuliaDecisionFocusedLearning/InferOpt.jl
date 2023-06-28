@@ -18,11 +18,11 @@ function Base.show(io::IO, plusid::PlusIdentity)
     return print(io, "PlusIdentity($(plusid.maximizer)")
 end
 
-function (plusid::PlusIdentity)(θ::AbstractArray{<:Real}; kwargs...)
+function (plusid::PlusIdentity)(θ::AbstractArray; kwargs...)
     return plusid.maximizer(θ; kwargs...)
 end
 
-function ChainRulesCore.rrule(plusid::PlusIdentity, θ::AbstractArray{<:Real}; kwargs...)
+function ChainRulesCore.rrule(plusid::PlusIdentity, θ::AbstractArray; kwargs...)
     y = plusid.maximizer(θ; kwargs...)
     plusid_pullback(dy) = NoTangent(), dy
     return y, plusid_pullback
