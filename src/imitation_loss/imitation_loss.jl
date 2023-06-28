@@ -53,7 +53,7 @@ Retrieve `y_true` from `t_true`. `t_true` must contain an `y_true` field.
 """
 get_y_true(t_true::NamedTuple) = t_true.y_true
 
-function prediction_and_loss(l::ImitationLoss, θ::AbstractArray{<:Real}, t_true; kwargs...)
+function prediction_and_loss(l::ImitationLoss, θ::AbstractArray, t_true; kwargs...)
     (; base_loss, Ω, maximizer, α) = l
     y_true = get_y_true(t_true)
     ŷ = maximizer(θ, t_true; kwargs...)
@@ -63,14 +63,14 @@ end
 
 ## Forward pass
 
-function (l::ImitationLoss)(θ::AbstractArray{<:Real}, t_true; kwargs...)
+function (l::ImitationLoss)(θ::AbstractArray, t_true; kwargs...)
     _, l = prediction_and_loss(l, θ, t_true; kwargs...)
     return l
 end
 
 ## Backward pass
 
-function ChainRulesCore.rrule(l::ImitationLoss, θ::AbstractArray{<:Real}, t_true; kwargs...)
+function ChainRulesCore.rrule(l::ImitationLoss, θ::AbstractArray, t_true; kwargs...)
     (; α) = l
     y_true = get_y_true(t_true)
     ŷ, l = prediction_and_loss(l, θ, t_true; kwargs...)

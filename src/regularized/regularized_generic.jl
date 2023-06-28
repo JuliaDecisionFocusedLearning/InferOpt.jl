@@ -46,7 +46,7 @@ end
 
 @traitimpl IsRegularized{RegularizedGeneric}
 
-function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray{<:Real})
+function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray)
     return regularized.Ω(y)
 end
 
@@ -55,7 +55,7 @@ end
 
 Apply `compute_probability_distribution(regularized, θ, kwargs...)` and return the expectation.
 """
-function (regularized::RegularizedGeneric)(θ::AbstractArray{<:Real}; kwargs...)
+function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
     probadist = compute_probability_distribution(regularized, θ; kwargs...)
     return compute_expectation(probadist)
 end

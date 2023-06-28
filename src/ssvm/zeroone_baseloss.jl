@@ -7,12 +7,12 @@ struct ZeroOneBaseLoss end
 
 @traitimpl IsBaseLoss{ZeroOneBaseLoss}
 
-function (::ZeroOneBaseLoss)(y::AbstractArray{<:Real}, y_true::AbstractArray{<:Real})
+function (::ZeroOneBaseLoss)(y::AbstractArray, y_true::AbstractArray)
     return y == y_true ? zero(eltype(y)) : one(eltype(y))
 end
 
 function compute_maximizer(
-    ::ZeroOneBaseLoss, θ::AbstractVector{<:Real}, α::Real, y_true::AbstractVector{R}
+    ::ZeroOneBaseLoss, θ::AbstractVector, α::Real, y_true::AbstractVector{R}
 ) where {R<:Real}
     i_true = findfirst(==(one(R)), y_true)
     i_θ = argmax(θ)
