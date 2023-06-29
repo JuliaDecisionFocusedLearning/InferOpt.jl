@@ -90,14 +90,19 @@ end
 
 @testitem "Paths - imit - MSE RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity),
+        maximizer=RegularizedGeneric(
+            shortest_path_maximizer,
+            half_square_norm,
+            identity,
+            (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+        ),
         loss=mse,
         error_function=mse,
     )
@@ -140,7 +145,7 @@ end
 
 @testitem "Paths - imit - FYL RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -149,7 +154,12 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity)
+            RegularizedGeneric(
+                shortest_path_maximizer,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
         ),
         error_function=mse,
         epochs=100,
@@ -174,7 +184,7 @@ end
         error_function=mse,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=200,
+        epochs=500,
     )
 end
 
@@ -202,7 +212,8 @@ end
 
 @testitem "Paths - exp - Pushforward RegularizedGeneric" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
@@ -213,7 +224,13 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity), cost
+            RegularizedGeneric(
+                shortest_path_maximizer,
+                half_square_norm,
+                identity,
+                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
+            cost,
         ),
         error_function=mse,
         true_encoder=true_encoder,

@@ -6,7 +6,7 @@ The goal of InferOpt.jl is to make machine learning pipelines more expressive by
 
 Consider the following combinatorial optimization problem:
 ```math
-    f\colon \theta \longmapsto \max_{v \in \mathcal{V}} \theta^\top v
+    f\colon \theta \longmapsto \arg \max_{v \in \mathcal{V}} \theta^\top v
 ```
 where $\mathcal{V} \subset \mathbb{R}^d$ is a finite set of feasible solutions, and $\theta$ is an objective vector.
 Note that any linear program (LP) or mixed integer linear program (MILP) can be formulated this way.

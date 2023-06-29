@@ -49,10 +49,7 @@ end
 ## Forward pass
 
 function perturb_and_optimize(
-    perturbed::PerturbedAdditive,
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
-    kwargs...,
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z
@@ -65,7 +62,7 @@ end
 function ChainRulesCore.rrule(
     ::typeof(compute_probability_distribution),
     perturbed::PerturbedAdditive,
-    θ::AbstractArray{<:Real};
+    θ::AbstractArray;
     kwargs...,
 )
     (; ε) = perturbed

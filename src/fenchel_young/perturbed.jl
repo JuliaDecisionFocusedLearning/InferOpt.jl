@@ -1,5 +1,5 @@
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{F,false}, θ::AbstractArray{<:Real}, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{F,false}, θ::AbstractArray, Z_samples; kwargs...
 ) where {F}
     F_and_y_samples = [
         fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
@@ -9,7 +9,7 @@ function compute_F_and_y_samples(
 end
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{F,true}, θ::AbstractArray{<:Real}, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{F,true}, θ::AbstractArray, Z_samples; kwargs...
 ) where {F}
     return ThreadsX.map(
         Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
@@ -17,7 +17,7 @@ function compute_F_and_y_samples(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::AbstractPerturbed, θ::AbstractArray{<:Real}; kwargs...
+    perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
 )
     Z_samples = sample_perturbations(perturbed, θ)
     F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
@@ -25,10 +25,7 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive,
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
-    kwargs...,
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z
@@ -39,8 +36,8 @@ end
 
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedAdditive{<:GeneralizedMaximizer},
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
+    θ::AbstractArray,
+    Z::AbstractArray;
     kwargs...,
 )
     (; maximizer, ε) = perturbed
@@ -51,10 +48,7 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative,
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
-    kwargs...,
+    perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
     eZ = exp.(ε .* Z .- ε^2)
@@ -67,8 +61,8 @@ end
 
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedMultiplicative{<:GeneralizedMaximizer},
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
+    θ::AbstractArray,
+    Z::AbstractArray;
     kwargs...,
 )
     (; maximizer, ε) = perturbed

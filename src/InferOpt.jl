@@ -2,11 +2,7 @@ module InferOpt
 
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
-using FrankWolfe: FrankWolfe, ActiveSet, Agnostic, LinearMinimizationOracle
-using FrankWolfe: away_frank_wolfe, compute_extreme_point
-using Krylov: gmres
 using LinearAlgebra: dot
-using LinearOperators: LinearOperator
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using SimpleTraits: SimpleTraits
 using SimpleTraits: @traitdef, @traitfn, @traitimpl
@@ -21,9 +17,6 @@ include("utils/generalized_maximizer.jl")
 include("plus_identity/plus_identity.jl")
 
 include("interpolation/interpolation.jl")
-
-include("frank_wolfe/frank_wolfe_utils.jl")
-include("frank_wolfe/differentiable_frank_wolfe.jl")
 
 include("regularized/isregularized.jl")
 include("regularized/regularized_utils.jl")
@@ -46,6 +39,10 @@ include("ssvm/ssvm_loss.jl")
 
 include("imitation_loss/imitation_loss.jl")
 
+if !isdefined(Base, :get_extension)
+    include("../ext/InferOptFrankWolfeExt.jl")
+end
+
 export FixedAtomsProbabilityDistribution
 export compute_expectation, compress_distribution!
 export Pushforward
@@ -54,9 +51,6 @@ export compute_probability_distribution
 export PlusIdentity
 
 export Interpolation
-
-export DifferentiableFrankWolfe
-export LMOWrapper
 
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy

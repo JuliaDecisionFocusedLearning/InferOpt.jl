@@ -24,7 +24,7 @@ isprobadist(p::AbstractVector{R}) where {R<:Real} = all(isproba, p) && sum(p) �
 
 Compute the squared Euclidean norm of `x` and divide it by 2.
 """
-function half_square_norm(x::AbstractArray{<:Real})
+function half_square_norm(x::AbstractArray)
     return sum(abs2, x) / 2
 end
 
@@ -43,7 +43,7 @@ function shannon_entropy(p::AbstractVector{R}) where {R<:Real}
     return H
 end
 
-negative_shannon_entropy(p::AbstractVector{<:Real}) = -shannon_entropy(p)
+negative_shannon_entropy(p::AbstractVector) = -shannon_entropy(p)
 
 """
     one_hot_argmax(z)
@@ -61,7 +61,7 @@ end
 
 Compute the vector `r` such that `rᵢ` is the rank of `θᵢ` in `θ`.
 """
-function ranking(θ::AbstractVector{<:Real}; rev::Bool=false, kwargs...)
+function ranking(θ::AbstractVector; rev::Bool=false, kwargs...)
     return invperm(sortperm(θ; rev=rev))
 end
 

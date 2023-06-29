@@ -1,128 +1,61 @@
 """
-    RegularizedGeneric{M,RF,RG,F,G,S}
+    RegularizedGeneric{M,RF,RG}
 
-Differentiable regularized prediction function `ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}`.
+Differentiable regularized prediction function `ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}`.
 
 Relies on the Frank-Wolfe algorithm to minimize a concave objective on a polytope.
+
+!!! warning "Warning"
+    Since this is a conditional dependency, you need to run `import DifferentiableFrankWolfe` before using `RegularizedGeneric`.
 
 # Fields
 - `maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
 - `Ω::RF`: regularization function `Ω(y)`
 - `Ω_grad::RG`: gradient of the regularization function `∇Ω(y)`
-- `f::F`: objective function `f(x, θ) = Ω(y) - θᵀy` minimized by Frank-Wolfe (computed automatically)
-- `f_grad1::G`: gradient of the objective function `∇ₓf(x, θ) = ∇Ω(y) - θ` with respect to `x` (computed automatically)
-- `linear_solver::S`: solver for linear systems of equations, used during implicit differentiation
+- `frank_wolfe_kwargs::FWK`: keyword arguments passed to the Frank-Wolfe algorithm
 
 # Applicable methods
 
-- [`compute_probability_distribution(regularized::RegularizedGeneric, θ)`](@ref)
-- `(regularized::RegularizedGeneric)(θ)`
+- [`compute_probability_distribution(regularized::RegularizedGeneric, θ; kwargs...)`](@ref)
+- `(regularized::RegularizedGeneric)(θ; kwargs...)`
 
-See also: [`DifferentiableFrankWolfe`](@ref).
+# Frank-Wolfe parameters
+
+Some values you can tune:
+- `epsilon::Float64`: precision target
+- `max_iteration::Integer`: max number of iterations
+- `timeout::Float64`: max runtime in seconds
+- `lazy::Bool`: caching strategy
+- `away_steps::Bool`: avoid zig-zagging
+- `line_search::FrankWolfe.LineSearchMethod`: step size selection
+- `verbose::Bool`: console output
+
+See the documentation of FrankWolfe.jl for details.
 """
-struct RegularizedGeneric{M,RF,RG,F,G,S}
+struct RegularizedGeneric{M,RF,RG,FWK}
     maximizer::M
-    Ω::RF  # ! is is needed ?
-    Ω_grad::RG # ! is it needed ?
-    f::F
-    f_grad1::G
-    linear_solver::S
+    Ω::RF
+    Ω_grad::RG
+    frank_wolfe_kwargs::FWK
 end
 
 function Base.show(io::IO, regularized::RegularizedGeneric)
-    (; maximizer, Ω, Ω_grad, linear_solver) = regularized
-    return print(io, "RegularizedGeneric($maximizer, $Ω, $Ω_grad, $linear_solver)")
-end
-
-function RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver=gmres)
-    f(y, θ) = Ω(y) - dot(θ, y)
-    f_grad1(y, θ) = Ω_grad(y) - θ
-    return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
-end
-
-# function RegularizedGeneric(maximizer::GeneralizedMaximizer, Ω, Ω_grad, linear_solver=gmres)
-#     f(y, θ) = Ω(y) - objective_value(maximizer, θ, y)
-#     f_grad1(y, θ) = Ω_grad(y) - θ
-#     return RegularizedGeneric(maximizer, Ω, Ω_grad, f, f_grad1, linear_solver)
-# end
-
-"""
-    RegularizedGeneric(maximizer[; Ω, Ω_grad, linear_solver=gmres])
-
-Shorter constructor with defaults.
-"""
-function RegularizedGeneric(
-    maximizer; Ω=zero_regularization, Ω_grad=zero_gradient, linear_solver=gmres
-)
-    return RegularizedGeneric(maximizer, Ω, Ω_grad, linear_solver)
+    (; maximizer, Ω, Ω_grad) = regularized
+    return print(io, "RegularizedGeneric($maximizer, $Ω, $Ω_grad)")
 end
 
 @traitimpl IsRegularized{RegularizedGeneric}
 
-function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray{<:Real})
+function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray)
     return regularized.Ω(y)
 end
 
-## Forward pass
-
 """
-    compute_probability_distribution(regularized::RegularizedGeneric, θ[; maximizer_kwargs=(;), fw_kwargs=(;)])
+    (regularized::RegularizedGeneric)(θ; kwargs...)
 
-Construct a [`DifferentiableFrankWolfe`](@ref) struct and call `compute_probability_distribution` on it.
-
-The named tuple `maximizer_kwargs` is passed as keyword arguments to the underlying maximizer, which is wrapped inside a [`LMOWrapper`](@ref).
-The named tuple `fw_kwargs` is passed as keyword arguments to `FrankWolfe.away_frank_wolfe`.
+Apply `compute_probability_distribution(regularized, θ, kwargs...)` and return the expectation.
 """
-function compute_probability_distribution(
-    regularized::RegularizedGeneric,
-    θ::AbstractArray{<:Real};
-    maximizer_kwargs=(;),
-    fw_kwargs=(;),
-    kwargs...,
-)
-    (; f, f_grad1, maximizer, linear_solver) = regularized
-    lmo = LMOWrapper(maximizer, maximizer_kwargs)
-    dfw = DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver)
-    x0 = compute_extreme_point(lmo, θ)
-    probadist = compute_probability_distribution(dfw, θ, x0; fw_kwargs=fw_kwargs)
-    return probadist
-end
-
-"""
-    (regularized::RegularizedGeneric)(θ[; maximizer_kwargs=(;), fw_kwargs=(;)])
-
-Apply `compute_probability_distribution(regularized, θ)` and return the expectation.
-"""
-function (regularized::RegularizedGeneric)(
-    θ::AbstractArray{<:Real}; maximizer_kwargs=(;), fw_kwargs=(;), kwargs...
-)
-    probadist = compute_probability_distribution(
-        regularized, θ; maximizer_kwargs=maximizer_kwargs, fw_kwargs=fw_kwargs
-    )
+function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
+    probadist = compute_probability_distribution(regularized, θ; kwargs...)
     return compute_expectation(probadist)
-end
-
-## Backward pass, only works with vectors
-
-function ChainRulesCore.rrule(
-    rc::RuleConfig,
-    ::typeof(compute_probability_distribution),
-    regularized::RegularizedGeneric,
-    θ::AbstractArray{<:Real};
-    maximizer_kwargs=(;),
-    fw_kwargs=(;),
-    kwargs...,
-)
-    (; f, f_grad1, maximizer, linear_solver) = regularized
-    lmo = LMOWrapper(maximizer, maximizer_kwargs)
-    dfw = DifferentiableFrankWolfe(f, f_grad1, lmo, linear_solver)
-    x0 = compute_extreme_point(lmo, θ)
-    probadist, frank_wolfe_probadist_pullback = rrule(
-        rc, compute_probability_distribution, dfw, θ, x0; fw_kwargs=fw_kwargs
-    )
-    function regularized_generic_probadist_pullback(probadist_tangent)
-        _, _, dθ, _ = frank_wolfe_probadist_pullback(probadist_tangent)
-        return (NoTangent(), NoTangent(), dθ)
-    end
-    return probadist, regularized_generic_probadist_pullback
 end

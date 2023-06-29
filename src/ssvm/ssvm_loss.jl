@@ -24,10 +24,7 @@ end
 StructuredSVMLoss(base_loss; α=1.0) = StructuredSVMLoss(base_loss, float(α))
 
 @traitfn function prediction_and_loss(
-    ssvml::StructuredSVMLoss{L},
-    θ::AbstractArray{<:Real},
-    y_true::AbstractArray{<:Real};
-    kwargs...,
+    ssvml::StructuredSVMLoss{L}, θ::AbstractArray, y_true::AbstractArray; kwargs...
 ) where {L; IsBaseLoss{L}}
     (; base_loss, α) = ssvml
     ŷ = compute_maximizer(base_loss, θ, α, y_true; kwargs...)
@@ -38,7 +35,7 @@ end
 ## Forward pass
 
 @traitfn function (ssvml::StructuredSVMLoss{L})(
-    θ::AbstractArray{<:Real}, y_true::AbstractArray{<:Real}; kwargs...
+    θ::AbstractArray, y_true::AbstractArray; kwargs...
 ) where {L; IsBaseLoss{L}}
     _, l = prediction_and_loss(ssvml, θ, y_true; kwargs...)
     return l
@@ -47,10 +44,7 @@ end
 ## Backward pass
 
 @traitfn function ChainRulesCore.rrule(
-    ssvml::StructuredSVMLoss{L},
-    θ::AbstractArray{<:Real},
-    y_true::AbstractArray{<:Real};
-    kwargs...,
+    ssvml::StructuredSVMLoss{L}, θ::AbstractArray, y_true::AbstractArray; kwargs...
 ) where {L; IsBaseLoss{L}}
     (; α) = ssvml
     ŷ, l = prediction_and_loss(ssvml, θ, y_true; kwargs...)
