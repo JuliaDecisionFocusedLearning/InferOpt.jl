@@ -5,6 +5,7 @@ end
 
 @testitem "Correctness (JET.jl)" begin
     using JET
+    using DifferentiableFrankWolfe
     if VERSION >= v"1.9"
         @test_skip JET.test_package(InferOpt; target_defined_modules=true)
     end

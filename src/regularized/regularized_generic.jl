@@ -49,13 +49,3 @@ end
 function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray)
     return regularized.Ω(y)
 end
-
-"""
-    (regularized::RegularizedGeneric)(θ; kwargs...)
-
-Apply `compute_probability_distribution(regularized, θ, kwargs...)` and return the expectation.
-"""
-function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
-    probadist = compute_probability_distribution(regularized, θ; kwargs...)
-    return compute_expectation(probadist)
-end
