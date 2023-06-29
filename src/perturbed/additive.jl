@@ -16,7 +16,11 @@ struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
     seed::S
 
     function PerturbedAdditive{F,R,S,parallel}(
-        maximizer::F, ε::Float64, nb_samples::Int, rng::R, seed::S
+        maximizer::F,
+        ε::Float64,
+        nb_samples::Int,
+        rng::R,
+        seed::S,
     ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
         @assert parallel isa Bool
         return new{F,R,S,parallel}(maximizer, ε, nb_samples, rng, seed)
@@ -26,7 +30,8 @@ end
 function Base.show(io::IO, perturbed::PerturbedAdditive)
     (; maximizer, ε, rng, seed, nb_samples) = perturbed
     return print(
-        io, "PerturbedAdditive($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)"
+        io,
+        "PerturbedAdditive($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)",
     )
 end
 
@@ -73,7 +78,7 @@ function ChainRulesCore.rrule(
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_additive_probadist_pullback(probadist_tangent)
         weigths_tangent = probadist_tangent.weights
-        dθ = inv(ε) * sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        dθ = inv(ε) * mean(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_additive_probadist_pullback
