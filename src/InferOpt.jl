@@ -2,6 +2,7 @@ module InferOpt
 
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
+using DensityInterface: logdensityof
 using FrankWolfe: FrankWolfe, ActiveSet, Agnostic, LinearMinimizationOracle
 using FrankWolfe: away_frank_wolfe, compute_extreme_point
 using Krylov: gmres
@@ -10,7 +11,7 @@ using LinearOperators: LinearOperator
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using SimpleTraits: SimpleTraits
 using SimpleTraits: @traitdef, @traitfn, @traitimpl
-using Statistics: mean
+using Statistics: Statistics, mean
 using StatsBase: StatsBase, sample
 using ThreadsX: ThreadsX
 
@@ -33,6 +34,8 @@ include("regularized/regularized_generic.jl")
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
+
+include("perturbed/perturbed_oracle.jl")
 
 include("fenchel_young/perturbed.jl")
 include("fenchel_young/fenchel_young.jl")
@@ -76,5 +79,7 @@ export ZeroOneBaseLoss
 export StructuredSVMLoss
 
 export ImitationLoss, get_y_true
+
+export PerturbedOracle, EmpiricalDistribution
 
 end

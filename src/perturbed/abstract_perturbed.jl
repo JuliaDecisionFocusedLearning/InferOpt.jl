@@ -1,5 +1,5 @@
 """
-    AbstractPerturbed{B}
+    AbstractPerturbed{parallel}
 
 Differentiable perturbation of a black box optimizer.
 The parameter `parallel` is a boolean value, equal to true if the perturbations are run in parallel.
