@@ -1,5 +1,5 @@
 """
-    RegularizedGeneric{M,RF,RG}
+    FrankWolfeOptimizer{M,RF,RG,FWK}
 
 Differentiable regularized prediction function `ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}`.
 
@@ -9,7 +9,7 @@ Relies on the Frank-Wolfe algorithm to minimize a concave objective on a polytop
     Since this is a conditional dependency, you need to run `import DifferentiableFrankWolfe` before using `RegularizedGeneric`.
 
 # Fields
-- `maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
+- `linear_maximizer::M`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
 - `Ω::RF`: regularization function `Ω(y)`
 - `Ω_grad::RG`: gradient of the regularization function `∇Ω(y)`
 - `frank_wolfe_kwargs::FWK`: keyword arguments passed to the Frank-Wolfe algorithm
@@ -32,30 +32,14 @@ Some values you can tune:
 
 See the documentation of FrankWolfe.jl for details.
 """
-struct RegularizedGeneric{M,RF,RG,FWK}
-    maximizer::M
+struct FrankWolfeOptimizer{M,RF,RG,FWK}
+    linear_maximizer::M
     Ω::RF
     Ω_grad::RG
     frank_wolfe_kwargs::FWK
 end
 
-function Base.show(io::IO, regularized::RegularizedGeneric)
-    (; maximizer, Ω, Ω_grad) = regularized
-    return print(io, "RegularizedGeneric($maximizer, $Ω, $Ω_grad)")
-end
-
-@traitimpl IsRegularized{RegularizedGeneric}
-
-function compute_regularization(regularized::RegularizedGeneric, y::AbstractArray)
-    return regularized.Ω(y)
-end
-
-"""
-    (regularized::RegularizedGeneric)(θ; kwargs...)
-
-Apply `compute_probability_distribution(regularized, θ, kwargs...)` and return the expectation.
-"""
-function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
-    probadist = compute_probability_distribution(regularized, θ; kwargs...)
-    return compute_expectation(probadist)
+function Base.show(io::IO, optimizer::FrankWolfeOptimizer)
+    (; linear_maximizer, Ω, Ω_grad) = optimizer
+    return print(io, "RegularizedGeneric($linear_maximizer, $Ω, $Ω_grad)")
 end

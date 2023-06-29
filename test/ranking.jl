@@ -88,7 +88,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE RegularizedGeneric" default_imports = false begin
+@testitem "Ranking - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -97,7 +97,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=RegularizedGeneric(
+        maximizer=RegularizedFrankWolfe(
             ranking,
             half_square_norm,
             identity,
@@ -139,7 +139,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL RegularizedGeneric" default_imports = false begin
+@testitem "Ranking - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -150,7 +150,7 @@ end
         true_maximizer=ranking,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 ranking,
                 half_square_norm,
                 identity,
@@ -202,7 +202,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward RegularizedGeneric" default_imports = false begin
+@testitem "Ranking - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
@@ -216,7 +216,7 @@ end
         true_maximizer=ranking,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 ranking,
                 half_square_norm,
                 identity,

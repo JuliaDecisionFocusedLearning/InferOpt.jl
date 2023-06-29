@@ -1,11 +1,10 @@
 module InferOptFrankWolfeExt
 
 using DifferentiableFrankWolfe: DiffFW, LinearMaximizationOracleWithKwargs
-using InferOpt: InferOpt, RegularizedGeneric, FixedAtomsProbabilityDistribution
+using InferOpt:
+    InferOpt, Regularized, FixedAtomsProbabilityDistribution, FrankWolfeOptimizer
 using InferOpt: compute_expectation, compute_probability_distribution
 using LinearAlgebra: dot
-
-## Forward pass
 
 function InferOpt.compute_probability_distribution(
     dfw::DiffFW, θ::AbstractArray; frank_wolfe_kwargs=NamedTuple()
@@ -23,15 +22,21 @@ Construct a `DifferentiableFrankWolfe.DiffFW` struct and call `compute_probabili
 Keyword arguments are passed to the underlying linear maximizer.
 """
 function InferOpt.compute_probability_distribution(
-    regularized::RegularizedGeneric, θ::AbstractArray; kwargs...
+    optimizer::FrankWolfeOptimizer, θ::AbstractArray; kwargs...
 )
-    (; maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized
+    (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = optimizer
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
-    lmo = LinearMaximizationOracleWithKwargs(maximizer, kwargs)
+    lmo = LinearMaximizationOracleWithKwargs(linear_maximizer, kwargs)
     dfw = DiffFW(f, f_grad1, lmo)
     probadist = compute_probability_distribution(dfw, θ; frank_wolfe_kwargs)
     return probadist
+end
+
+function InferOpt.compute_probability_distribution(
+    regularized::Regularized{<:FrankWolfeOptimizer}, θ::AbstractArray; kwargs...
+)
+    return compute_probability_distribution(regularized.optimizer, θ; kwargs...)
 end
 
 """
@@ -41,8 +46,8 @@ Apply `compute_probability_distribution(regularized, θ)` and return the expecta
 
 Keyword arguments are passed to the underlying linear maximizer.
 """
-function (regularized::RegularizedGeneric)(θ::AbstractArray; kwargs...)
-    probadist = compute_probability_distribution(regularized, θ; kwargs...)
+function (optimizer::FrankWolfeOptimizer)(θ::AbstractArray; kwargs...)
+    probadist = compute_probability_distribution(optimizer, θ; kwargs...)
     return compute_expectation(probadist)
 end
 

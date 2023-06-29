@@ -24,9 +24,9 @@ function (fyl::FenchelYoungLoss)(θ::AbstractArray, y_true::AbstractArray; kwarg
     return l
 end
 
-@traitfn function fenchel_young_loss_and_grad(
+function fenchel_young_loss_and_grad(
     fyl::FenchelYoungLoss{P}, θ::AbstractArray, y_true::AbstractArray; kwargs...
-) where {P; IsRegularized{P}}
+) where {P<:Regularized}
     (; predictor) = fyl
     ŷ = predictor(θ; kwargs...)
     Ωy_true = compute_regularization(predictor, y_true)

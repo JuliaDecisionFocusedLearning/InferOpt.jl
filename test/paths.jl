@@ -88,7 +88,7 @@ end
     )
 end
 
-@testitem "Paths - imit - MSE RegularizedGeneric" default_imports = false begin
+@testitem "Paths - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -97,7 +97,7 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=RegularizedGeneric(
+        maximizer=RegularizedFrankWolfe(
             shortest_path_maximizer,
             half_square_norm,
             identity,
@@ -143,7 +143,7 @@ end
     )
 end
 
-@testitem "Paths - imit - FYL RegularizedGeneric" default_imports = false begin
+@testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -154,7 +154,7 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 shortest_path_maximizer,
                 half_square_norm,
                 identity,
@@ -210,7 +210,7 @@ end
     )
 end
 
-@testitem "Paths - exp - Pushforward RegularizedGeneric" default_imports = false begin
+@testitem "Paths - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
@@ -224,7 +224,7 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 shortest_path_maximizer,
                 half_square_norm,
                 identity,

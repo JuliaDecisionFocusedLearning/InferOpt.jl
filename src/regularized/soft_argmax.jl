@@ -10,8 +10,12 @@ function soft_argmax(z::AbstractVector; kwargs...)
     return s
 end
 
-@traitimpl IsRegularized{typeof(soft_argmax)}
+# @traitimpl IsRegularized{typeof(soft_argmax)}
 
-function compute_regularization(::typeof(soft_argmax), y::AbstractVector{R}) where {R<:Real}
+# function compute_regularization(::typeof(soft_argmax), y::AbstractVector{R}) where {R<:Real}
+#     return isprobadist(y) ? negative_shannon_entropy(y) : typemax(R)
+# end
+
+function soft_argmax_regularization(y::AbstractVector)
     return isprobadist(y) ? negative_shannon_entropy(y) : typemax(R)
 end

@@ -52,7 +52,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=sparse_argmax,
+        maximizer=SparseArgmax(),
         loss=mse,
         error_function=hamming_distance,
     )
@@ -67,7 +67,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=soft_argmax,
+        maximizer=SoftArgmax(),
         loss=mse,
         error_function=hamming_distance,
     )
@@ -112,7 +112,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=RegularizedGeneric(
+        maximizer=RegularizedFrankWolfe(
             one_hot_argmax,
             half_square_norm,
             identity,
@@ -133,7 +133,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
-        loss=FenchelYoungLoss(sparse_argmax),
+        loss=FenchelYoungLoss(SparseArgmax()),
         error_function=hamming_distance,
     )
 end
@@ -148,7 +148,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
-        loss=FenchelYoungLoss(soft_argmax),
+        loss=FenchelYoungLoss(SoftArgmax()),
         error_function=hamming_distance,
     )
 end
@@ -194,7 +194,7 @@ end
         true_maximizer=one_hot_argmax,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 one_hot_argmax,
                 half_square_norm,
                 identity,
@@ -259,7 +259,7 @@ end
         true_maximizer=one_hot_argmax,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(
+            RegularizedFrankWolfe(
                 one_hot_argmax,
                 half_square_norm,
                 identity,

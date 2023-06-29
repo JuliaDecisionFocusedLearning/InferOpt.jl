@@ -17,11 +17,11 @@ include("plus_identity/plus_identity.jl")
 
 include("interpolation/interpolation.jl")
 
-include("regularized/isregularized.jl")
 include("regularized/regularized_utils.jl")
 include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
-include("regularized/regularized_generic.jl")
+include("regularized/regularized.jl")
+include("regularized/frank_wolfe_optimizer.jl")
 
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
@@ -54,9 +54,8 @@ export Interpolation
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
-export IsRegularized
 export soft_argmax, sparse_argmax
-export RegularizedGeneric
+export Regularized
 
 export PerturbedAdditive
 export PerturbedMultiplicative
@@ -70,5 +69,9 @@ export ZeroOneBaseLoss
 export StructuredSVMLoss
 
 export ImitationLoss, get_y_true
+
+export SparseArgmax, SoftArgmax
+
+export RegularizedFrankWolfe
 
 end

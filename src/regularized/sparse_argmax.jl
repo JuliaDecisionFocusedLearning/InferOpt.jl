@@ -10,11 +10,15 @@ function sparse_argmax(z::AbstractVector; kwargs...)
     return p
 end
 
-@traitimpl IsRegularized{typeof(sparse_argmax)}
+# @traitimpl IsRegularized{typeof(sparse_argmax)}
 
-function compute_regularization(
-    ::typeof(sparse_argmax), y::AbstractVector{R}
-) where {R<:Real}
+# function compute_regularization(
+#     ::typeof(sparse_argmax), y::AbstractVector{R}
+# ) where {R<:Real}
+#     return isprobadist(y) ? half_square_norm(y) : typemax(R)
+# end
+
+function sparse_argmax_regularization(y::AbstractVector)
     return isprobadist(y) ? half_square_norm(y) : typemax(R)
 end
 
