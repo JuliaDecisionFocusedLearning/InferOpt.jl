@@ -69,8 +69,11 @@ function ChainRulesCore.rrule(
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_additive_probadist_pullback(probadist_tangent)
-        weigths_tangent = probadist_tangent.weights
-        dθ = inv(ε) * sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        weights = probadist.weights
+        weights_tangent = probadist_tangent.weights
+        dθ =
+            inv(ε) *
+            sum(w * wt * Z for (w, wt, Z) in zip(weights, weights_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_additive_probadist_pullback
