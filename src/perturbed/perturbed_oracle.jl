@@ -1,3 +1,6 @@
+"""
+TODO
+"""
 struct PerturbedOracle{parallel,D,O,G,R<:AbstractRNG,S<:Union{Nothing,Int}}
     perturbation::D
     oracle::O
@@ -94,9 +97,8 @@ function ChainRulesCore.rrule(
         y_samples, ones(length(y_samples)) ./ length(y_samples)
     )
     ∇logp_samples = [perturbation_grad_logdensity(rc, po, θ, η) for η in η_samples]
-    y_sum = sum(y_samples)
     function perturbed_oracle_dist_pullback(δy_dist)
-        δy_samples = δy_dist.weights # unthunk(δy_dist).weights
+        δy_samples = δy_dist.weights
         δy_sum = sum(δy_samples)
         δθ_samples = map(1:M) do i
             δyᵢ, ∇logpᵢ = δy_samples[i], ∇logp_samples[i]
