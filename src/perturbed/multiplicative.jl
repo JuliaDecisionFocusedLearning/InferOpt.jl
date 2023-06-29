@@ -71,8 +71,11 @@ function ChainRulesCore.rrule(
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_multiplicative_probadist_pullback(probadist_tangent)
-        weigths_tangent = probadist_tangent.weights
-        dθ = inv.(ε .* θ) .* sum(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        weights_tangent = probadist_tangent.weights
+        if length(weights_tangent) != length(Z_samples)
+            throw(ArgumentError("Probadist tangent has invalid number of atoms"))
+        end
+        dθ = inv.(ε .* θ) .* mean(wt * Z for (wt, Z) in zip(weights_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_multiplicative_probadist_pullback
