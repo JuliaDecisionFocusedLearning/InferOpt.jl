@@ -78,7 +78,7 @@ end
 function ChainRulesCore.rrule(il::ImitationLoss, θ::AbstractArray, t_true; kwargs...)
     (; α) = il
     y_true = get_y_true(t_true)
-    ŷ, l = prediction_and_loss(l, θ, t_true; kwargs...)
-    l_pullback(dl) = NoTangent(), dl .* α .* (ŷ .- y_true), NoTangent()
-    return l, l_pullback
+    ŷ, l = prediction_and_loss(il, θ, t_true; kwargs...)
+    il_pullback(dl) = NoTangent(), dl .* α .* (ŷ .- y_true), NoTangent()
+    return l, il_pullback
 end
