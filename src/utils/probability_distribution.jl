@@ -110,14 +110,3 @@ function ChainRulesCore.rrule(
     end
     return e, expectation_pullback
 end
-
-"""
-    compute_probability_distribution(layer, θ)
-
-Apply a probabilistic layer (regularized or perturbed) to an objective direction `θ` in order to generate a [`FixedAtomsProbabilityDistribution`](@ref) on the vertices of a polytope.
-
-The following layer types are supported:
-- [`AbstractPerturbed`](@ref)
-- [`RegularizedGeneric`](@ref)
-"""
-function compute_probability_distribution end

@@ -28,7 +28,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PlusIdentity" default_imports = false begin
+@testitem "Ranking - imit - MSE IdentityRelaxation" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -37,7 +37,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=normalize ∘ PlusIdentity(ranking),
+        maximizer=normalize ∘ IdentityRelaxation(ranking),
         loss=mse,
         error_function=hamming_distance,
     )
@@ -98,10 +98,10 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=RegularizedFrankWolfe(
-            ranking,
-            half_square_norm,
-            identity,
-            (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ranking;
+            Ω=half_square_norm,
+            Ω_grad=identity,
+            frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
         ),
         loss=mse,
         error_function=hamming_distance,
@@ -151,10 +151,10 @@ end
         maximizer=identity,
         loss=FenchelYoungLoss(
             RegularizedFrankWolfe(
-                ranking,
-                half_square_norm,
-                identity,
-                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                ranking;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
         ),
         error_function=hamming_distance,
@@ -217,10 +217,10 @@ end
         maximizer=identity,
         loss=Pushforward(
             RegularizedFrankWolfe(
-                ranking,
-                half_square_norm,
-                identity,
-                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                ranking;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
             cost,
         ),

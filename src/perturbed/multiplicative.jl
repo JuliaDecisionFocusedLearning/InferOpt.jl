@@ -1,11 +1,11 @@
 """
-    PerturbedMultiplicative{F}
+    PerturbedMultiplicative <: AbstractPerturbed
 
-Differentiable log-normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ N(0, I)`.
+Differentiable log-normal perturbation of a black-box maximizer: the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ N(0, I)`.
 
-See also: [`AbstractPerturbed`](@ref).
+Reference: <https://arxiv.org/abs/2207.13513>
 
-Reference: preprint coming soon.
+See [`AbstractPerturbed`](@ref) for more details.
 """
 struct PerturbedMultiplicative{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}

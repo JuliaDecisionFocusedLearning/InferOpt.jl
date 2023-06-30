@@ -1,11 +1,11 @@
 """
-    PerturbedAdditive{F}
+    PerturbedAdditive <: AbstractPerturbed
 
-Differentiable normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
-
-See also: [`AbstractPerturbed`](@ref).
+Differentiable normal perturbation of a black-box maximizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
 Reference: <https://arxiv.org/abs/2002.08676>
+
+See [`AbstractPerturbed`](@ref) for more details.
 """
 struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}

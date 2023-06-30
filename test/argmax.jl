@@ -38,12 +38,12 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
-        loss=StructuredSVMLoss(ZeroOneBaseLoss()),
+        loss=ZeroOneStructuredSVMLoss(),
         error_function=hamming_distance,
     )
 end
 
-@testitem "Argmax - imit - MSE sparse argmax" default_imports = false begin
+@testitem "Argmax - imit - MSE SparseArgmax" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -58,7 +58,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE soft argmax" default_imports = false begin
+@testitem "Argmax - imit - MSE SoftArgmax" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -103,7 +103,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - MSE RegularizedGeneric" default_imports = false begin
+@testitem "Argmax - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -113,17 +113,17 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=RegularizedFrankWolfe(
-            one_hot_argmax,
-            half_square_norm,
-            identity,
-            (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            one_hot_argmax;
+            Ω=half_square_norm,
+            Ω_grad=identity,
+            frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
         ),
         loss=mse,
         error_function=hamming_distance,
     )
 end
 
-@testitem "Argmax - imit - FYL sparse argmax" default_imports = false begin
+@testitem "Argmax - imit - FYL SparseArgmax" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -138,7 +138,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL soft argmax" default_imports = false begin
+@testitem "Argmax - imit - FYL SoftArgmax" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -183,7 +183,7 @@ end
     )
 end
 
-@testitem "Argmax - imit - FYL RegularizedGeneric" default_imports = false begin
+@testitem "Argmax - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -195,10 +195,10 @@ end
         maximizer=identity,
         loss=FenchelYoungLoss(
             RegularizedFrankWolfe(
-                one_hot_argmax,
-                half_square_norm,
-                identity,
-                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                one_hot_argmax;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
         ),
         error_function=hamming_distance,
@@ -245,7 +245,7 @@ end
     )
 end
 
-@testitem "Argmax - exp - Pushforward RegularizedGeneric" default_imports = false begin
+@testitem "Argmax - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
@@ -260,10 +260,10 @@ end
         maximizer=identity,
         loss=Pushforward(
             RegularizedFrankWolfe(
-                one_hot_argmax,
-                half_square_norm,
-                identity,
-                (; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                one_hot_argmax;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
             cost,
         ),

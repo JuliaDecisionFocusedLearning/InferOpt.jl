@@ -23,7 +23,7 @@ end
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
-tuto_jl_file = joinpath(dirname(@__DIR__), "test", "tutorial.jl")
+tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial.jl")
 tuto_md_dir = joinpath(@__DIR__, "src")
 Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
 
@@ -39,9 +39,9 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Tutorials" => ["tutorial.md", "advanced_tutorials.md"],
         "Background" => "background.md",
-        "Algorithms & API" => "algorithms.md",
+        "Tutorials" => ["tutorial.md", "advanced_tutorials.md"],
+        "API reference" => "api.md",
     ],
 )
 

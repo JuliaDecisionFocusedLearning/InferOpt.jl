@@ -1,20 +1,16 @@
 """
-    AbstractPerturbed{B}
+    AbstractPerturbed{parallel} <: AbstractOptimizationLayer
 
 Differentiable perturbation of a black box optimizer.
+
 The parameter `parallel` is a boolean value, equal to true if the perturbations are run in parallel.
 
-# Applicable functions
-
-- [`compute_probability_distribution(perturbed::AbstractPerturbed, θ)`](@ref)
-- `(perturbed::AbstractPerturbed)(θ)`
-
-# Available subtypes
+# Available implementations
 
 - [`PerturbedAdditive`](@ref)
 - [`PerturbedMultiplicative`](@ref)
 
-These subtypes share the following fields:
+These two subtypes share the following fields:
 
 - `maximizer`: black box optimizer
 - `ε`: magnitude of the perturbation
@@ -22,7 +18,7 @@ These subtypes share the following fields:
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
 """
-abstract type AbstractPerturbed{parallel} end
+abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
 
 """
     sample_perturbations(perturbed::AbstractPerturbed, θ)

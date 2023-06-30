@@ -1,22 +1,19 @@
 """
-    sparse_argmax(z)
+    SparseArgmax <: AbstractRegularized
 
 Compute the Euclidean projection of the vector `z` onto the probability simplex.
 
 Corresponds to regularized prediction on the probability simplex with square norm penalty.
 """
+struct SparseArgmax <: AbstractRegularized end
+
+(::SparseArgmax)(z) = sparse_argmax(z)
+compute_regularization(::SparseArgmax, y) = sparse_argmax_regularization(y)
+
 function sparse_argmax(z::AbstractVector; kwargs...)
     p, _ = simplex_projection_and_support(z)
     return p
 end
-
-# @traitimpl IsRegularized{typeof(sparse_argmax)}
-
-# function compute_regularization(
-#     ::typeof(sparse_argmax), y::AbstractVector{R}
-# ) where {R<:Real}
-#     return isprobadist(y) ? half_square_norm(y) : typemax(R)
-# end
 
 function sparse_argmax_regularization(y::AbstractVector)
     return isprobadist(y) ? half_square_norm(y) : typemax(R)
@@ -25,7 +22,7 @@ end
 """
     simplex_projection_and_support(z)
 
-Compute the Euclidean projection `p` of `z` on the probability simplex (also called [`sparse_argmax`](@ref)), and the indicators `s` of its support.
+Compute the Euclidean projection `p` of `z` on the probability simplex (also called `sparse_argmax`), and the indicators `s` of its support.
 
 Reference: <https://arxiv.org/abs/1602.02068>.
 """
