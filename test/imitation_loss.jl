@@ -11,7 +11,7 @@
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
-        loss=ZeroOneImitationLoss(),
+        loss=InferOpt.ZeroOneImitationLoss(),
         error_function=hamming_distance,
         true_encoder,
     )
@@ -22,7 +22,7 @@
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
-        loss=ZeroOneStructuredSVMLoss(),
+        loss=InferOpt.ZeroOneStructuredSVMLoss(),
         error_function=hamming_distance,
         true_encoder,
         verbose=false,
