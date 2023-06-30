@@ -37,33 +37,6 @@ end
 Base.rand(probadist::FixedAtomsProbabilityDistribution) = rand(GLOBAL_RNG, probadist)
 
 """
-    compress_distribution!(probadist[; atol])
-
-Remove duplicated atoms in `probadist` (up to a tolerance on equality).
-"""
-function compress_distribution!(
-    probadist::FixedAtomsProbabilityDistribution{A,W}; atol=0
-) where {A,W}
-    (; atoms, weights) = probadist
-    to_delete = Int[]
-    for i in length(probadist):-1:1
-        ai = atoms[i]
-        for j in 1:(i - 1)
-            aj = atoms[j]
-            if isapprox(ai, aj; atol=atol)
-                weights[j] += weights[i]
-                push!(to_delete, i)
-                break
-            end
-        end
-    end
-    sort!(to_delete)
-    deleteat!(atoms, to_delete)
-    deleteat!(weights, to_delete)
-    return probadist
-end
-
-"""
     apply_on_atoms(post_processing, probadist)
 
 Create a new distribution by applying the function `post_processing` to each atom of `probadist` (the weights remain the same).
@@ -109,4 +82,33 @@ function ChainRulesCore.rrule(
         return NoTangent(), d_probadist, NoTangent()
     end
     return e, expectation_pullback
+end
+
+"""
+    compress_distribution!(probadist[; atol])
+
+Remove duplicated atoms in `probadist` (up to a tolerance on equality).
+
+This function can break probabilistic layers if used during training. It is only meant for analyzing outputs.
+"""
+function compress_distribution!(
+    probadist::FixedAtomsProbabilityDistribution{A,W}; atol=0
+) where {A,W}
+    (; atoms, weights) = probadist
+    to_delete = Int[]
+    for i in length(probadist):-1:1
+        ai = atoms[i]
+        for j in 1:(i - 1)
+            aj = atoms[j]
+            if isapprox(ai, aj; atol=atol)
+                weights[j] += weights[i]
+                push!(to_delete, i)
+                break
+            end
+        end
+    end
+    sort!(to_delete)
+    deleteat!(atoms, to_delete)
+    deleteat!(weights, to_delete)
+    return probadist
 end
