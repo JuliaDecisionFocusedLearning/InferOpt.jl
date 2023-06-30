@@ -1,15 +1,15 @@
 """
-    SPOPlusLoss{F}
+    SPOPlusLoss <: AbstractLossLayer
 
 Convex surrogate of the Smart "Predict-then-Optimize" loss.
 
 # Fields
-- `maximizer::F`: linear maximizer function of the form `θ ⟼ ŷ(θ) = argmax θᵀy`
-- `α::Float64`: convexification parameter
+- `maximizer`: linear maximizer function of the form `θ -> ŷ(θ) = argmax θᵀy`
+- `α::Float64`: convexification parameter, default = 2.0
 
 Reference: <https://arxiv.org/abs/1710.08005>
 """
-struct SPOPlusLoss{F}
+struct SPOPlusLoss{F} <: AbstractLossLayer
     maximizer::F
     α::Float64
 end
@@ -19,10 +19,16 @@ function Base.show(io::IO, spol::SPOPlusLoss)
     return print(io, "SPOPlusLoss($maximizer, $α)")
 end
 
+"""
+    SPOPlusLoss(maximizer; α=2.0)
+"""
 SPOPlusLoss(maximizer; α=2.0) = SPOPlusLoss(maximizer, float(α))
 
 ## Forward pass
 
+"""
+    (spol::SPOPlusLoss)(θ, θ_true, y_true; kwargs...)
+"""
 function (spol::SPOPlusLoss)(
     θ::AbstractArray, θ_true::AbstractArray, y_true::AbstractArray; kwargs...
 )
@@ -33,6 +39,9 @@ function (spol::SPOPlusLoss)(
     return l
 end
 
+"""
+    (spol::SPOPlusLoss)(θ, θ_true; kwargs...)
+"""
 function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray; kwargs...)
     y_true = spol.maximizer(θ_true; kwargs...)
     return spol(θ, θ_true, y_true)

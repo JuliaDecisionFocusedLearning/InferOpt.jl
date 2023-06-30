@@ -1,6 +1,8 @@
 @testitem "Quality (Aqua.jl)" begin
     using Aqua
+    using StatsBase
     Aqua.test_all(InferOpt; ambiguities=false)
+    Aqua.test_ambiguities(InferOpt; exclude=[StatsBase.TestStat])
 end
 
 @testitem "Correctness (JET.jl)" begin

@@ -3,8 +3,10 @@
 *.jl.mem
 /Manifest.toml
 /docs/build/
+/docs/src/index.md
+/docs/src/tutorial.md
 /test/profiling.jl
-
+.vscode
 *.tar.gz
 *.zip
 *.csv
