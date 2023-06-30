@@ -22,8 +22,6 @@ end
 
 """
     StructuredSVMLoss(; aux_loss_maximizer, δ, α=1.0)
-
-Explicit constructor with keyword arguments.
 """
 function StructuredSVMLoss(; aux_loss_maximizer, δ, α=1.0)
     return StructuredSVMLoss(aux_loss_maximizer, δ, float(α))
@@ -45,6 +43,9 @@ end
 
 ## Forward pass
 
+"""
+    (ssvml::StructuredSVMLoss)(θ, y_true; kwargs...)
+"""
 function (ssvml::StructuredSVMLoss)(θ::AbstractArray, y_true::AbstractArray; kwargs...)
     _, l = prediction_and_loss(ssvml, θ, y_true; kwargs...)
     return l

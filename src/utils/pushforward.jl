@@ -38,7 +38,7 @@ function compute_probability_distribution(pushforward::Pushforward, θ; kwargs..
 end
 
 """
-    (pushforward::Pushforward)(θ)
+    (pushforward::Pushforward)(θ; kwargs...)
 
 Output the expectation of `pushforward.post_processing(X)`, where `X` follows the distribution defined by `pushforward.optimization_layer` applied to `θ`.
 

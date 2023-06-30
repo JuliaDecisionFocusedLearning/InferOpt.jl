@@ -65,15 +65,18 @@ end
 
 ## Forward pass
 
-function (l::ImitationLoss)(θ::AbstractArray, t_true; kwargs...)
-    _, l = prediction_and_loss(l, θ, t_true; kwargs...)
+"""
+    (il::ImitationLoss)(θ, t_true; kwargs...)
+"""
+function (il::ImitationLoss)(θ::AbstractArray, t_true; kwargs...)
+    _, l = prediction_and_loss(il, θ, t_true; kwargs...)
     return l
 end
 
 ## Backward pass
 
-function ChainRulesCore.rrule(l::ImitationLoss, θ::AbstractArray, t_true; kwargs...)
-    (; α) = l
+function ChainRulesCore.rrule(il::ImitationLoss, θ::AbstractArray, t_true; kwargs...)
+    (; α) = il
     y_true = get_y_true(t_true)
     ŷ, l = prediction_and_loss(l, θ, t_true; kwargs...)
     l_pullback(dl) = NoTangent(), dl .* α .* (ŷ .- y_true), NoTangent()

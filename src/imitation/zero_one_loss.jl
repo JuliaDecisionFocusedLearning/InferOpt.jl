@@ -34,7 +34,7 @@ end
 """
     ZeroOneStructuredSVMLoss
 
-Implementation of the `StructuredSVMLoss` based on a 0-1 loss for multiclass classification.
+Implementation of the [`StructuredSVMLoss`](@ref) based on a 0-1 loss for multiclass classification.
 """
 function ZeroOneStructuredSVMLoss(α=1)
     return StructuredSVMLoss(;
@@ -45,7 +45,7 @@ end
 """
     ZeroOneStructuredSVMLoss(α)
 
-Implementation of the `ImitationLoss` based on a 0-1 loss for multiclass classification with no regularization.
+Implementation of the [`ImitationLoss`](@ref) based on a 0-1 loss for multiclass classification with no regularization.
 """
 function ZeroOneImitationLoss(α=1)
     return ImitationLoss(;

@@ -63,9 +63,11 @@ function compute_probability_distribution(
 end
 
 """
-    compute_probability_distribution(perturbed::AbstractPerturbed, θ)
+    compute_probability_distribution(perturbed::AbstractPerturbed, θ; kwargs...)
 
 Turn random perturbations of `θ` into a distribution on polytope vertices.
+
+Keyword arguments are passed to the underlying linear maximizer.
 """
 function compute_probability_distribution(
     perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
@@ -75,9 +77,9 @@ function compute_probability_distribution(
 end
 
 """
-    (perturbed::AbstractPerturbed)(θ)
+    (perturbed::AbstractPerturbed)(θ; kwargs...)
 
-Apply `compute_probability_distribution(perturbed, θ)` and return the expectation.
+Apply `compute_probability_distribution(perturbed, θ; kwargs...)` and return the expectation.
 """
 function (perturbed::AbstractPerturbed)(θ::AbstractArray; kwargs...)
     probadist = compute_probability_distribution(perturbed, θ; kwargs...)

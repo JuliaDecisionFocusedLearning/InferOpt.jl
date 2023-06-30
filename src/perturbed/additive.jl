@@ -32,8 +32,6 @@ end
 
 """
     PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
-
-Shorter constructor with defaults.
 """
 function PerturbedAdditive(
     maximizer::F;

@@ -23,6 +23,9 @@ end
 
 ## Forward pass
 
+"""
+    (fyl::FenchelYoungLoss)(θ, y_true; kwargs...)
+"""
 function (fyl::FenchelYoungLoss)(θ::AbstractArray, y_true::AbstractArray; kwargs...)
     l, _ = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)
     return l

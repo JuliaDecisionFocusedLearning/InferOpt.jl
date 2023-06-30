@@ -27,18 +27,17 @@ include("simple/identity.jl")
 include("regularized/abstract_regularized.jl")
 include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
-include("regularized/frank_wolfe.jl")
+include("regularized/regularized_frank_wolfe.jl")
 
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
 
-include("imitation/fenchel_young.jl")
+include("imitation/spoplus_loss.jl")
 include("imitation/ssvm_loss.jl")
+include("imitation/fenchel_young_loss.jl")
 include("imitation/imitation_loss.jl")
 include("imitation/zero_one_loss.jl")
-
-include("spo/spoplus_loss.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/InferOptFrankWolfeExt.jl")
@@ -68,8 +67,6 @@ export PerturbedMultiplicative
 export FenchelYoungLoss
 export StructuredSVMLoss
 export ImitationLoss
-export ZeroOneStructuredSVMLoss, ZeroOneImitationLoss
-
 export SPOPlusLoss
 
 end

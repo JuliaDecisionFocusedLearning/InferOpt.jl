@@ -1,7 +1,10 @@
 """
     RegularizedFrankWolfe <: AbstractRegularized
 
-Differentiable regularized layer `ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}` which relies on the Frank-Wolfe algorithm to define a probability distribution.
+Regularized optimization layer which relies on the Frank-Wolfe algorithm to define a probability distribution while solving
+```
+ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}
+```
 
 !!! warning "Warning"
     Since this is a conditional dependency, you need to have loaded the package DifferentiableFrankWolfe.jl before using `RegularizedFrankWolfe`.
@@ -33,6 +36,9 @@ struct RegularizedFrankWolfe{M,RF,RG,FWK} <: AbstractRegularized
     frank_wolfe_kwargs::FWK
 end
 
+"""
+    RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=(;))
+"""
 function RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=NamedTuple())
     return RegularizedFrankWolfe(linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs)
 end
@@ -51,9 +57,7 @@ end
 """
     (regularized::RegularizedFrankWolfe)(θ; kwargs...)
 
-Apply `compute_probability_distribution(regularized, θ)` and return the expectation.
-
-Keyword arguments are passed to the underlying linear maximizer.
+Apply `compute_probability_distribution(regularized, θ; kwargs...)` and return the expectation.
 """
 function (regularized::RegularizedFrankWolfe)(θ::AbstractArray; kwargs...)
     probadist = compute_probability_distribution(regularized, θ; kwargs...)
