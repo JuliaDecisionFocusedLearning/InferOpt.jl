@@ -48,9 +48,9 @@ export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
 
 export FixedAtomsProbabilityDistribution
-export compute_expectation, compress_distribution!
-export Pushforward
+export compute_expectation
 export compute_probability_distribution
+export Pushforward
 
 export IdentityRelaxation
 export Interpolation
