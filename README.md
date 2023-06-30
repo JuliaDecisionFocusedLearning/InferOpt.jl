@@ -33,3 +33,11 @@ julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
 If you use our package in your research, please cite the following paper:
 
 > [Learning with Combinatorial Optimization Layers: a Probabilistic Approach](https://arxiv.org/abs/2207.13513) - Guillaume Dalle, Léo Baty, Louis Bouvier and Axel Parmentier (2022)
+
+## Related packages
+
+The following libraries implement similar functionalities:
+
+- [ImplicitDifferentiation.jl](https://github.com/gdalle/ImplicitDifferentiation.jl): automatic differentiation of implicit functions 
+- [DiffOpt.jl](https://github.com/jump-dev/DiffOpt.jl): differentiating convex optimization programs w.r.t. program parameters
+- [JAXopt](https://github.com/google/jaxopt): hardware accelerated, batchable and differentiable optimizers in JAX

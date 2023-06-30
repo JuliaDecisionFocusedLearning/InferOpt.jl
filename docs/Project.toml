@@ -1,9 +1,11 @@
 [deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 GridGraphs = "dd2b58c7-5af7-4f17-9e46-57c68ac813fb"
 InferOpt = "4846b161-c94e-4150-8dac-c7ae193c601f"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"

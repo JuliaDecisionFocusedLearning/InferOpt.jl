@@ -40,7 +40,8 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
-        "Tutorials" => ["tutorial.md", "advanced_tutorials.md"],
+        "Examples" => ["tutorial.md", "advanced_applications.md"],
+        "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
 )

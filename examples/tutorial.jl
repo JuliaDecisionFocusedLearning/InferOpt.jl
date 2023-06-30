@@ -114,7 +114,7 @@ Thanks to this smoothing, we can now train our model with a standard gradient op
 encoder = deepcopy(initial_encoder)
 opt = Flux.Adam();
 losses = Float64[]
-for epoch in 1:200
+for epoch in 1:100
     l = 0.0
     for (x, y) in zip(X_train, Y_train)
         grads = gradient(Flux.params(encoder)) do
@@ -147,7 +147,7 @@ But in reality, it doesn't matter as much as our ability to provide accurate pat
 Let us therefore compare our predictions with the actual paths on the training set.
 =#
 
-normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x))
+normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x));
 
 #-
 
