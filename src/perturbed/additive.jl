@@ -1,11 +1,11 @@
 """
-    PerturbedAdditive{F}
+    PerturbedAdditive <: AbstractPerturbed
 
-Differentiable normal perturbation of a black-box optimizer of type `F`: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
-
-See also: [`AbstractPerturbed`](@ref).
+Differentiable normal perturbation of a black-box maximizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
 Reference: <https://arxiv.org/abs/2002.08676>
+
+See [`AbstractPerturbed`](@ref) for more details.
 """
 struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}
@@ -37,8 +37,6 @@ end
 
 """
     PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
-
-Shorter constructor with defaults.
 """
 function PerturbedAdditive(
     maximizer::F;
@@ -54,10 +52,7 @@ end
 ## Forward pass
 
 function perturb_and_optimize(
-    perturbed::PerturbedAdditive,
-    θ::AbstractArray{<:Real},
-    Z::AbstractArray{<:Real};
-    kwargs...,
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
     θ_perturbed = θ .+ ε .* Z
@@ -70,15 +65,18 @@ end
 function ChainRulesCore.rrule(
     ::typeof(compute_probability_distribution),
     perturbed::PerturbedAdditive,
-    θ::AbstractArray{<:Real};
+    θ::AbstractArray;
     kwargs...,
 )
     (; ε) = perturbed
     Z_samples = sample_perturbations(perturbed, θ)
     probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
     function perturbed_additive_probadist_pullback(probadist_tangent)
-        weigths_tangent = probadist_tangent.weights
-        dθ = inv(ε) * mean(wt * Z for (wt, Z) in zip(weigths_tangent, Z_samples))
+        weights_tangent = probadist_tangent.weights
+        if length(weights_tangent) != length(Z_samples)
+            throw(ArgumentError("Probadist tangent has invalid number of atoms"))
+        end
+        dθ = inv(ε) * mean(wt * Z for (wt, Z) in zip(weights_tangent, Z_samples))
         return NoTangent(), NoTangent(), dθ
     end
     return probadist, perturbed_additive_probadist_pullback

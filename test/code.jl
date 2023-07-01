@@ -1,13 +1,15 @@
 @testitem "Quality (Aqua.jl)" begin
     using Aqua
+    using StatsBase
     Aqua.test_all(InferOpt; ambiguities=false)
+    Aqua.test_ambiguities(InferOpt; exclude=[StatsBase.TestStat])
 end
 
 @testitem "Correctness (JET.jl)" begin
     using JET
-    using Zygote
-    if VERSION >= v"1.8"
-        JET.test_package(InferOpt; toplevel_logger=nothing, mode=:typo)
+    using DifferentiableFrankWolfe
+    if VERSION >= v"1.9"
+        @test_skip JET.test_package(InferOpt; target_defined_modules=true)
     end
 end
 

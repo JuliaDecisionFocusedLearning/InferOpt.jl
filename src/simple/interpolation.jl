@@ -1,15 +1,15 @@
 """
-    Interpolation{F}
+    Interpolation <: AbstractOptimizationLayer
 
 Piecewise-linear interpolation of a black-box optimizer.
 
 # Fields
-- `maximizer::F`: underlying argmax function
+- `maximizer`: underlying argmax function
 - `λ::Float64`: smoothing parameter (smaller = more faithful approximation, larger = more informative gradients)
 
 Reference: <https://arxiv.org/abs/1912.02175>
 """
-struct Interpolation{F}
+struct Interpolation{F} <: AbstractOptimizationLayer
     maximizer::F
     λ::Float64
 end
@@ -21,13 +21,11 @@ end
 
 Interpolation(maximizer; λ=1.0) = Interpolation(maximizer, float(λ))
 
-function (interpolation::Interpolation)(θ::AbstractArray{<:Real}; kwargs...)
+function (interpolation::Interpolation)(θ::AbstractArray; kwargs...)
     return interpolation.maximizer(θ; kwargs...)
 end
 
-function ChainRulesCore.rrule(
-    interpolation::Interpolation, θ::AbstractArray{<:Real}; kwargs...
-)
+function ChainRulesCore.rrule(interpolation::Interpolation, θ::AbstractArray; kwargs...)
     (; maximizer, λ) = interpolation
     y = maximizer(θ; kwargs...)
     function interpolation_pullback(dy)

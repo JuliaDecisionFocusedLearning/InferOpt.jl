@@ -28,7 +28,7 @@ end
     )
 end
 
-@testitem "Paths - imit - MSE PlusIdentity" default_imports = false begin
+@testitem "Paths - imit - MSE IdentityRelaxation" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -37,7 +37,7 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=normalize ∘ PlusIdentity(shortest_path_maximizer),
+        maximizer=normalize ∘ IdentityRelaxation(shortest_path_maximizer),
         loss=mse,
         error_function=mse,
     )
@@ -88,16 +88,21 @@ end
     )
 end
 
-@testitem "Paths - imit - MSE RegularizedGeneric" default_imports = false begin
+@testitem "Paths - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity),
+        maximizer=RegularizedFrankWolfe(
+            shortest_path_maximizer;
+            Ω=half_square_norm,
+            Ω_grad=identity,
+            frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+        ),
         loss=mse,
         error_function=mse,
     )
@@ -138,9 +143,9 @@ end
     )
 end
 
-@testitem "Paths - imit - FYL RegularizedGeneric" default_imports = false begin
+@testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -149,7 +154,12 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=FenchelYoungLoss(
-            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity)
+            RegularizedFrankWolfe(
+                shortest_path_maximizer;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
         ),
         error_function=mse,
         epochs=100,
@@ -200,9 +210,10 @@ end
     )
 end
 
-@testitem "Paths - exp - Pushforward RegularizedGeneric" default_imports = false begin
+@testitem "Paths - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
@@ -213,7 +224,13 @@ end
         true_maximizer=shortest_path_maximizer,
         maximizer=identity,
         loss=Pushforward(
-            RegularizedGeneric(shortest_path_maximizer, half_square_norm, identity), cost
+            RegularizedFrankWolfe(
+                shortest_path_maximizer;
+                Ω=half_square_norm,
+                Ω_grad=identity,
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            ),
+            cost,
         ),
         error_function=mse,
         true_encoder=true_encoder,
