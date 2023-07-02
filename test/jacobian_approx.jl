@@ -11,8 +11,9 @@
     perturbed1 = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=1_000, seed=0)
     perturbed1_big = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=10_000, seed=0)
     perturbed2 = PerturbedMultiplicative(one_hot_argmax; ε=0.5, nb_samples=1_000, seed=0)
-    perturbed2_big =
-        PerturbedMultiplicative(one_hot_argmax; ε=0.5, nb_samples=10_000, seed=0)
+    perturbed2_big = PerturbedMultiplicative(
+        one_hot_argmax; ε=0.5, nb_samples=10_000, seed=0
+    )
 
     @testset "PerturbedAdditive" begin
         # Compute jacobian with reverse mode
