@@ -21,42 +21,41 @@ These two subtypes share the following fields:
 abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
 
 """
-    sample_perturbations(perturbed::AbstractPerturbed, θ)
+    sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
 
-Draw random perturbations `Z` which will be applied to the objective direction `θ`.
+Draw random perturbations `η` from p(η|θ).
 """
-function sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
-    (; rng, seed, nb_samples) = perturbed
-    seed!(rng, seed)
-    Z_samples = [randn(rng, size(θ)) for _ in 1:nb_samples]
-    return Z_samples
+function sample_perturbations end
+
+"""
+perturbation_grad_logdensity::RuleConfig,
+    perturbed::AbstractPerturbed,
+    θ::AbstractArray,
+    η::AbstractArray,
+)
+"""
+function perturbation_grad_logdensity end
+
+function get_nb_samples(perturbed::AbstractPerturbed)
+    return perturbed.nb_samples
 end
 
 function compute_atoms(
-    perturbed::AbstractPerturbed{false},
-    θ::AbstractArray,
-    Z_samples::Vector{<:AbstractArray};
-    kwargs...,
+    perturbed::AbstractPerturbed{false}, η_samples::Vector{<:AbstractArray}; kwargs...
 )
-    return [perturb_and_optimize(perturbed, θ, Z; kwargs...) for Z in Z_samples]
+    return [perturbed.oracle(η; kwargs...) for η in η_samples]
 end
 
 function compute_atoms(
-    perturbed::AbstractPerturbed{true},
-    θ::AbstractArray,
-    Z_samples::Vector{<:AbstractArray};
-    kwargs...,
+    perturbed::AbstractPerturbed{true}, η_samples::Vector{<:AbstractArray}; kwargs...
 )
-    return ThreadsX.map(Z -> perturb_and_optimize(perturbed, θ, Z; kwargs...), Z_samples)
+    return ThreadsX.map(η -> perturbed.oracle(η; kwargs...), η_samples)
 end
 
 function compute_probability_distribution(
-    perturbed::AbstractPerturbed,
-    θ::AbstractArray,
-    Z_samples::Vector{<:AbstractArray};
-    kwargs...,
+    perturbed::AbstractPerturbed, η_samples::Vector{<:AbstractArray}; kwargs...
 )
-    atoms = compute_atoms(perturbed, θ, Z_samples; kwargs...)
+    atoms = compute_atoms(perturbed, η_samples; kwargs...)
     weights = ones(length(atoms)) ./ length(atoms)
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
@@ -70,18 +69,64 @@ Turn random perturbations of `θ` into a distribution on polytope vertices.
 Keyword arguments are passed to the underlying linear maximizer.
 """
 function compute_probability_distribution(
-    perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
+    perturbed::AbstractPerturbed,
+    θ::AbstractArray;
+    autodiff_variance_reduction::Bool=false,
+    kwargs...,
 )
-    Z_samples = sample_perturbations(perturbed, θ)
-    return compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
+    η_samples = sample_perturbations(perturbed, θ)
+    return compute_probability_distribution(perturbed, η_samples; kwargs...)
 end
+
+# Forward pass
 
 """
     (perturbed::AbstractPerturbed)(θ; kwargs...)
 
 Apply `compute_probability_distribution(perturbed, θ; kwargs...)` and return the expectation.
 """
-function (perturbed::AbstractPerturbed)(θ::AbstractArray; kwargs...)
-    probadist = compute_probability_distribution(perturbed, θ; kwargs...)
+function (perturbed::AbstractPerturbed)(
+    θ::AbstractArray; autodiff_variance_reduction::Bool=false, kwargs...
+)
+    probadist = compute_probability_distribution(
+        perturbed, θ; autodiff_variance_reduction, kwargs...
+    )
     return compute_expectation(probadist)
+end
+
+# Backward pass
+
+function ChainRulesCore.rrule(
+    rc::RuleConfig,
+    ::typeof(compute_probability_distribution),
+    perturbed::AbstractPerturbed,
+    θ::AbstractArray;
+    autodiff_variance_reduction::Bool=false,
+    kwargs...,
+)
+    η_samples = sample_perturbations(perturbed, θ)
+    y_dist = compute_probability_distribution(perturbed, η_samples; kwargs...)
+
+    ∇logp_samples = [perturbation_grad_logdensity(rc, perturbed, θ, η) for η in η_samples]
+
+    M = get_nb_samples(perturbed)
+    function perturbed_oracle_dist_pullback(δy_dist)
+        weights = y_dist.weights
+        δy_weights = δy_dist.weights
+        δy_sum = sum(δy_weights)
+        δθ = sum(
+            map(1:M) do i
+                δyᵢ, ∇logpᵢ, w = δy_weights[i], ∇logp_samples[i], weights[i]
+                bᵢ = M == 1 ? 0 * δy_sum : (δy_sum - δyᵢ) / (M - 1)
+                return if autodiff_variance_reduction
+                    w * (δyᵢ - bᵢ) * ∇logpᵢ
+                else
+                    w * δyᵢ * ∇logpᵢ
+                end
+            end,
+        )
+        return NoTangent(), NoTangent(), δθ
+    end
+
+    return y_dist, perturbed_oracle_dist_pullback
 end

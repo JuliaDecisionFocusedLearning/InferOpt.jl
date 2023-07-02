@@ -66,49 +66,53 @@ end
 ## Specific overrides for perturbed layers
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{false}, θ::AbstractArray, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{false},
+    θ::AbstractArray,
+    η_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     F_and_y_samples = [
-        fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
-        Z in Z_samples
+        fenchel_young_F_and_first_part_of_grad(perturbed, θ, η; kwargs...) for
+        η in η_samples
     ]
     return F_and_y_samples
 end
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{true}, θ::AbstractArray, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{true},
+    θ::AbstractArray,
+    η_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     return ThreadsX.map(
-        Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
+        η -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, η; kwargs...), η_samples
     )
 end
 
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
 )
-    Z_samples = sample_perturbations(perturbed, θ)
-    F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
+    η_samples = sample_perturbations(perturbed, θ)
+    F_and_y_samples = compute_F_and_y_samples(perturbed, θ, η_samples; kwargs...)
     return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
+    perturbed::PerturbedAdditive, θ::AbstractArray, η::AbstractArray, kwargs...
 )
-    (; maximizer, ε) = perturbed
-    θ_perturbed = θ .+ ε .* Z
-    y = maximizer(θ_perturbed; kwargs...)
-    F = dot(θ_perturbed, y)
+    (; oracle) = perturbed
+    y = oracle(η; kwargs...)
+    F = dot(η, y)
     return F, y
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
+    perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray; kwargs...
 )
-    (; maximizer, ε) = perturbed
-    eZ = exp.(ε .* Z .- ε^2)
-    θ_perturbed = θ .* eZ
-    y = maximizer(θ_perturbed; kwargs...)
-    F = dot(θ_perturbed, y)
+    (; oracle) = perturbed
+    eZ = η ./ θ  # TODO: check, and maybe find something better
+    y = oracle(η; kwargs...)
+    F = dot(η, y)
     y_scaled = y .* eZ
     return F, y_scaled
 end

@@ -65,12 +65,11 @@ export RegularizedFrankWolfe
 export AbstractPerturbed
 export PerturbedAdditive
 export PerturbedMultiplicative
+export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss
 export ImitationLoss
 export SPOPlusLoss
-
-export PerturbedOracle, EmpiricalDistribution
 
 end

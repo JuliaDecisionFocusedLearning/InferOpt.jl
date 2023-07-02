@@ -7,77 +7,50 @@ Reference: <https://arxiv.org/abs/2002.08676>
 
 See [`AbstractPerturbed`](@ref) for more details.
 """
-struct PerturbedAdditive{F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
+struct PerturbedAdditive{O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}
-    maximizer::F
+    oracle::O
     ε::Float64
     nb_samples::Int
     rng::R
     seed::S
 
-    function PerturbedAdditive{F,R,S,parallel}(
-        maximizer::F,
-        ε::Float64,
-        nb_samples::Int,
-        rng::R,
-        seed::S,
-    ) where {F,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
+    function PerturbedAdditive{O,R,S,parallel}(
+        oracle::O, ε::Float64, nb_samples::Int, rng::R, seed::S
+    ) where {O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel}
         @assert parallel isa Bool
-        return new{F,R,S,parallel}(maximizer, ε, nb_samples, rng, seed)
+        return new{O,R,S,parallel}(oracle, ε, nb_samples, rng, seed)
     end
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
-    (; maximizer, ε, rng, seed, nb_samples) = perturbed
-    return print(
-        io,
-        "PerturbedAdditive($maximizer, $ε, $nb_samples, $(typeof(rng)), $seed)",
-    )
+    (; oracle, ε, rng, seed, nb_samples) = perturbed
+    return print(io, "PerturbedAdditive($oracle, $ε, $nb_samples, $(typeof(rng)), $seed)")
 end
 
 """
     PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
 """
 function PerturbedAdditive(
-    maximizer::F;
+    oracle::O;
     ε=1.0,
     nb_samples=1,
     rng::R=MersenneTwister(0),
     seed::S=nothing,
     is_parallel=false,
-) where {F,R,S}
-    return PerturbedAdditive{F,R,S,is_parallel}(maximizer, float(ε), nb_samples, rng, seed)
+) where {O,R,S}
+    return PerturbedAdditive{O,R,S,is_parallel}(oracle, float(ε), nb_samples, rng, seed)
 end
 
-## Forward pass
-
-function perturb_and_optimize(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
-)
-    (; maximizer, ε) = perturbed
-    θ_perturbed = θ .+ ε .* Z
-    y = maximizer(θ_perturbed; kwargs...)
-    return y
+function sample_perturbations(perturbed::PerturbedAdditive, θ::AbstractArray)
+    (; rng, seed, nb_samples, ε) = perturbed
+    seed!(rng, seed)
+    return [θ .+ ε .* randn(rng, size(θ)) for _ in 1:nb_samples]
 end
 
-## Backward pass
-
-function ChainRulesCore.rrule(
-    ::typeof(compute_probability_distribution),
-    perturbed::PerturbedAdditive,
-    θ::AbstractArray;
-    kwargs...,
+function perturbation_grad_logdensity(
+    ::RuleConfig, perturbed::AbstractPerturbed, θ::AbstractArray, η::AbstractArray
 )
     (; ε) = perturbed
-    Z_samples = sample_perturbations(perturbed, θ)
-    probadist = compute_probability_distribution(perturbed, θ, Z_samples; kwargs...)
-    function perturbed_additive_probadist_pullback(probadist_tangent)
-        weights_tangent = probadist_tangent.weights
-        if length(weights_tangent) != length(Z_samples)
-            throw(ArgumentError("Probadist tangent has invalid number of atoms"))
-        end
-        dθ = inv(ε) * mean(wt * Z for (wt, Z) in zip(weights_tangent, Z_samples))
-        return NoTangent(), NoTangent(), dθ
-    end
-    return probadist, perturbed_additive_probadist_pullback
+    return (η .- θ) ./ ε  # TODO: check formula
 end
