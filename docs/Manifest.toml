@@ -407,7 +407,7 @@ version = "0.4.10"
 deps = ["ChainRulesCore", "LinearAlgebra", "Random", "Statistics", "StatsBase", "ThreadsX"]
 path = ".."
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
-version = "0.5.0-DEV"
+version = "0.5.1"
 
     [deps.InferOpt.extensions]
     InferOptFrankWolfeExt = "DifferentiableFrankWolfe"

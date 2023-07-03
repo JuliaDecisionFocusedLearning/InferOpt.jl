@@ -119,7 +119,6 @@ function fenchel_young_F_and_first_part_of_grad(
 )
     (; oracle) = perturbed
     η = θ .* eZ
-    # eZ = η ./ θ  # TODO: check, and maybe find something better
     y = oracle(η; kwargs...)
     F = dot(η, y)
     y_scaled = y .* eZ
