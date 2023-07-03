@@ -105,7 +105,7 @@ function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
-    eZ = exp.(ε .* Z .- ε^2)
+    eZ = exp.(ε .* Z .- ε^2 ./ 2)
     θ_perturbed = θ .* eZ
     y = maximizer(θ_perturbed; kwargs...)
     F = dot(θ_perturbed, y)

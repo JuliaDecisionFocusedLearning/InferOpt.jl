@@ -52,7 +52,7 @@ function perturb_and_optimize(
     perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; maximizer, ε) = perturbed
-    θ_perturbed = θ .* exp.(ε .* Z .- ε^2)
+    θ_perturbed = θ .* exp.(ε .* Z .- ε^2 ./ 2)
     y = maximizer(θ_perturbed; kwargs...)
     return y
 end
