@@ -96,7 +96,7 @@ Here is the crucial part where InferOpt.jl intervenes: the choice of a clever lo
 - evaluate the quality of our model based on the paths that it recommends
 =#
 
-layer = PerturbedMultiplicative(linear_maximizer; ε=1.0, nb_samples=5);
+layer = PerturbedMultiplicative(linear_maximizer; ε=0.1, nb_samples=5);
 loss = FenchelYoungLoss(layer);
 
 #=
