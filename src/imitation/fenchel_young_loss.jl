@@ -98,6 +98,14 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
+    perturbed::PerturbedMultiplicative, θ::AbstractArray; kwargs...
+)
+    Z_samples = sample_Z_perturbations(perturbed, θ)
+    F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
+    return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
+end
+
+function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedAdditive, θ::AbstractArray, η::AbstractArray, kwargs...
 )
     (; oracle) = perturbed
@@ -107,10 +115,11 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray; kwargs...
+    perturbed::PerturbedMultiplicative, θ::AbstractArray, eZ::AbstractArray; kwargs...
 )
     (; oracle) = perturbed
-    eZ = η ./ θ  # TODO: check, and maybe find something better
+    η = θ .* eZ
+    # eZ = η ./ θ  # TODO: check, and maybe find something better
     y = oracle(η; kwargs...)
     F = dot(η, y)
     y_scaled = y .* eZ

@@ -52,6 +52,12 @@ function sample_perturbations(perturbed::PerturbedMultiplicative, θ::AbstractAr
     return [θ .* exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
 end
 
+function sample_Z_perturbations(perturbed::PerturbedMultiplicative, θ::AbstractArray)
+    (; rng, seed, nb_samples, ε) = perturbed
+    seed!(rng, seed)
+    return [exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
+end
+
 function perturbation_grad_logdensity(
     ::RuleConfig, perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray
 )
