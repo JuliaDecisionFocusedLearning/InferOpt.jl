@@ -63,7 +63,7 @@ true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
 To be consistent with the literature, we frame this problem as a linear maximization problem, which justifies the change of sign in front of $\theta$.
-Note that `linear_maximizer` can take keyword arguments, eg. to give additional information about the instance that `θ` doesn't contain. 
+Note that `linear_maximizer` can take keyword arguments, eg. to give additional information about the instance that `θ` doesn't contain.
 =#
 
 function linear_maximizer(θ; directions)
@@ -96,7 +96,7 @@ Here is the crucial part where InferOpt.jl intervenes: the choice of a clever lo
 - evaluate the quality of our model based on the paths that it recommends
 =#
 
-layer = PerturbedMultiplicative(linear_maximizer; ε=1.0, nb_samples=5);
+layer = PerturbedMultiplicative(linear_maximizer; ε=0.1, nb_samples=5);
 loss = FenchelYoungLoss(layer);
 
 #=
