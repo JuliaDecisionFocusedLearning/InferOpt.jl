@@ -9,11 +9,11 @@ The parameter `parallel` is a boolean value, equal to true if the perturbations 
 
 - [`PerturbedAdditive`](@ref)
 - [`PerturbedMultiplicative`](@ref)
+- [`PerturbedOracle`](@ref)
 
 These two subtypes share the following fields:
 
-- `maximizer`: black box optimizer
-- `ε`: magnitude of the perturbation
+- `oracle`: black box (optimizer)
 - `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
@@ -23,7 +23,7 @@ abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
 """
     sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
 
-Draw random perturbations `η` from p(η|θ).
+Draw random perturbations `η` from perturbation(θ).
 """
 function sample_perturbations end
 
