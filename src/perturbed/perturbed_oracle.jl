@@ -1,5 +1,8 @@
 """
-TODO
+    PerturbedOracle <: AbstractPerturbed
+
+Differentiable perturbed black-box oracle. The `oracle` input `θ` is perturbed as `η ∼ perturbation(⋅|θ)`.
+This is equivalent to [`PerturbedAdditive`](@ref) when using `perturbation(θ) = MvNormal(θ, ε * I)`
 """
 struct PerturbedOracle{parallel,D,O,G,R<:AbstractRNG,S<:Union{Nothing,Int}} <:
        AbstractPerturbed{parallel}
@@ -11,6 +14,17 @@ struct PerturbedOracle{parallel,D,O,G,R<:AbstractRNG,S<:Union{Nothing,Int}} <:
     nb_samples::Int
 end
 
+"""
+    PerturbedOracle(perturbation, oracle[; grad_logdensity=nothing, rng=MersenneTwister(0), seed=nothing, is_parallel=false, nb_samples=1])
+
+# Arguments
+- `perturbation`: should be a callable such that `perturbation(θ)` is an object that can be sampled with `rand`.
+- `oracle`: the black-box oracle we want to differebtiate through
+- `grad_logdensity`: gradient function of `perturbation` w.r.t. `θ`. If set to nothing (default), it's computed using automatic differentiation.
+- `rng`: random number generator for sampling from `perturbation(θ)`
+- `seed`: for reproducibility, no seed by default
+- `nb_samples::Int`: number of samples drawn to compute the Monte-Carlo estimation
+"""
 function PerturbedOracle(
     perturbation::D,
     oracle::O;

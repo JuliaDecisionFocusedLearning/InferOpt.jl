@@ -117,11 +117,11 @@ function ChainRulesCore.rrule(
         δθ = sum(
             map(1:M) do i
                 δyᵢ, ∇logpᵢ, w = δy_weights[i], ∇logp_samples[i], weights[i]
-                bᵢ = M == 1 ? 0 * δy_sum : (δy_sum - δyᵢ) / (M - 1)
-                return if autodiff_variance_reduction
-                    w * (δyᵢ - bᵢ) * ∇logpᵢ
+                if autodiff_variance_reduction
+                    bᵢ = M == 1 ? 0 * δy_sum : (δy_sum - δyᵢ) / (M - 1)
+                    return w * (δyᵢ - bᵢ) * ∇logpᵢ
                 else
-                    w * δyᵢ * ∇logpᵢ
+                    return w * δyᵢ * ∇logpᵢ
                 end
             end,
         )
