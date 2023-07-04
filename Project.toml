@@ -31,6 +31,7 @@ julia = "1.7"
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
@@ -51,4 +52,4 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Aqua", "DifferentiableFrankWolfe", "Documenter", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "JET", "JuliaFormatter", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]
+test = ["Aqua", "DifferentiableFrankWolfe", "Distributions", "Documenter", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "JET", "JuliaFormatter", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]
