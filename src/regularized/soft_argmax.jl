@@ -16,5 +16,5 @@ function soft_argmax(z::AbstractVector)
 end
 
 function soft_argmax_regularization(y::AbstractVector)
-    return isprobadist(y) ? negative_shannon_entropy(y) : typemax(R)
+    return isprobadist(y) ? negative_shannon_entropy(y) : typemax(eltype(y))
 end

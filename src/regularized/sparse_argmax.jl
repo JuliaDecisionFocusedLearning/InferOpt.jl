@@ -16,7 +16,7 @@ function sparse_argmax(z::AbstractVector; kwargs...)
 end
 
 function sparse_argmax_regularization(y::AbstractVector)
-    return isprobadist(y) ? half_square_norm(y) : typemax(R)
+    return isprobadist(y) ? half_square_norm(y) : typemax(eltype(y))
 end
 
 """
