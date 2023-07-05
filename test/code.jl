@@ -5,11 +5,14 @@
     Aqua.test_ambiguities(InferOpt; exclude=[StatsBase.TestStat])
 end
 
-@testitem "Correctness (JET.jl)" begin
+@testitem "Correctness (JET.jl)" default_imports = false begin
     using JET
     using DifferentiableFrankWolfe
+    using InferOpt
     if VERSION >= v"1.9"
-        @test_skip JET.test_package(InferOpt; target_defined_modules=true)
+        JET.test_package(InferOpt; target_modules=[InferOpt])
+        # TODO: why does the following line fail even though the method is defined in the extension?
+        # JET.test_package(InferOpt, target_defined_modules=true)
     end
 end
 
