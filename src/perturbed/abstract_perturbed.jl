@@ -1,5 +1,5 @@
 """
-    AbstractPerturbed{parallel} <: AbstractOptimizationLayer
+    AbstractPerturbed{parallel,P,G} <: AbstractOptimizationLayer
 
 Differentiable perturbation of a black box optimizer.
 
@@ -11,9 +11,11 @@ The parameter `parallel` is a boolean value, equal to true if the perturbations 
 - [`PerturbedMultiplicative`](@ref)
 - [`PerturbedOracle`](@ref)
 
-These two subtypes share the following fields:
+These three subtypes share the following fields:
 
 - `oracle`: black box (optimizer)
+- `perturbation::P`
+- `grad_logdensity::G`
 - `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
 - `seed::Union{Nothing,Int}`: random seed
