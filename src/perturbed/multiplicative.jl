@@ -62,5 +62,5 @@ function perturbation_grad_logdensity(
     ::RuleConfig, perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray
 )
     (; ε) = perturbed
-    return inv.(ε .* θ) .* (η .- θ)
+    return inv.(ε .* θ) .* ((log.(η) .- log.(θ)) ./ ε .+ ε / 2)
 end
