@@ -62,7 +62,7 @@ export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
 export RegularizedFrankWolfe
 
-export AbstractPerturbed
+# export AbstractPerturbed
 export PerturbedAdditive
 export PerturbedMultiplicative
 export PerturbedOracle
