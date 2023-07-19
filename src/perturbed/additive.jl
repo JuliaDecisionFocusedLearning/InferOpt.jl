@@ -66,7 +66,10 @@ function sample_perturbations(perturbed::PerturbedAdditive{Nothing}, θ::Abstrac
 end
 
 function compute_probability_distribution_from_samples(
-    perturbed::PerturbedAdditive, θ, Z_samples::Vector{<:AbstractArray}; kwargs...
+    perturbed::PerturbedAdditive,
+    θ::AbstractArray,
+    Z_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     (; ε) = perturbed
     η_samples = [θ .+ ε .* Z for Z in Z_samples]

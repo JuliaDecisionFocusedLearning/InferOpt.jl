@@ -67,10 +67,12 @@ function sample_perturbations(perturbed::PerturbedMultiplicative{Nothing}, θ::A
 end
 
 function compute_probability_distribution_from_samples(
-    perturbed::PerturbedMultiplicative, θ, Z_samples::Vector{<:AbstractArray}; kwargs...
+    perturbed::PerturbedMultiplicative,
+    θ::AbstractArray,
+    Z_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     (; ε) = perturbed
-    # Z_samples = sample_perturbations(perturbed, θ)
     η_samples = [θ .* exp.(ε .* Z .- ε^2 / 2) for Z in Z_samples]
     atoms = compute_atoms(perturbed, η_samples; kwargs...)
     weights = ones(length(atoms)) ./ length(atoms)
