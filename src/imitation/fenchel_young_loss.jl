@@ -68,12 +68,12 @@ end
 function compute_F_and_y_samples(
     perturbed::AbstractPerturbed{false},
     θ::AbstractArray,
-    η_samples::Vector{<:AbstractArray};
+    Z_samples::Vector{<:AbstractArray};
     kwargs...,
 )
     F_and_y_samples = [
-        fenchel_young_F_and_first_part_of_grad(perturbed, θ, η; kwargs...) for
-        η in η_samples
+        fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
+        Z in Z_samples
     ]
     return F_and_y_samples
 end
@@ -81,11 +81,11 @@ end
 function compute_F_and_y_samples(
     perturbed::AbstractPerturbed{true},
     θ::AbstractArray,
-    η_samples::Vector{<:AbstractArray};
+    Z_samples::Vector{<:AbstractArray};
     kwargs...,
 )
     return ThreadsX.map(
-        η -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, η; kwargs...), η_samples
+        Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
     )
 end
 
