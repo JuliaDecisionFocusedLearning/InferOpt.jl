@@ -53,7 +53,7 @@ function sample_perturbations(po::PerturbedOracle, θ::AbstractArray)
     return η_samples
 end
 
-function perturbation_logdensity(po::PerturbedOracle, θ::AbstractArray, η::AbstractArray)
+function _perturbation_logdensity(po::PerturbedOracle, θ::AbstractArray, η::AbstractArray)
     return logdensityof(po.perturbation(θ), η)
 end
 
@@ -63,13 +63,7 @@ function perturbation_grad_logdensity(
     θ::AbstractArray,
     η::AbstractArray,
 ) where {parallel,D,O}
-    l, logdensity_pullback = rrule_via_ad(rc, perturbation_logdensity, po, θ, η)
+    l, logdensity_pullback = rrule_via_ad(rc, _perturbation_logdensity, po, θ, η)
     δperturbation_logdensity, δpo, δθ, δη = logdensity_pullback(one(l))
     return δθ
-end
-
-function perturbation_grad_logdensity(
-    ::RuleConfig, po::PerturbedOracle, θ::AbstractArray, η::AbstractArray
-)
-    return po.grad_logdensity(θ, η)
 end

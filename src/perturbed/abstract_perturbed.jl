@@ -25,7 +25,7 @@ abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
 """
     sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
 
-Draw random perturbations `η` from perturbation(θ).
+Draw `nb_samples` random perturbations from perturbation(θ).
 """
 function sample_perturbations end
 
@@ -95,6 +95,12 @@ function (perturbed::AbstractPerturbed)(
         perturbed, θ; autodiff_variance_reduction, kwargs...
     )
     return compute_expectation(probadist)
+end
+
+function perturbation_grad_logdensity(
+    ::RuleConfig, perturbed::AbstractPerturbed, θ::AbstractArray, η::AbstractArray
+)
+    return perturbed.grad_logdensity(θ, η)
 end
 
 # Backward pass

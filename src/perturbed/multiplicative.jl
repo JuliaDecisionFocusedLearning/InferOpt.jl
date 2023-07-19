@@ -16,7 +16,7 @@ See [`AbstractPerturbed`](@ref) for more details.
 - `seed`
 - `perturbation`
 """
-struct PerturbedMultiplicative{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G} <:
+struct PerturbedMultiplicative{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}
     oracle::O
     ε::Float64
@@ -26,7 +26,7 @@ struct PerturbedMultiplicative{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel
     perturbation::P
     grad_logdensity::G
 
-    function PerturbedMultiplicative{P,O,R,S,parallel,G}(
+    function PerturbedMultiplicative{P,G,O,R,S,parallel}(
         oracle::O,
         ε::Float64,
         nb_samples::Int,
@@ -36,7 +36,7 @@ struct PerturbedMultiplicative{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel
         grad_logdensity,
     ) where {P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G}
         @assert parallel isa Bool
-        return new{P,O,R,S,parallel,G}(
+        return new{P,G,O,R,S,parallel}(
             oracle, ε, nb_samples, rng, seed, perturbation, grad_logdensity
         )
     end
@@ -64,7 +64,7 @@ function PerturbedMultiplicative(
     perturbation::P=nothing,
     grad_logdensity::G=nothing,
 ) where {F,R,S,P,G}
-    return PerturbedMultiplicative{P,F,R,S,is_parallel,G}(
+    return PerturbedMultiplicative{P,G,F,R,S,is_parallel}(
         oracle, float(ε), nb_samples, rng, seed, perturbation, grad_logdensity
     )
 end
@@ -95,10 +95,31 @@ end
 
 function perturbation_grad_logdensity(
     ::RuleConfig,
-    perturbed::PerturbedMultiplicative{Nothing},
+    perturbed::PerturbedMultiplicative{Nothing,Nothing},
     θ::AbstractArray,
     Z::AbstractArray,
 )
     (; ε) = perturbed
     return inv.(ε .* θ) .* Z
+end
+
+function perturbation_logdensity(
+    perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray
+)
+    (; ε) = perturbed
+    Z = (log.(η) .- log.(θ)) ./ ε .+ ε / 2
+    return logdensityof(perturbed.perturbation, Z)
+end
+
+function perturbation_grad_logdensity(
+    ::RuleConfig,
+    perturbed::PerturbedMultiplicative{P,Nothing},
+    θ::AbstractArray,
+    Z::AbstractArray,
+) where {P}
+    (; ε) = perturbed
+    η = θ .* exp.(ε .* Z .- ε^2 / 2)
+    l, logdensity_pullback = rrule_via_ad(rc, perturbation_logdensity, perturbed, θ, η)
+    δperturbation_logdensity, δperturbed, δθ, δη = logdensity_pullback(one(l))
+    return δθ
 end

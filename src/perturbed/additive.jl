@@ -16,7 +16,7 @@ See [`AbstractPerturbed`](@ref) for more details.
 - `perturbation`
 - `grad_logdensity`
 """
-struct PerturbedAdditive{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G} <:
+struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}
     oracle::O
     ε::Float64
@@ -26,7 +26,8 @@ struct PerturbedAdditive{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G} <:
     perturbation::P
     grad_logdensity::G
 
-    function PerturbedAdditive{P,O,R,S,parallel,G}(
+    # TODO: is this really necessary, the custom constructors enforces parallel to be a Bool. Probably not.
+    function PerturbedAdditive{P,G,O,R,S,parallel}(
         oracle::O,
         ε::Float64,
         nb_samples::Int,
@@ -36,7 +37,7 @@ struct PerturbedAdditive{P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G} <:
         grad_logdensity::G,
     ) where {P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G}
         @assert parallel isa Bool
-        return new{P,O,R,S,parallel,G}(
+        return new{P,G,O,R,S,parallel}(
             oracle, ε, nb_samples, rng, seed, perturbation, grad_logdensity
         )
     end
@@ -63,7 +64,7 @@ function PerturbedAdditive(
     perturbation::P=nothing,
     grad_logdensity::G=nothing,
 ) where {O,R,S,P,G}
-    return PerturbedAdditive{P,O,R,S,is_parallel,G}(
+    return PerturbedAdditive{P,G,O,R,S,is_parallel}(
         oracle, float(ε), nb_samples, rng, seed, perturbation, grad_logdensity
     )
 end
@@ -92,8 +93,32 @@ function compute_probability_distribution_from_samples(
 end
 
 function perturbation_grad_logdensity(
-    ::RuleConfig, perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray, Z::AbstractArray
+    ::RuleConfig,
+    perturbed::PerturbedAdditive{Nothing,Nothing},
+    θ::AbstractArray,
+    Z::AbstractArray,
 )
     (; ε) = perturbed
     return Z ./ ε
+end
+
+function _perturbation_logdensity(
+    perturbed::PerturbedAdditive, θ::AbstractArray, η::AbstractArray
+)
+    (; ε) = perturbed
+    Z = (η .- θ) ./ ε
+    return logdensityof(perturbed.perturbation, Z)
+end
+
+function perturbation_grad_logdensity(
+    ::RuleConfig,
+    perturbed::PerturbedAdditive{P,Nothing},
+    θ::AbstractArray,
+    Z::AbstractArray,
+) where {P}
+    (; ε) = perturbed
+    η = θ .+ ε .* Z
+    l, logdensity_pullback = rrule_via_ad(rc, _perturbation_logdensity, perturbed, θ, η)
+    δperturbation_logdensity, δperturbed, δθ, δη = logdensity_pullback(one(l))
+    return δθ
 end
