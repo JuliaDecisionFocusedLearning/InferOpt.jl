@@ -56,7 +56,7 @@ end
 function sample_perturbations(perturbed::PerturbedAdditive, θ::AbstractArray)
     (; rng, seed, nb_samples, perturbation) = perturbed
     seed!(rng, seed)
-    return [rand(rng, perturbation(θ)) for _ in 1:nb_samples]
+    return [rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
 end
 
 function sample_perturbations(perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray)
@@ -94,7 +94,7 @@ function _perturbation_logdensity(
 )
     (; ε, perturbation) = perturbed
     Z = (η .- θ) ./ ε
-    return logdensityof(perturbation(θ), Z)
+    return sum(logdensityof(perturbation, z) for z in Z)
 end
 
 function perturbation_grad_logdensity(

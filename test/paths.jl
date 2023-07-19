@@ -143,6 +143,25 @@ end
     )
 end
 
+@testitem "Paths - imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Distributions
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=(5, 5),
+        true_maximizer=shortest_path_maximizer,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(
+                shortest_path_maximizer; ε=1.0, nb_samples=5, perturbation=LogNormal(0, 1)
+            ),
+        ),
+        error_function=mse,
+    )
+end
+
 @testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
