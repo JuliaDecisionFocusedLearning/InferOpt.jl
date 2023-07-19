@@ -25,21 +25,6 @@ struct PerturbedMultiplicative{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parall
     seed::S
     perturbation::P
     grad_logdensity::G
-
-    function PerturbedMultiplicative{P,G,O,R,S,parallel}(
-        oracle::O,
-        ε::Float64,
-        nb_samples::Int,
-        rng::R,
-        seed::S,
-        perturbation::P,
-        grad_logdensity,
-    ) where {P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G}
-        @assert parallel isa Bool
-        return new{P,G,O,R,S,parallel}(
-            oracle, ε, nb_samples, rng, seed, perturbation, grad_logdensity
-        )
-    end
 end
 
 function Base.show(io::IO, perturbed::PerturbedMultiplicative)
@@ -72,7 +57,7 @@ end
 function sample_perturbations(perturbed::PerturbedMultiplicative, θ::AbstractArray)
     (; rng, seed, nb_samples, perturbation) = perturbed
     seed!(rng, seed)
-    return [rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
+    return [rand(rng, perturbation(θ)) for _ in 1:nb_samples]
 end
 
 function sample_perturbations(perturbed::PerturbedMultiplicative{Nothing}, θ::AbstractArray)
@@ -103,23 +88,23 @@ function perturbation_grad_logdensity(
     return inv.(ε .* θ) .* Z
 end
 
-function perturbation_logdensity(
+function _perturbation_logdensity(
     perturbed::PerturbedMultiplicative, θ::AbstractArray, η::AbstractArray
 )
-    (; ε) = perturbed
+    (; ε, perturbation) = perturbed
     Z = (log.(η) .- log.(θ)) ./ ε .+ ε / 2
-    return logdensityof(perturbed.perturbation, Z)
+    return logdensityof(perturbation(θ), Z)
 end
 
 function perturbation_grad_logdensity(
-    ::RuleConfig,
+    rc::RuleConfig,
     perturbed::PerturbedMultiplicative{P,Nothing},
     θ::AbstractArray,
     Z::AbstractArray,
 ) where {P}
     (; ε) = perturbed
     η = θ .* exp.(ε .* Z .- ε^2 / 2)
-    l, logdensity_pullback = rrule_via_ad(rc, perturbation_logdensity, perturbed, θ, η)
+    l, logdensity_pullback = rrule_via_ad(rc, _perturbation_logdensity, perturbed, θ, η)
     δperturbation_logdensity, δperturbed, δθ, δη = logdensity_pullback(one(l))
     return δθ
 end

@@ -97,14 +97,6 @@ function fenchel_young_F_and_first_part_of_grad(
     return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
 end
 
-# function fenchel_young_F_and_first_part_of_grad(
-#     perturbed::PerturbedMultiplicative, θ::AbstractArray; kwargs...
-# )
-#     Z_samples = sample_Z_perturbations(perturbed, θ)
-#     F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
-#     return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
-# end
-
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray, kwargs...
 )

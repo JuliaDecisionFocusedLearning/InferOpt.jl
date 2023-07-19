@@ -139,6 +139,25 @@ end
     )
 end
 
+@testitem "Ranking - imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Distributions, LinearAlgebra
+    Random.seed!(63)
+
+    p(θ) = MvLogNormal(θ, I)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(ranking; ε=1.0, nb_samples=5, perturbation=p)
+        ),
+        error_function=hamming_distance,
+    )
+end
+
 @testitem "Ranking - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
@@ -199,6 +218,55 @@ end
         true_encoder=true_encoder,
         cost=cost,
         epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedAdditive{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
+
+    p(θ) = MvLogNormal(θ, I)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedAdditive(ranking; ε=1.0, nb_samples=10, perturbation=p), cost
+        ),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedMultiplicative{LogNormal}" default_imports =
+    false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
+
+    p(θ) = MvLogNormal(θ, I)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedMultiplicative(ranking; ε=0.1, nb_samples=10, perturbation=p), cost
+        ),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=1000,
     )
 end
 

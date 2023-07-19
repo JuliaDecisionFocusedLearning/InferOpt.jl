@@ -25,22 +25,6 @@ struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
     seed::S
     perturbation::P
     grad_logdensity::G
-
-    # TODO: is this really necessary, the custom constructors enforces parallel to be a Bool. Probably not.
-    function PerturbedAdditive{P,G,O,R,S,parallel}(
-        oracle::O,
-        ε::Float64,
-        nb_samples::Int,
-        rng::R,
-        seed::S,
-        perturbation::P,
-        grad_logdensity::G,
-    ) where {P,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel,G}
-        @assert parallel isa Bool
-        return new{P,G,O,R,S,parallel}(
-            oracle, ε, nb_samples, rng, seed, perturbation, grad_logdensity
-        )
-    end
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
@@ -72,7 +56,7 @@ end
 function sample_perturbations(perturbed::PerturbedAdditive, θ::AbstractArray)
     (; rng, seed, nb_samples, perturbation) = perturbed
     seed!(rng, seed)
-    return [rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
+    return [rand(rng, perturbation(θ)) for _ in 1:nb_samples]
 end
 
 function sample_perturbations(perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray)
@@ -105,13 +89,13 @@ end
 function _perturbation_logdensity(
     perturbed::PerturbedAdditive, θ::AbstractArray, η::AbstractArray
 )
-    (; ε) = perturbed
+    (; ε, perturbation) = perturbed
     Z = (η .- θ) ./ ε
-    return logdensityof(perturbed.perturbation, Z)
+    return logdensityof(perturbation(θ), Z)
 end
 
 function perturbation_grad_logdensity(
-    ::RuleConfig,
+    rc::RuleConfig,
     perturbed::PerturbedAdditive{P,Nothing},
     θ::AbstractArray,
     Z::AbstractArray,
