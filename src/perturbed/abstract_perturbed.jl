@@ -14,7 +14,7 @@ The parameter `parallel` is a boolean value, equal to true if the perturbations 
 These three subtypes share the following fields:
 
 - `oracle`: black box (optimizer)
-- `perturbation::P`
+- `perturbation::P` -> doesn't mean the same thing depending on the implementation, use different names ?
 - `grad_logdensity::G`
 - `nb_samples::Int`: number of random samples for Monte-Carlo computations
 - `rng::AbstractRNG`: random number generator
@@ -38,6 +38,7 @@ perturbation_grad_logdensity::RuleConfig,
 """
 function perturbation_grad_logdensity end
 
+# TODO: remove this, all imlementations have the nb_samples field
 function get_nb_samples(perturbed::AbstractPerturbed)
     return perturbed.nb_samples
 end
@@ -54,8 +55,8 @@ function compute_atoms(
     return ThreadsX.map(η -> perturbed.oracle(η; kwargs...), η_samples)
 end
 
-function compute_probability_distribution(
-    perturbed::AbstractPerturbed, η_samples::Vector{<:AbstractArray}; kwargs...
+function compute_probability_distribution_from_samples(
+    perturbed::AbstractPerturbed, θ, η_samples::Vector{<:AbstractArray}; kwargs...
 )
     atoms = compute_atoms(perturbed, η_samples; kwargs...)
     weights = ones(length(atoms)) ./ length(atoms)
@@ -77,7 +78,7 @@ function compute_probability_distribution(
     kwargs...,
 )
     η_samples = sample_perturbations(perturbed, θ)
-    return compute_probability_distribution(perturbed, η_samples; kwargs...)
+    return compute_probability_distribution_from_samples(perturbed, θ, η_samples; kwargs...)
 end
 
 # Forward pass
@@ -107,7 +108,9 @@ function ChainRulesCore.rrule(
     kwargs...,
 )
     η_samples = sample_perturbations(perturbed, θ)
-    y_dist = compute_probability_distribution(perturbed, η_samples; kwargs...)
+    y_dist = compute_probability_distribution_from_samples(
+        perturbed, θ, η_samples; kwargs...
+    )
 
     ∇logp_samples = [perturbation_grad_logdensity(rc, perturbed, θ, η) for η in η_samples]
 

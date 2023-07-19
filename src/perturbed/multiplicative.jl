@@ -69,34 +69,58 @@ function PerturbedMultiplicative(
     )
 end
 
+# function sample_perturbations(perturbed::PerturbedMultiplicative, θ::AbstractArray)
+#     (; rng, seed, nb_samples, ε, perturbation) = perturbed
+#     seed!(rng, seed)
+#     return [
+#         θ .* exp.(ε .* rand(rng, perturbation, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples
+#     ]
+# end
+
+# function sample_perturbations(perturbed::PerturbedMultiplicative{Nothing}, θ::AbstractArray)
+#     (; rng, seed, nb_samples, ε) = perturbed
+#     seed!(rng, seed)
+#     return [θ .* exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
+# end
+
+# function sample_Z_perturbations(
+#     perturbed::PerturbedMultiplicative{Nothing}, θ::AbstractArray
+# )
+#     (; rng, seed, nb_samples, ε) = perturbed
+#     seed!(rng, seed)
+#     return [exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
+# end
+
 function sample_perturbations(perturbed::PerturbedMultiplicative, θ::AbstractArray)
-    (; rng, seed, nb_samples, ε, perturbation) = perturbed
+    (; rng, seed, nb_samples, perturbation) = perturbed
     seed!(rng, seed)
-    return [
-        θ .* exp.(ε .* rand(rng, perturbation, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples
-    ]
+    return [rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
 end
 
 function sample_perturbations(perturbed::PerturbedMultiplicative{Nothing}, θ::AbstractArray)
-    (; rng, seed, nb_samples, ε) = perturbed
+    (; rng, seed, nb_samples) = perturbed
     seed!(rng, seed)
-    return [θ .* exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
+    return [randn(rng, size(θ)) for _ in 1:nb_samples]
 end
 
-function sample_Z_perturbations(
-    perturbed::PerturbedMultiplicative{Nothing}, θ::AbstractArray
+function compute_probability_distribution_from_samples(
+    perturbed::PerturbedMultiplicative, θ, Z_samples::Vector{<:AbstractArray}; kwargs...
 )
-    (; rng, seed, nb_samples, ε) = perturbed
-    seed!(rng, seed)
-    return [exp.(ε .* randn(rng, size(θ)) .- ε^2 / 2) for _ in 1:nb_samples]
+    (; ε) = perturbed
+    # Z_samples = sample_perturbations(perturbed, θ)
+    η_samples = [θ .* exp.(ε .* Z .- ε^2 / 2) for Z in Z_samples]
+    atoms = compute_atoms(perturbed, η_samples; kwargs...)
+    weights = ones(length(atoms)) ./ length(atoms)
+    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
+    return probadist
 end
 
 function perturbation_grad_logdensity(
     ::RuleConfig,
     perturbed::PerturbedMultiplicative{Nothing},
     θ::AbstractArray,
-    η::AbstractArray,
+    Z::AbstractArray,
 )
     (; ε) = perturbed
-    return inv.(ε .* θ) .* ((log.(η) .- log.(θ)) ./ ε .+ ε / 2)
+    return inv.(ε .* θ) .* Z
 end

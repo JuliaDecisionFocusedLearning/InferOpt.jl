@@ -92,32 +92,34 @@ end
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
 )
-    η_samples = sample_perturbations(perturbed, θ)
-    F_and_y_samples = compute_F_and_y_samples(perturbed, θ, η_samples; kwargs...)
-    return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
-end
-
-function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray; kwargs...
-)
-    Z_samples = sample_Z_perturbations(perturbed, θ)
+    Z_samples = sample_perturbations(perturbed, θ)
     F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
     return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
 end
 
+# function fenchel_young_F_and_first_part_of_grad(
+#     perturbed::PerturbedMultiplicative, θ::AbstractArray; kwargs...
+# )
+#     Z_samples = sample_Z_perturbations(perturbed, θ)
+#     F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
+#     return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
+# end
+
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive, θ::AbstractArray, η::AbstractArray, kwargs...
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray, kwargs...
 )
-    (; oracle) = perturbed
+    (; oracle, ε) = perturbed
+    η = θ .+ ε .* Z
     y = oracle(η; kwargs...)
     F = dot(η, y)
     return F, y
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray, eZ::AbstractArray; kwargs...
+    perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
-    (; oracle) = perturbed
+    (; oracle, ε) = perturbed
+    eZ = exp.(ε .* Z .- ε^2 ./ 2)
     η = θ .* eZ
     y = oracle(η; kwargs...)
     F = dot(η, y)

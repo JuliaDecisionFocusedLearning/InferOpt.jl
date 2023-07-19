@@ -69,20 +69,31 @@ function PerturbedAdditive(
 end
 
 function sample_perturbations(perturbed::PerturbedAdditive, θ::AbstractArray)
-    (; rng, seed, nb_samples, ε, perturbation) = perturbed
+    (; rng, seed, nb_samples, perturbation) = perturbed
     seed!(rng, seed)
-    return [θ .+ ε .* rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
+    return [rand(rng, perturbation, size(θ)) for _ in 1:nb_samples]
 end
 
 function sample_perturbations(perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray)
-    (; rng, seed, nb_samples, ε) = perturbed
+    (; rng, seed, nb_samples) = perturbed
     seed!(rng, seed)
-    return [θ .+ ε .* randn(rng, size(θ)) for _ in 1:nb_samples]
+    return [randn(rng, size(θ)) for _ in 1:nb_samples]
+end
+
+function compute_probability_distribution_from_samples(
+    perturbed::PerturbedAdditive, θ, Z_samples::Vector{<:AbstractArray}; kwargs...
+)
+    (; ε) = perturbed
+    η_samples = [θ .+ ε .* Z for Z in Z_samples]
+    atoms = compute_atoms(perturbed, η_samples; kwargs...)
+    weights = ones(length(atoms)) ./ length(atoms)
+    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
+    return probadist
 end
 
 function perturbation_grad_logdensity(
-    ::RuleConfig, perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray, η::AbstractArray
+    ::RuleConfig, perturbed::PerturbedAdditive{Nothing}, θ::AbstractArray, Z::AbstractArray
 )
     (; ε) = perturbed
-    return (η .- θ) ./ ε^2
+    return Z ./ ε
 end
