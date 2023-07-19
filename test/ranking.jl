@@ -234,7 +234,7 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=300,
+        epochs=500,
     )
 end
 
@@ -260,7 +260,7 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=300,
+        epochs=500,
     )
 end
 
@@ -278,7 +278,7 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=Pushforward(PerturbedOracle(p, ranking; nb_samples=10), cost),
+        loss=Pushforward(PerturbedOracle(ranking, p; nb_samples=10), cost),
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,

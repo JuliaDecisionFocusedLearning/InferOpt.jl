@@ -1,30 +1,27 @@
 """
-    PerturbedAdditive <: AbstractPerturbed
+    PerturbedAdditive{P,G,O,R,S,parallel} <: AbstractPerturbed{parallel}
 
 Differentiable normal perturbation of a black-box maximizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
+
+This [`OptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
+if the oracle is an optimization maximizer with a linear objective.
 
 Reference: <https://arxiv.org/abs/2002.08676>
 
 See [`AbstractPerturbed`](@ref) for more details.
 
-# Fields
-- `oracle`
-- `ε`
-- `nb_samples`
-- `rng`
-- `seed`
-- `perturbation`
-- `grad_logdensity`
+# Specific field
+- `ε:Float64`: size of the perturbation
 """
 struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{parallel}
-    oracle::O
-    ε::Float64
-    nb_samples::Int
-    rng::R
-    seed::S
     perturbation::P
     grad_logdensity::G
+    oracle::O
+    rng::R
+    seed::S
+    nb_samples::Int
+    ε::Float64
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
@@ -36,20 +33,40 @@ function Base.show(io::IO, perturbed::PerturbedAdditive)
 end
 
 """
-    PerturbedAdditive(maximizer[; ε=1.0, nb_samples=1])
+    PerturbedAdditive(oracle[; ε, nb_samples, seed, is_parallel, perturbation, grad_logdensity, rng])
+
+[`PerturbedAdditive`](@ref) constructor.
+
+# Arguments
+- `oracle`: the black-box oracle we want to differentiate through.
+    It should be a linear maximizer if you want to use it inside a [`FenchelYoungLoss`].
+
+# Keyword arguments (optional)
+- `ε=1.0`: size of the perturbation.
+- `nb_samples::Int=1`: number of perturbation samples drawn at each forward pass.
+- `perturbation=nothing`: nothing by default. If you want to use a different distribution than a
+    `Normal` for the perturbation `z`, give it here as a distribution-like object implementing
+    the `rand` method. It should also implement `logdensityof` if `grad_logdensity` is not given.
+- `grad_logdensity=nothing`: gradient function of `perturbation` w.r.t. `θ`.
+    If set to nothing (default), it's computed using automatic differentiation.
+- `seed::Union{Nothing,Int}=nothing`: seed of the perturbation.
+    It is reset each time the forward pass is called,
+    making it deterministic by always drawing the same perturbations.
+    If you do not want this behaviour, set this field to `nothing`.
+- `rng::AbstractRNG`=MersenneTwister(0): random number generator using the `seed`.
 """
 function PerturbedAdditive(
     oracle::O;
     ε=1.0,
     nb_samples=1,
-    rng::R=MersenneTwister(0),
     seed::S=nothing,
     is_parallel::Bool=false,
     perturbation::P=nothing,
     grad_logdensity::G=nothing,
-) where {O,R,S,P,G}
+    rng::R=MersenneTwister(0),
+) where {P,G,O,R<:AbstractRNG,S<:Union{Int,Nothing}}
     return PerturbedAdditive{P,G,O,R,S,is_parallel}(
-        oracle, float(ε), nb_samples, rng, seed, perturbation, grad_logdensity
+        perturbation, grad_logdensity, oracle, rng, seed, nb_samples, float(ε)
     )
 end
 

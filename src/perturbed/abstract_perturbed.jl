@@ -1,47 +1,32 @@
 """
-    AbstractPerturbed{parallel,P,G} <: AbstractOptimizationLayer
+    AbstractPerturbed{parallel} <: AbstractOptimizationLayer
 
 Differentiable perturbation of a black box optimizer.
 
-The parameter `parallel` is a boolean value, equal to true if the perturbations are run in parallel.
+The parameter `parallel` is a boolean value indicating if the perturbations are run in parallel.
+This is particularly useful if your black box optimizer running time is high.
 
-# Available implementations
-
+# Available implementations:
 - [`PerturbedAdditive`](@ref)
 - [`PerturbedMultiplicative`](@ref)
 - [`PerturbedOracle`](@ref)
 
-These three subtypes share the following fields:
-
+# These three subtypes share the following fields:
 - `oracle`: black box (optimizer)
-- `perturbation::P` -> doesn't mean the same thing depending on the implementation, use different names ?
-- `grad_logdensity::G`
-- `nb_samples::Int`: number of random samples for Monte-Carlo computations
-- `rng::AbstractRNG`: random number generator
-- `seed::Union{Nothing,Int}`: random seed
+- `perturbation::P`: perturbation distribution of the input θ
+- `grad_logdensity::G`: gradient of the log density `perturbation` w.r.t. input θ
+- `nb_samples::Int`: number of perturbation samples drawn at each forward pass
+- `seed::Union{Nothing,Int}`: seed of the perturbation.
+    It is reset each time the forward pass is called,
+    making it deterministic by always drawing the same perturbations.
+    If you do not want this behaviour, set this field to `nothing`.
+- `rng::AbstractRNG`: random number generator using the `seed`.
+
+!!! warning
+    The `perturbation` field does not mean the same thing for a [`PerturbedOracle`](@ref)
+    than for a [`PerturbedAdditive`](@ref)/[`PerturbedMultiplicative`](@ref). See their respective docs.
 """
 abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
-
-"""
-    sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
-
-Draw `nb_samples` random perturbations from perturbation(θ).
-"""
-function sample_perturbations end
-
-"""
-perturbation_grad_logdensity::RuleConfig,
-    perturbed::AbstractPerturbed,
-    θ::AbstractArray,
-    η::AbstractArray,
-)
-"""
-function perturbation_grad_logdensity end
-
-# TODO: remove this, all imlementations have the nb_samples field
-function get_nb_samples(perturbed::AbstractPerturbed)
-    return perturbed.nb_samples
-end
 
 function compute_atoms(
     perturbed::AbstractPerturbed{false}, η_samples::Vector{<:AbstractArray}; kwargs...
@@ -55,14 +40,37 @@ function compute_atoms(
     return ThreadsX.map(η -> perturbed.oracle(η; kwargs...), η_samples)
 end
 
-function compute_probability_distribution_from_samples(
-    perturbed::AbstractPerturbed, θ, η_samples::Vector{<:AbstractArray}; kwargs...
-)
-    atoms = compute_atoms(perturbed, η_samples; kwargs...)
-    weights = ones(length(atoms)) ./ length(atoms)
-    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
-    return probadist
-end
+"""
+    sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
+
+Draw `nb_samples` random perturbations from the `perturbation` distribution.
+"""
+function sample_perturbations end
+
+"""
+    perturbation_grad_logdensity(
+        ::RuleConfig,
+        ::AbstractPerturbed,
+        θ::AbstractArray,
+        sample::AbstractArray,
+    )
+
+Compute de gradient w.r.t to the input `θ` of the logdensity of the perturbed input
+distribution evaluated in the observed perturbation sample `η`.
+"""
+function perturbation_grad_logdensity end
+
+"""
+    compute_probability_distribution_from_samples(
+        ::AbstractPerturbed,
+        θ::AbstractArray,
+        samples::Vector{<:AbstractArray};
+        kwargs...,
+    )
+
+Create a probability distributions from `samples` drawn from `perturbation`.
+"""
+function compute_probability_distribution_from_samples end
 
 """
     compute_probability_distribution(perturbed::AbstractPerturbed, θ; kwargs...)
@@ -86,7 +94,7 @@ end
 """
     (perturbed::AbstractPerturbed)(θ; kwargs...)
 
-Apply `compute_probability_distribution(perturbed, θ; kwargs...)` and return the expectation.
+Forward pass. Compute the expectation of the underlying distribution.
 """
 function (perturbed::AbstractPerturbed)(
     θ::AbstractArray; autodiff_variance_reduction::Bool=false, kwargs...
@@ -120,7 +128,7 @@ function ChainRulesCore.rrule(
 
     ∇logp_samples = [perturbation_grad_logdensity(rc, perturbed, θ, η) for η in η_samples]
 
-    M = get_nb_samples(perturbed)
+    M = perturbed.nb_samples
     function perturbed_oracle_dist_pullback(δy_dist)
         weights = y_dist.weights
         δy_weights = δy_dist.weights
