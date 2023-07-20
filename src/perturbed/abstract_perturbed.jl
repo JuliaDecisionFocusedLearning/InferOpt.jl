@@ -97,7 +97,7 @@ end
 Forward pass. Compute the expectation of the underlying distribution.
 """
 function (perturbed::AbstractPerturbed)(
-    θ::AbstractArray; autodiff_variance_reduction::Bool=false, kwargs...
+    θ::AbstractArray; autodiff_variance_reduction::Bool=true, kwargs...
 )
     probadist = compute_probability_distribution(
         perturbed, θ; autodiff_variance_reduction, kwargs...
@@ -118,7 +118,7 @@ function ChainRulesCore.rrule(
     ::typeof(compute_probability_distribution),
     perturbed::AbstractPerturbed,
     θ::AbstractArray;
-    autodiff_variance_reduction::Bool=false,
+    autodiff_variance_reduction::Bool=true,
     kwargs...,
 )
     η_samples = sample_perturbations(perturbed, θ)

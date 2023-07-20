@@ -15,8 +15,10 @@
 
     @testset "PerturbedAdditive" begin
         # Compute jacobian with reverse mode
-        jac1 = Zygote.jacobian(perturbed1, θ)[1]
-        jac1_big = Zygote.jacobian(perturbed1_big, θ)[1]
+        jac1 = Zygote.jacobian(θ -> perturbed1(θ; autodiff_variance_reduction=false), θ)[1]
+        jac1_big = Zygote.jacobian(
+            θ -> perturbed1_big(θ; autodiff_variance_reduction=false), θ
+        )[1]
         # Only diagonal should be positive
         @test all(diag(jac1) .>= 0)
         @test all(jac1 - Diagonal(jac1) .<= 0)
@@ -27,8 +29,10 @@
     end
 
     @testset "PerturbedMultiplicative" begin
-        jac2 = Zygote.jacobian(perturbed2, θ)[1]
-        jac2_big = Zygote.jacobian(perturbed2_big, θ)[1]
+        jac2 = Zygote.jacobian(θ -> perturbed2(θ; autodiff_variance_reduction=false), θ)[1]
+        jac2_big = Zygote.jacobian(
+            θ -> perturbed2_big(θ; autodiff_variance_reduction=false), θ
+        )[1]
         @test all(diag(jac2) .>= 0)
         @test all(jac2 - Diagonal(jac2) .<= 0)
         @test sortperm(diag(jac2)) != sortperm(θ)

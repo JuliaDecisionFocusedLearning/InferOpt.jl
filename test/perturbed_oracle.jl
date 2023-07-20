@@ -31,11 +31,11 @@ end
     n = 10
     θ = randn(10)
 
-    Ja = jacobian(pa, θ)[1]
-    Ja_reduced_variance = jacobian(x -> pa(x; autodiff_variance_reduction=true), θ)[1]
+    Ja = jacobian(θ -> pa(θ; autodiff_variance_reduction=false), θ)[1]
+    Ja_reduced_variance = jacobian(pa, θ)[1]
 
-    Jm = jacobian(pm, θ)[1]
-    Jm_reduced_variance = jacobian(x -> pm(x; autodiff_variance_reduction=true), θ)[1]
+    Jm = jacobian(x -> pm(x; autodiff_variance_reduction=false), θ)[1]
+    Jm_reduced_variance = jacobian(pm, θ)[1]
 
     J_true = Matrix(I, n, n)  # exact jacobian is the identity matrix
 
