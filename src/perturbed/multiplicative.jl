@@ -1,7 +1,7 @@
 """
     PerturbedMultiplicative{P,G,O,R,S,parallel} <: AbstractPerturbed{parallel}
 
-Differentiable log-normal perturbation of a black-box oracle:
+Differentiable multiplicative perturbation of a black-box oracle:
 the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ perturbation`.
 
 This [`OptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
