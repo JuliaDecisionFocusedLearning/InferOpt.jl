@@ -20,6 +20,7 @@ include("interface.jl")
 include("utils/some_functions.jl")
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
+include("utils/isotonic.jl")
 
 include("simple/interpolation.jl")
 include("simple/identity.jl")
@@ -27,6 +28,7 @@ include("simple/identity.jl")
 include("regularized/abstract_regularized.jl")
 include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
+include("regularized/soft_rank.jl")
 include("regularized/regularized_frank_wolfe.jl")
 
 include("perturbed/abstract_perturbed.jl")
@@ -58,6 +60,8 @@ export Interpolation
 export AbstractRegularized
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
+export SoftRank, soft_rank
+export SoftSort, soft_sort
 export RegularizedFrankWolfe
 
 export AbstractPerturbed
