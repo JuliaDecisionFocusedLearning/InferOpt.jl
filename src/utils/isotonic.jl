@@ -1,6 +1,6 @@
 function isotonic_l2(y::AbstractVector)
     n = length(y)
-    target = [i for i in 1:n]
+    target = [i for i in 1:n] # if block i -> j, then target[i] = j and target[j] = i
     c = ones(n)
     sums = copy(y)
     sol = copy(y)
@@ -11,7 +11,7 @@ function isotonic_l2(y::AbstractVector)
         if k == n + 1
             break
         end
-        if sol[i] > sol[k]  # continue if B and B+ are correctly ordered
+        if sol[i] < sol[k]  # continue if B and B+ are correctly ordered
             i = k
             continue
         end
@@ -76,8 +76,8 @@ function ChainRulesCore.rrule(rc::RuleConfig, ::typeof(isotonic_l2), y::Abstract
 end
 
 function projection(z, w)
-    p = sortperm(z; rev=true)
-    return z .- isotonic_l2(z[p], sort(w; rev=true))[invperm(p)]
+    p = sortperm(z)
+    return z .- isotonic_l2(z[p], sort(w))[invperm(p)]
 end
 
 function ChainRulesCore.rrule(
@@ -85,10 +85,10 @@ function ChainRulesCore.rrule(
 )
     y = projection(z, w)
 
-    p = sortperm(z; rev=true)
+    p = sortperm(z)
     p_inv = invperm(p)
 
-    pw = sortperm(w; rev=true)
+    pw = sortperm(w)
     pw_inv = invperm(pw)
 
     _, isotonic_pullback = rrule_via_ad(rc, isotonic_l2, z[p], w[pw])
