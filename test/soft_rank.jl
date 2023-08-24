@@ -39,7 +39,7 @@ end
     end
 end
 
-@testitem "InferOpt pipeline with sodt rank" default_imports = false begin
+@testitem "LEarn by experience soft rank" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
@@ -55,5 +55,22 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
+    )
+end
+
+@testitem "Fenchel-Young loss soft rank" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(SoftRank(1.0)),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
     )
 end
