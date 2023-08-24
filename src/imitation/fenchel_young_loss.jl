@@ -24,7 +24,7 @@ end
 ## Forward pass
 
 """
-    (fyl::FenchelYoungLoss)(θ, y_true; kwargs...)
+    (fyl::FenchelYoungLoss)(θ, y_true[; kwargs...])
 """
 function (fyl::FenchelYoungLoss)(θ::AbstractArray, y_true::AbstractArray; kwargs...)
     l, _ = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)
@@ -66,7 +66,10 @@ end
 ## Specific overrides for perturbed layers
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{false}, θ::AbstractArray, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{false},
+    θ::AbstractArray,
+    Z_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     F_and_y_samples = [
         fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
@@ -76,7 +79,10 @@ function compute_F_and_y_samples(
 end
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{true}, θ::AbstractArray, Z_samples; kwargs...
+    perturbed::AbstractPerturbed{true},
+    θ::AbstractArray,
+    Z_samples::Vector{<:AbstractArray};
+    kwargs...,
 )
     return ThreadsX.map(
         Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
@@ -92,23 +98,23 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray, kwargs...
 )
-    (; maximizer, ε) = perturbed
-    θ_perturbed = θ .+ ε .* Z
-    y = maximizer(θ_perturbed; kwargs...)
-    F = dot(θ_perturbed, y)
+    (; oracle, ε) = perturbed
+    η = θ .+ ε .* Z
+    y = oracle(η; kwargs...)
+    F = dot(η, y)
     return F, y
 end
 
 function fenchel_young_F_and_first_part_of_grad(
     perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
-    (; maximizer, ε) = perturbed
+    (; oracle, ε) = perturbed
     eZ = exp.(ε .* Z .- ε^2 ./ 2)
-    θ_perturbed = θ .* eZ
-    y = maximizer(θ_perturbed; kwargs...)
-    F = dot(θ_perturbed, y)
+    η = θ .* eZ
+    y = oracle(η; kwargs...)
+    F = dot(η, y)
     y_scaled = y .* eZ
     return F, y_scaled
 end

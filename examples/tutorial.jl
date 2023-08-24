@@ -63,7 +63,7 @@ true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
 To be consistent with the literature, we frame this problem as a linear maximization problem, which justifies the change of sign in front of $\theta$.
-Note that `linear_maximizer` can take keyword arguments, eg. to give additional information about the instance that `θ` doesn't contain. 
+Note that `linear_maximizer` can take keyword arguments, eg. to give additional information about the instance that `θ` doesn't contain.
 =#
 
 function linear_maximizer(θ; directions)

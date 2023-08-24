@@ -135,7 +135,23 @@ end
         maximizer=identity,
         loss=FenchelYoungLoss(PerturbedMultiplicative(ranking; ε=1.0, nb_samples=5)),
         error_function=hamming_distance,
-        epochs=100,
+    )
+end
+
+@testitem "Ranking - imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, Distributions, LinearAlgebra
+    Random.seed!(63)
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(ranking; ε=1.0, nb_samples=5, perturbation=LogNormal(0, 1))
+        ),
+        error_function=hamming_distance,
     )
 end
 
@@ -158,7 +174,6 @@ end
             ),
         ),
         error_function=hamming_distance,
-        epochs=100,
     )
 end
 
@@ -178,7 +193,6 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=100,
     )
 end
 
@@ -198,7 +212,76 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=100,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedAdditive{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedAdditive(ranking; ε=1.0, nb_samples=10, perturbation=LogNormal(0, 1)),
+            cost,
+        ),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=500,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedMultiplicative{LogNormal}" default_imports =
+    false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(
+            PerturbedMultiplicative(
+                ranking; ε=1.0, nb_samples=10, perturbation=LogNormal(0, 1)
+            ),
+            cost,
+        ),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=500,
+    )
+end
+
+@testitem "Ranking - exp - Pushforward PerturbedOracle{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
+
+    p(θ) = MvLogNormal(θ, I)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience;
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(PerturbedOracle(ranking, p; nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
     )
 end
 
@@ -227,6 +310,5 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=100,
     )
 end

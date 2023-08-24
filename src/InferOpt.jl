@@ -9,6 +9,7 @@ module InferOpt
 
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
+using DensityInterface: logdensityof
 using LinearAlgebra: dot
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
@@ -34,6 +35,7 @@ include("regularized/regularized_frank_wolfe.jl")
 include("perturbed/abstract_perturbed.jl")
 include("perturbed/additive.jl")
 include("perturbed/multiplicative.jl")
+include("perturbed/perturbed_oracle.jl")
 
 include("imitation/spoplus_loss.jl")
 include("imitation/ssvm_loss.jl")
@@ -64,9 +66,9 @@ export SoftRank, soft_rank
 export SoftSort, soft_sort
 export RegularizedFrankWolfe
 
-export AbstractPerturbed
 export PerturbedAdditive
 export PerturbedMultiplicative
+export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss
