@@ -40,14 +40,14 @@ end
 Regularized `sort` function.
 """
 function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false)
-    ρ = 1:length(θ)
-    return rev ? -projection(ρ ./ ε, -θ) : projection(ρ ./ ε, θ)
+    ρ = collect(1:length(θ))
+    return rev ? -projection_l2(ρ ./ ε, -θ) : projection_l2(ρ ./ ε, θ)
 end
 
 """
     soft_rank(θ::AbstractVector; ε=1.0, rev=false)
 """
 function soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false)
-    ρ = 1:length(θ)
-    return rev ? projection(-θ ./ ε, ρ) : projection(θ ./ ε, ρ)
+    ρ = collect(1:length(θ))
+    return rev ? projection_l2(-θ ./ ε, ρ) : projection_l2(θ ./ ε, ρ)
 end

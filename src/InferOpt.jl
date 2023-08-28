@@ -14,6 +14,7 @@ using LinearAlgebra: dot
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
+using StatsFuns: logaddexp, softmax
 using ThreadsX: ThreadsX
 
 include("interface.jl")
@@ -21,7 +22,9 @@ include("interface.jl")
 include("utils/some_functions.jl")
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
-include("utils/isotonic.jl")
+include("utils/isotonic_regression/isotonic_l2.jl")
+include("utils/isotonic_regression/isotonic_kl.jl")
+include("utils/isotonic_regression/projection.jl")
 
 include("simple/interpolation.jl")
 include("simple/identity.jl")

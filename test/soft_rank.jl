@@ -1,4 +1,4 @@
-@testitem "Isotonic regression testing" default_imports = false begin
+@testitem "Isotonic l2 compare to HiGHS" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, HiGHS, JuMP, Test
     Random.seed!(63)
@@ -39,7 +39,7 @@ end
     end
 end
 
-@testitem "LEarn by experience soft rank" default_imports = false begin
+@testitem "Learn by experience soft rank" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
