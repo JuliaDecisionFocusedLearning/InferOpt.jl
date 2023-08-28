@@ -1,24 +1,43 @@
 """
-TODO
+    SoftRank <: AbstractRegularized
+
+Fast differentiable ranking optimization layer.
+
+As an [`AbstractRegularized`](@ref) layer, it can also be used for supervised learning with
+a [`FenchelYoungLoss`](@ref).
 """
 struct SoftRank <: AbstractRegularized
     ε::Float64
+    rev::Bool
 end
 
+function SoftRank(; ε::Float64=1.0, rev::Bool=false)
+    return SoftRank(ε, rev)
+end
+
+compute_regularization(l::SoftRank, y) = l.ε * half_square_norm(y)
+(l::SoftRank)(θ) = soft_rank(θ; ε=l.ε, rev=l.rev)
+
 """
-TODO
+    SoftSort <: AbstractOptimizationLayer
+
+Fast differentiable sorting optimization layer.
 """
 struct SoftSort <: AbstractOptimizationLayer
     ε::Float64
+    rev::Bool
 end
 
-(l::SoftRank)(θ) = soft_rank(θ; ε=l.ε)
-(l::SoftSort)(θ) = soft_sort(θ; ε=l.ε)
+function SoftSort(; ε::Float64=1.0, rev::Bool=false)
+    return SoftSort(ε, rev)
+end
 
-compute_regularization(l::SoftRank, y) = l.ε * half_square_norm(y)
+(l::SoftSort)(θ) = soft_sort(θ; ε=l.ε, rev=l.rev)
 
 """
-    soft_sort(θ::AbstractVector; ε=1.0)
+    soft_sort(θ::AbstractVector; ε=1.0, rev=false)
+
+Regularized `sort` function.
 """
 function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false)
     ρ = 1:length(θ)
@@ -26,7 +45,7 @@ function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_rank(θ::AbstractVector; ε=1.0)
+    soft_rank(θ::AbstractVector; ε=1.0, rev=false)
 """
 function soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false)
     ρ = 1:length(θ)
