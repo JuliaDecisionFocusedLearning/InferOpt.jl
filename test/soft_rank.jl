@@ -69,7 +69,7 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=FenchelYoungLoss(SoftRank(1.0)),
+        loss=FenchelYoungLoss(SoftRank(1.0, false)),
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )
