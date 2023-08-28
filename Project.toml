@@ -1,14 +1,14 @@
 name = "InferOpt"
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
 authors = ["Guillaume Dalle", "Léo Baty", "Louis Bouvier", "Axel Parmentier"]
-version = "0.5.0-DEV"
+version = "0.5.2"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 ThreadsX = "ac1d9e8a-700a-412c-b207-f0111f4b6c0d"
@@ -21,8 +21,8 @@ InferOptFrankWolfeExt = "DifferentiableFrankWolfe"
 
 [compat]
 ChainRulesCore = "1"
+DensityInterface = "0.4.0"
 DifferentiableFrankWolfe = "0.1.2"
-SimpleTraits = "0.9"
 StatsBase = "0.33, 0.34"
 TestItemRunner = "0.2.2"
 ThreadsX = "0.1.11"
@@ -31,6 +31,7 @@ julia = "1.7"
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
@@ -51,4 +52,4 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Aqua", "DifferentiableFrankWolfe", "Documenter", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "JET", "JuliaFormatter", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]
+test = ["Aqua", "DifferentiableFrankWolfe", "Distributions", "Documenter", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "JET", "JuliaFormatter", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]

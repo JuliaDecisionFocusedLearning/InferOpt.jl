@@ -35,6 +35,5 @@ Since we want our package to be as generic as possible, we don't make any assump
 That way, the best solver can be selected for each use case.
 We only ask the user to provide a black box function called `maximizer`, taking $\theta$ as argument and returning $f(\theta)$.
 
-This function is then wrapped into a callable Julia `struct`, which can be used (for instance) within neural networks from the [`Flux.jl`](https://github.com/FluxML/Flux.jl) library.
-To achieve this compatibility, we leverage Julia's automatic differentiation (AD) ecosystem, which revolves around the [`ChainRules.jl`](https://github.com/JuliaDiff/ChainRules.jl) package.
-See their [documentation](https://juliadiff.org/ChainRulesCore.jl/dev/index.html) for more details.
+This function is then wrapped into a callable Julia `struct`, which can be used (for instance) within neural networks from the [Flux.jl](https://github.com/FluxML/Flux.jl) or [Lux.jl](https://github.com/LuxDL/Lux.jl) library.
+To achieve this compatibility, we leverage Julia's automatic differentiation (AD) ecosystem, which revolves around the [ChainRules.jl](https://github.com/JuliaDiff/ChainRules.jl) package.

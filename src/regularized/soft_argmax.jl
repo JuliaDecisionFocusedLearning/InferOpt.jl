@@ -1,17 +1,20 @@
 """
-    soft_argmax(z)
+    SoftArgmax <: Regularized
 
 Soft argmax activation function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 
 Corresponds to regularized prediction on the probability simplex with entropic penalty.
 """
-function soft_argmax(z::AbstractVector; kwargs...)
-    s = exp.(z) / sum(exp, z)
-    return s
+struct SoftArgmax <: AbstractRegularized end
+
+(::SoftArgmax)(z) = soft_argmax(z)
+compute_regularization(::SoftArgmax, y) = soft_argmax_regularization(y)
+
+function soft_argmax(z::AbstractVector)
+    s = exp.(z)
+    return s ./ sum(s)
 end
 
-@traitimpl IsRegularized{typeof(soft_argmax)}
-
-function compute_regularization(::typeof(soft_argmax), y::AbstractVector{R}) where {R<:Real}
-    return isprobadist(y) ? negative_shannon_entropy(y) : typemax(R)
+function soft_argmax_regularization(y::AbstractVector)
+    return isprobadist(y) ? negative_shannon_entropy(y) : typemax(eltype(y))
 end
