@@ -2,7 +2,7 @@ function isotonic_l2(y::AbstractVector)
     n = length(y)
     target = [i for i in 1:n] # if block i -> j, then target[i] = j and target[j] = i
     c = ones(n)
-    sums = copy(y)
+    sums = zeros(n) .+ y
     sol = sums ./ c
 
     i = 1
@@ -11,7 +11,7 @@ function isotonic_l2(y::AbstractVector)
         if k == n + 1
             break
         end
-        if sol[i] < sol[k]  # continue if B and B+ are correctly ordered
+        if sol[i] > sol[k]  # continue if B and B+ are correctly ordered
             i = k
             continue
         end

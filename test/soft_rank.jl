@@ -3,7 +3,7 @@
     using InferOpt, .InferOptTestUtils, Random, HiGHS, JuMP, Test
     Random.seed!(63)
 
-    function isotonic_custom(y)
+    function isotonic_custom(y; rev=false)
         model = Model(HiGHS.Optimizer)
         set_silent(model)
 

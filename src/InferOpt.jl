@@ -65,8 +65,8 @@ export Interpolation
 export AbstractRegularized
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
-export SoftRank, soft_rank
-export SoftSort, soft_sort
+export SoftRank, soft_rank, soft_sort_kl
+export SoftSort, soft_sort, soft_rank_kl
 export RegularizedFrankWolfe
 
 export PerturbedAdditive

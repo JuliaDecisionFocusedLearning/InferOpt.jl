@@ -11,7 +11,7 @@ function isotonic_kl(s::AbstractVector, w::AbstractVector)
         if k == n + 1
             break
         end
-        if sol[i] < sol[k]  # continue if B and B+ are correctly ordered
+        if sol[i] > sol[k]  # continue if B and B+ are correctly ordered
             i = k
             continue
         end
@@ -46,6 +46,7 @@ function ChainRulesCore.rrule(
     rc::RuleConfig, ::typeof(isotonic_kl), s::AbstractVector, w::AbstractVector
 )
     ŷ = isotonic_kl(s, w)
+    @show ŷ s w
 
     # TODO: probably can do better (without push! allocations)
     widths = [1]
@@ -65,10 +66,13 @@ function ChainRulesCore.rrule(
         start = 1
         for width in widths
             slice = start:(start + width - 1)
+            @show ŷ widths slice softmax(s[slice]) Δy[slice] softmax(w[slice])
+            println()
             res_s[slice] .= dot(softmax(s[slice]), Δy[slice])
             res_w[slice] .= -dot(softmax(w[slice]), Δy[slice])
             start += width
         end
+        @show res_w
         return NoTangent(), res_s, res_w
     end
 
