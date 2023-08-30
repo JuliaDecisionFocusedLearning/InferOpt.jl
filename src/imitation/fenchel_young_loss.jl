@@ -53,6 +53,22 @@ function fenchel_young_loss_and_grad(
     return l, g
 end
 
+function fenchel_young_loss_and_grad(
+    fyl::FenchelYoungLoss{P},
+    θ::AbstractArray{<:Real},
+    y_true::AbstractArray{<:Real};
+    kwargs...,
+) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
+    (; optimization_layer) = fyl
+    F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(
+        optimization_layer, θ; kwargs...
+    )
+    l = F - objective_value(optimization_layer.oracle, θ, y_true; kwargs...)
+    # @info size(almost_g_of_ŷ), size(y_true), size(optimization_layer.oracle.g(y_true))
+    g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true)
+    return l, g
+end
+
 ## Backward pass
 
 function ChainRulesCore.rrule(
@@ -66,11 +82,11 @@ end
 ## Specific overrides for perturbed layers
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{F,false},
+    perturbed::AbstractPerturbed{O,false},
     θ::AbstractArray,
     Z_samples::Vector{<:AbstractArray};
     kwargs...,
-) where {F}
+) where {O}
     F_and_y_samples = [
         fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
         Z in Z_samples
@@ -79,11 +95,11 @@ function compute_F_and_y_samples(
 end
 
 function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{F,true},
+    perturbed::AbstractPerturbed{O,true},
     θ::AbstractArray,
     Z_samples::Vector{<:AbstractArray};
     kwargs...,
-) where {F}
+) where {O}
     return ThreadsX.map(
         Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
     )
@@ -103,8 +119,19 @@ function fenchel_young_F_and_first_part_of_grad(
     (; oracle, ε) = perturbed
     η = θ .+ ε .* Z
     y = oracle(η; kwargs...)
+    @show perturbed
     F = dot(η, y)
     return F, y
+end
+
+function fenchel_young_F_and_first_part_of_grad(
+    perturbed::PerturbedAdditive{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
+) where {P,G,O<:GeneralizedMaximizer}
+    (; oracle, ε) = perturbed
+    η = θ .+ ε .* Z
+    y = oracle(η; kwargs...)
+    F = objective_value(oracle, η, y; kwargs...)
+    return F, oracle.g(y)
 end
 
 function fenchel_young_F_and_first_part_of_grad(
@@ -117,4 +144,16 @@ function fenchel_young_F_and_first_part_of_grad(
     F = dot(η, y)
     y_scaled = y .* eZ
     return F, y_scaled
+end
+
+function fenchel_young_F_and_first_part_of_grad(
+    perturbed::PerturbedMultiplicative{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
+) where {P,G,O<:GeneralizedMaximizer}
+    (; oracle, ε) = perturbed
+    eZ = exp.(ε .* Z .- ε^2)
+    η = θ .* eZ
+    y = oracle(η; kwargs...)
+    F = objective_value(oracle, η, y; kwargs...)
+    y_scaled = y .* eZ
+    return F, oracle.g(y_scaled)
 end

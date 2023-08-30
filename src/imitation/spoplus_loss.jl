@@ -57,7 +57,7 @@ end
 """
 function (spol::SPOPlusLoss)(θ::AbstractArray, θ_true::AbstractArray; kwargs...)
     y_true = spol.maximizer(θ_true; kwargs...)
-    return spol(θ, θ_true, y_true)
+    return spol(θ, θ_true, y_true; kwargs...)
 end
 
 ## Backward pass

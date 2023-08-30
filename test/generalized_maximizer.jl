@@ -71,27 +71,103 @@ end
     )
 end
 
-# @testitem "Generalized maximizer - imit - FYL PerturbedAdditive" default_imports = false begin
-#     include("InferOptTestUtils/InferOptTestUtils.jl")
-#     using InferOpt, .InferOptTestUtils, Random
-#     Random.seed!(63)
+@testitem "Generalized maximizer - imit - FYL PerturbedAdditive" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
 
-#     true_encoder = encoder_factory()
+    true_encoder = encoder_factory()
 
-#     generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
-#     function cost(y; instance)
-#         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
-#     end
+    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    function cost(y; instance)
+        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+    end
 
-#     test_pipeline!(
-#         PipelineLossImitation;
-#         instance_dim=5,
-#         true_maximizer=max_pricing,
-#         maximizer=identity_kw,
-#         loss=FenchelYoungLoss(
-#             PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=5)
-#         ),
-#         error_function=hamming_distance,
-#         true_encoder,
-#     )
-# end
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=max_pricing,
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(
+            PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=5)
+        ),
+        error_function=hamming_distance,
+        cost,
+        true_encoder,
+    )
+end
+
+@testitem "Generalized maximizer - imit - FYL PerturbedMultiplicative" default_imports =
+    false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    function cost(y; instance)
+        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+    end
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=max_pricing,
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(
+            PerturbedMultiplicative(generalized_maximizer; ε=0.1, nb_samples=5)
+        ),
+        error_function=hamming_distance,
+        cost,
+        true_encoder,
+    )
+end
+
+@testitem "Generalized maximizer - imit - SPO+ (θ)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    function cost(y; instance)
+        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+    end
+
+    test_pipeline!(
+        PipelineLossImitationθ;
+        instance_dim=5,
+        true_maximizer=max_pricing,
+        maximizer=identity_kw,
+        loss=SPOPlusLoss(generalized_maximizer),
+        error_function=hamming_distance,
+        cost,
+        true_encoder,
+    )
+end
+
+@testitem "Generalized maximizer - imit - SPO+ (θ & y)" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    function cost(y; instance)
+        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+    end
+
+    test_pipeline!(
+        PipelineLossImitationθy;
+        instance_dim=5,
+        true_maximizer=max_pricing,
+        maximizer=identity_kw,
+        loss=SPOPlusLoss(generalized_maximizer),
+        error_function=hamming_distance,
+        cost,
+        true_encoder,
+    )
+end
