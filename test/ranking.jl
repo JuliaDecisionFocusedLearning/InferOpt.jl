@@ -28,7 +28,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE Identity_kwRelaxation" default_imports = false begin
+@testitem "Ranking - imit - MSE IdentityRelaxation" default_imports = false begin
     include("InferOptTestUtils/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
