@@ -98,7 +98,7 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray, kwargs...
+    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
 )
     (; oracle, ε) = perturbed
     η = θ .+ ε .* Z

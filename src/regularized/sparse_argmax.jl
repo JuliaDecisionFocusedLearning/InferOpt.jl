@@ -7,7 +7,7 @@ Corresponds to regularized prediction on the probability simplex with square nor
 """
 struct SparseArgmax <: AbstractRegularized end
 
-(::SparseArgmax)(z) = sparse_argmax(z)
+(::SparseArgmax)(z; kwargs...) = sparse_argmax(z)
 compute_regularization(::SparseArgmax, y) = sparse_argmax_regularization(y)
 
 function sparse_argmax(z::AbstractVector; kwargs...)

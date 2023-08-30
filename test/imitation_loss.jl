@@ -10,7 +10,7 @@
         PipelineLossImitationLoss;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=InferOpt.ZeroOneImitationLoss(),
         error_function=hamming_distance,
         true_encoder,
@@ -21,7 +21,7 @@
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=InferOpt.ZeroOneStructuredSVMLoss(),
         error_function=hamming_distance,
         true_encoder,
@@ -45,11 +45,11 @@ end
         PipelineLossImitationLoss;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=ImitationLoss(;
             δ=(y, t_true) -> 0,
             Ω=y -> half_square_norm(y),
-            aux_loss_maximizer=(θ, t_true, α) -> sparse_argmax(θ),
+            aux_loss_maximizer=(θ, t_true, α; kwargs...) -> sparse_argmax(θ),
         ),
         error_function=hamming_distance,
         true_encoder,
@@ -60,7 +60,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(SparseArgmax()),
         error_function=hamming_distance,
         true_encoder,
@@ -84,11 +84,11 @@ end
         PipelineLossImitationLoss;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=ImitationLoss(;
             δ=(y, t_true) -> 0,
             Ω=y -> negative_shannon_entropy(y),
-            aux_loss_maximizer=(θ, t_true, α) -> soft_argmax(θ),
+            aux_loss_maximizer=(θ, t_true, α; kwargs...) -> soft_argmax(θ),
         ),
         error_function=hamming_distance,
         true_encoder,
@@ -99,7 +99,7 @@ end
         PipelineLossImitation;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(SoftArgmax()),
         error_function=hamming_distance,
         true_encoder,
@@ -135,7 +135,7 @@ end
         PipelineLossImitationLoss;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=ImitationLoss(;
             δ=spo_base_loss, Ω=y -> 0, α=1, aux_loss_maximizer=spo_predictor
         ),
@@ -148,7 +148,7 @@ end
         PipelineLossImitationθy;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(one_hot_argmax; α=1.0),
         error_function=hamming_distance,
         true_encoder,
@@ -184,7 +184,7 @@ end
         PipelineLossImitationLoss;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=ImitationLoss(;
             δ=spo_base_loss, Ω=y -> 0, α=2, aux_loss_maximizer=spo_predictor
         ),
@@ -197,7 +197,7 @@ end
         PipelineLossImitationθy;
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(one_hot_argmax),
         error_function=hamming_distance,
         true_encoder,

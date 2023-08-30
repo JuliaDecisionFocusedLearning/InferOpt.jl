@@ -7,9 +7,9 @@
         PipelineLossImitationθ;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(shortest_path_maximizer),
-        error_function=mse,
+        error_function=mse_kw,
     )
 end
 
@@ -22,9 +22,9 @@ end
         PipelineLossImitationθy;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(shortest_path_maximizer),
-        error_function=mse,
+        error_function=mse_kw,
     )
 end
 
@@ -38,8 +38,8 @@ end
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=normalize ∘ IdentityRelaxation(shortest_path_maximizer),
-        loss=mse,
-        error_function=mse,
+        loss=mse_kw,
+        error_function=mse_kw,
     )
 end
 
@@ -53,8 +53,8 @@ end
 #         instance_dim=(5, 5),
 #         true_maximizer=shortest_path_maximizer,
 #         maximizer=Interpolation(shortest_path_maximizer; λ=5.0),
-#         loss=mse,
-#         error_function=mse,
+#         loss=mse_kw,
+#         error_function=mse_kw,
 #     )
 # end  # TODO: make it work (doesn't seem to depend on λ)
 
@@ -68,8 +68,8 @@ end
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=10),
-        loss=mse,
-        error_function=mse,
+        loss=mse_kw,
+        error_function=mse_kw,
     )
 end
 
@@ -83,8 +83,8 @@ end
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=10),
-        loss=mse,
-        error_function=mse,
+        loss=mse_kw,
+        error_function=mse_kw,
     )
 end
 
@@ -100,11 +100,11 @@ end
         maximizer=RegularizedFrankWolfe(
             shortest_path_maximizer;
             Ω=half_square_norm,
-            Ω_grad=identity,
+            Ω_grad=identity_kw,
             frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
         ),
-        loss=mse,
-        error_function=mse,
+        loss=mse_kw,
+        error_function=mse_kw,
     )
 end
 
@@ -117,11 +117,11 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(
             PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=5)
         ),
-        error_function=mse,
+        error_function=mse_kw,
     )
 end
 
@@ -134,11 +134,11 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(
             PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=5)
         ),
-        error_function=mse,
+        error_function=mse_kw,
         epochs=100,
     )
 end
@@ -152,13 +152,13 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(
             PerturbedAdditive(
                 shortest_path_maximizer; ε=1.0, nb_samples=5, perturbation=LogNormal(0, 1)
             ),
         ),
-        error_function=mse,
+        error_function=mse_kw,
     )
 end
 
@@ -171,16 +171,16 @@ end
         PipelineLossImitation;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(
             RegularizedFrankWolfe(
                 shortest_path_maximizer;
                 Ω=half_square_norm,
-                Ω_grad=identity,
+                Ω_grad=identity_kw,
                 frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
         ),
-        error_function=mse,
+        error_function=mse_kw,
         epochs=100,
     )
 end
@@ -196,11 +196,11 @@ end
         PipelineLossExperience;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(
             PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=10), cost
         ),
-        error_function=mse,
+        error_function=mse_kw,
         true_encoder=true_encoder,
         cost=cost,
         epochs=500,
@@ -218,11 +218,11 @@ end
         PipelineLossExperience;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(
             PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=10), cost
         ),
-        error_function=mse,
+        error_function=mse_kw,
         true_encoder=true_encoder,
         cost=cost,
         epochs=500,
@@ -241,17 +241,17 @@ end
         PipelineLossExperience;
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(
             RegularizedFrankWolfe(
                 shortest_path_maximizer;
                 Ω=half_square_norm,
-                Ω_grad=identity,
+                Ω_grad=identity_kw,
                 frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
             cost,
         ),
-        error_function=mse,
+        error_function=mse_kw,
         true_encoder=true_encoder,
         cost=cost,
         epochs=200,

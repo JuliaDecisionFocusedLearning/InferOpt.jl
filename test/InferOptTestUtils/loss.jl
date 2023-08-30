@@ -37,20 +37,21 @@ end
 
 function (pl::PipelineLossImitation)(x, θ, y)
     (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), y)
+    l = loss(maximizer(encoder(x); instance=x), y; instance=x)
+    return l
 end
 
 function (pl::PipelineLossImitationθ)(x, θ, y)
     (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), θ)
+    return loss(maximizer(encoder(x)), θ; instance=x)
 end
 
 function (pl::PipelineLossImitationθy)(x, θ, y)
     (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), θ, y)
+    return loss(maximizer(encoder(x)), θ, y; instance=x)
 end
 
 function (pl::PipelineLossImitationLoss)(x, θ, y)
     (; encoder, loss, maximizer) = pl
-    return loss(maximizer(encoder(x)), (; y_true=y, θ_true=θ))
+    return loss(maximizer(encoder(x)), (; y_true=y, θ_true=θ); instance=x)
 end

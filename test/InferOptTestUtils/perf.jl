@@ -14,7 +14,7 @@ function init_perf()
 end
 
 function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
+    Y_pred = [maximizer(encoder(x); instance=x) for x in X]
     return Y_pred
 end
 

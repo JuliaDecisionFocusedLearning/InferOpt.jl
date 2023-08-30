@@ -18,7 +18,8 @@ argmax_y {δ(y, y_true) + α θᵀ(y - y_true)}
 function zero_one_loss_maximizer(
     θ::AbstractVector,
     y_true::AbstractVector{R},  # TODO: does it work with arrays?
-    α,
+    α;
+    kwargs...,
 ) where {R<:Real}
     i_true = findfirst(==(one(R)), y_true)
     i_θ = argmax(θ)
@@ -52,7 +53,7 @@ function ZeroOneImitationLoss(α=1)
         δ=(y, t_true) -> zero_one_loss(y, get_y_true(t_true)),
         Ω=y -> 0,
         α=α,
-        aux_loss_maximizer=(θ, t_true, α) ->
-            zero_one_loss_maximizer(θ, get_y_true(t_true), α),
+        aux_loss_maximizer=(θ, t_true, α; kwargs...) ->
+            zero_one_loss_maximizer(θ, get_y_true(t_true), α; kwargs...),
     )
 end
