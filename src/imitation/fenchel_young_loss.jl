@@ -50,7 +50,6 @@ function fenchel_young_loss_and_grad(
     ŷ = optimization_layer(θ; kwargs...)
     Ωy_true = compute_regularization(optimization_layer, y_true)
     Ωŷ = compute_regularization(optimization_layer, ŷ)
-    l = (Ωy_true - dot(θ, y_true)) - (Ωŷ - dot(θ, ŷ))
     l =
         (Ωy_true - objective_value(oracle, θ, y_true; kwargs...)) -
         (Ωŷ - objective_value(oracle, θ, ŷ; kwargs...))
