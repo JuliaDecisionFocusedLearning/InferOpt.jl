@@ -54,17 +54,13 @@ function fenchel_young_loss_and_grad(
 end
 
 function fenchel_young_loss_and_grad(
-    fyl::FenchelYoungLoss{P},
-    θ::AbstractArray{<:Real},
-    y_true::AbstractArray{<:Real};
-    kwargs...,
+    fyl::FenchelYoungLoss{P}, θ::AbstractArray, y_true::AbstractArray; kwargs...
 ) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
     (; optimization_layer) = fyl
     F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(
         optimization_layer, θ; kwargs...
     )
     l = F - objective_value(optimization_layer.oracle, θ, y_true; kwargs...)
-    # @info size(almost_g_of_ŷ), size(y_true), size(optimization_layer.oracle.g(y_true))
     g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true)
     return l, g
 end
@@ -119,7 +115,6 @@ function fenchel_young_F_and_first_part_of_grad(
     (; oracle, ε) = perturbed
     η = θ .+ ε .* Z
     y = oracle(η; kwargs...)
-    @show perturbed
     F = dot(η, y)
     return F, y
 end

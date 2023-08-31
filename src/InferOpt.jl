@@ -49,6 +49,7 @@ end
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
+export GeneralizedMaximizer, objective_value
 
 export FixedAtomsProbabilityDistribution
 export compute_expectation
@@ -69,8 +70,6 @@ export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss
-
-export GeneralizedMaximizer, objective_value
 export ImitationLoss, get_y_true
 export SPOPlusLoss
 

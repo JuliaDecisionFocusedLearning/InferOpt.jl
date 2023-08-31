@@ -28,11 +28,6 @@ function generate_dataset(
     return data_train, data_test
 end
 
-# function generate_predictions(encoder, maximizer, X)
-#     Y_pred = [maximizer(encoder(x); instance=x) for x in X]
-#     return Y_pred
-# end
-
 function train_test_split(X::AbstractVector, train_percentage::Real=0.5)
     N = length(X)
     N_train = floor(Int, N * train_percentage)

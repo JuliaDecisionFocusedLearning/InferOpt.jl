@@ -45,7 +45,7 @@ function (spol::SPOPlusLoss{<:GeneralizedMaximizer})(
     (; maximizer, α) = spol
     θ_α = α * θ - θ_true
     y_α = maximizer(θ_α; kwargs...)
-    # Seems to only work if α = 2 in theory
+    # This only works in theory if α = 2
     l =
         objective_value(maximizer, θ_α, y_α; kwargs...) -
         objective_value(maximizer, θ_α, y_true; kwargs...)

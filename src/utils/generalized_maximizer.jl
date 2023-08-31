@@ -2,7 +2,10 @@
     GeneralizedMaximizer{F,G,H}
 
 Wrapper for generalized maximizers `maximizer` of the form argmax_y θᵀg(y) + h(y).
-Can be used with ...
+It is compatible with the following layers
+- [`PerturbedAdditive`](@ref) (with or without [`FenchelYoungLoss`](@ref))
+- [`PerturbedMultiplicative`](@ref) (with or without [`FenchelYoungLoss`](@ref))
+- [`SPOPlusLoss`](@ref)
 """
 # TODO: find better names for GeneralizedMaximizer, g, and h ?
 struct GeneralizedMaximizer{F,G,H}
