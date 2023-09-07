@@ -15,6 +15,7 @@ using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
 using ThreadsX: ThreadsX
+using RequiredInterfaces
 
 include("interface.jl")
 

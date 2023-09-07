@@ -17,7 +17,7 @@ Convex regularization perturbation of a black box optimizer
 - [`SparseArgmax`](@ref)
 - [`RegularizedFrankWolfe`](@ref)
 """
-abstract type AbstractRegularized <: AbstractOptimizationLayer end
+abstract type AbstractRegularized{O} <: AbstractOptimizationLayer end
 
 """
     compute_regularization(regularized, y)
@@ -25,3 +25,10 @@ abstract type AbstractRegularized <: AbstractOptimizationLayer end
 Return the convex penalty `Ω(y)` associated with an `AbstractRegularized` layer.
 """
 function compute_regularization end
+
+function get_maximizer end
+
+@required AbstractRegularized begin
+    compute_regularization(::AbstractRegularized, ::Any)
+    get_maximizer(::AbstractRegularized)
+end

@@ -5,7 +5,7 @@ Soft argmax activation function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 
 Corresponds to regularized prediction on the probability simplex with entropic penalty.
 """
-struct SoftArgmax <: AbstractRegularized end
+struct SoftArgmax <: AbstractRegularized{nothing} end
 
 (::SoftArgmax)(z; kwargs...) = soft_argmax(z)
 compute_regularization(::SoftArgmax, y) = soft_argmax_regularization(y)

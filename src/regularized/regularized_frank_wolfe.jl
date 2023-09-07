@@ -29,7 +29,7 @@ Some values you can tune:
 
 See the documentation of FrankWolfe.jl for details.
 """
-struct RegularizedFrankWolfe{M,RF,RG,FWK} <: AbstractRegularized
+struct RegularizedFrankWolfe{M,RF,RG,FWK} <: AbstractRegularized{M}
     linear_maximizer::M
     Ω::RF
     Ω_grad::RG

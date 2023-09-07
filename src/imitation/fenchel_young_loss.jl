@@ -45,6 +45,21 @@ end
 
 function fenchel_young_loss_and_grad(
     fyl::FenchelYoungLoss{O}, θ::AbstractArray, y_true::AbstractArray; kwargs...
+) where {O<:AbstractRegularized{<:GeneralizedMaximizer}}
+    (; optimization_layer) = fyl
+    ŷ = optimization_layer(θ; kwargs...)
+    Ωy_true = compute_regularization(optimization_layer, y_true)
+    Ωŷ = compute_regularization(optimization_layer, ŷ)
+    maximizer = get_maximizer(optimization_layer)
+    l =
+        (Ωy_true - objective_value(maximizer, θ, y_true; kwargs...)) -
+        (Ωŷ - objective_value(maximizer, θ, ŷ; kwargs...))
+    g = maximizer.g(ŷ; kwargs...) - maximizer.g(y_true; kwargs...)
+    return l, g
+end
+
+function fenchel_young_loss_and_grad(
+    fyl::FenchelYoungLoss{O}, θ::AbstractArray, y_true::AbstractArray; kwargs...
 ) where {O<:AbstractPerturbed}
     (; optimization_layer) = fyl
     F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(optimization_layer, θ; kwargs...)
@@ -61,7 +76,7 @@ function fenchel_young_loss_and_grad(
         optimization_layer, θ; kwargs...
     )
     l = F - objective_value(optimization_layer.oracle, θ, y_true; kwargs...)
-    g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true)
+    g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true; kwargs...)
     return l, g
 end
 
