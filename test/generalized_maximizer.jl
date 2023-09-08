@@ -13,7 +13,7 @@
 
     @test y == [1 0 1; 0 1 0; 1 1 1]
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
 
     @test generalized_maximizer(θ; instance) == y
 
@@ -29,7 +29,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -54,7 +54,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -78,7 +78,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -105,7 +105,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -131,7 +131,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -155,7 +155,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -180,7 +180,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -207,7 +207,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing, g, h)
+    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -223,5 +223,35 @@ end
         error_function=hamming_distance,
         true_encoder,
         cost,
+    )
+end
+
+@testitem "Regularized with a GeneralizedMaximizer" default_imports = false begin
+    include("InferOptTestUtils/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, RequiredInterfaces, Test
+    const RI = RequiredInterfaces
+    Random.seed!(63)
+
+    struct MyRegularized{M<:GeneralizedMaximizer} <: AbstractRegularizedGeneralizedMaximizer
+        maximizer::M
+    end
+
+    (regularized::MyRegularized)(θ; kwargs...) = regularized.maximizer(θ; kwargs...)
+    function InferOpt.compute_regularization(regularized::MyRegularized, y::AbstractArray)
+        return InferOpt.sparse_argmax_regularization(y)
+    end
+    InferOpt.get_maximizer(regularized::MyRegularized) = regularized.maximizer
+
+    @test RI.check_interface_implemented(AbstractRegularized, MyRegularized)
+
+    regularized = MyRegularized(GeneralizedMaximizer(sparse_argmax))
+
+    test_pipeline!(
+        PipelineLossImitation;
+        instance_dim=5,
+        true_maximizer=one_hot_argmax,
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(regularized),
+        error_function=hamming_distance,
     )
 end

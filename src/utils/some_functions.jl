@@ -67,3 +67,6 @@ end
 
 zero_regularization(y) = zero(eltype(y))
 zero_gradient(y) = zero(y)
+
+identity_kw(x; kwargs...) = identity(x)
+eltype_kw(x; kwargs...) = eltype(x)

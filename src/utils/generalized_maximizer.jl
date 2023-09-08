@@ -14,7 +14,7 @@ struct GeneralizedMaximizer{F,G,H}
     h::H
 end
 
-GeneralizedMaximizer(f; g=identity, h=zero) = GeneralizedMaximizer(f, g, h)
+GeneralizedMaximizer(f; g=identity_kw, h=zero ∘ eltype_kw) = GeneralizedMaximizer(f, g, h)
 
 function Base.show(io::IO, f::GeneralizedMaximizer)
     (; maximizer, g, h) = f

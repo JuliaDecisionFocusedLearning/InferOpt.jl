@@ -60,7 +60,7 @@ export Pushforward
 export IdentityRelaxation
 export Interpolation
 
-export AbstractRegularized
+export AbstractRegularized, AbstractRegularizedGeneralizedMaximizer
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
 export RegularizedFrankWolfe
