@@ -9,7 +9,7 @@
 
         @variable(model, x[1:length(y)])
         @objective(model, Min, sum((x[i] - y[i])^2 for i in eachindex(x)))
-        @constraint(model, [i in 1:(length(x) - 1)], x[i] <= x[i + 1])
+        @constraint(model, [i in 1:(length(x) - 1)], x[i] >= x[i + 1])
 
         optimize!(model)
         return value.(x)
@@ -29,12 +29,22 @@ end
     Random.seed!(63)
 
     for _ in 1:100
-        θ = randn(100)
+        θ = randn(50)
+
         sort_jac = Zygote.jacobian(soft_sort, θ)[1]
         sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort, θ)[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
+
+        sort_jac = Zygote.jacobian(soft_sort_kl, θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort_kl, θ)[1]
+        @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
+
         rank_jac = Zygote.jacobian(soft_rank, θ)[1]
         rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank, θ)[1]
+        @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
+
+        rank_jac = Zygote.jacobian(soft_rank_kl, θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank_kl, θ)[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
     end
 end
