@@ -51,7 +51,7 @@ Return the associated optimizer.
 function get_maximizer end
 
 @required AbstractRegularized begin
-    #(regularized::AbstractRegularized)(θ::AbstractArray; kwargs...)
+    # (regularized::AbstractRegularized)(θ::AbstractArray; kwargs...) # waiting for RequiredInterfaces to support this (see https://github.com/Seelengrab/RequiredInterfaces.jl/issues/11)
     compute_regularization(::AbstractRegularized, ::AbstractArray)
 end
 

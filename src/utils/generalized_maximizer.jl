@@ -7,7 +7,6 @@ It is compatible with the following layers
 - [`PerturbedMultiplicative`](@ref) (with or without [`FenchelYoungLoss`](@ref))
 - [`SPOPlusLoss`](@ref)
 """
-# TODO: find better names for GeneralizedMaximizer, g, and h ?
 struct GeneralizedMaximizer{F,G,H}
     maximizer::F
     g::G
@@ -31,7 +30,6 @@ end
 
 Computes the objective value of given GeneralizedMaximizer `f`, knowing weights `θ` and solution `y`.
 """
-# TODO: maybe find a better function name
 function objective_value(f::GeneralizedMaximizer, θ, y; kwargs...)
     return dot(θ, f.g(y; kwargs...)) .+ f.h(y; kwargs...)
 end
