@@ -32,12 +32,7 @@ with g and h functions of y.
 
 - `(regularized::AbstractRegularized)(θ; kwargs...)`: return `ŷ(θ)`
 - `compute_regularization(regularized, y)`: return `Ω(y)`
-
-# Available implementations
-
-- [`SoftArgmax`](@ref)
-- [`SparseArgmax`](@ref)
-- [`RegularizedFrankWolfe`](@ref)
+- `get_maximizer(regularized)`: return the associated `GeneralizedMaximizer` optimizer
 """
 abstract type AbstractRegularizedGeneralizedMaximizer <: AbstractRegularized end
 
@@ -48,15 +43,17 @@ Return the convex penalty `Ω(y)` associated with an `AbstractRegularized` layer
 """
 function compute_regularization end
 
+"""
+    get_maximizer(regularized)
+
+Return the associated optimizer.
+"""
+function get_maximizer end
+
 @required AbstractRegularized begin
     #(regularized::AbstractRegularized)(θ::AbstractArray; kwargs...)
     compute_regularization(::AbstractRegularized, ::AbstractArray)
 end
-
-"""
-TODO
-"""
-function get_maximizer end
 
 @required AbstractRegularizedGeneralizedMaximizer begin
     get_maximizer(::AbstractRegularizedGeneralizedMaximizer)
