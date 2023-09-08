@@ -5,7 +5,7 @@ Compute the Euclidean projection of the vector `z` onto the probability simplex.
 
 Corresponds to regularized prediction on the probability simplex with square norm penalty.
 """
-struct SparseArgmax <: AbstractRegularized{nothing} end
+struct SparseArgmax <: AbstractRegularized end
 
 (::SparseArgmax)(z; kwargs...) = sparse_argmax(z)
 compute_regularization(::SparseArgmax, y) = sparse_argmax_regularization(y)

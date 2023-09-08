@@ -45,7 +45,7 @@ end
 
 function fenchel_young_loss_and_grad(
     fyl::FenchelYoungLoss{O}, θ::AbstractArray, y_true::AbstractArray; kwargs...
-) where {O<:AbstractRegularized{<:GeneralizedMaximizer}}
+) where {O<:AbstractRegularizedGeneralizedMaximizer}
     (; optimization_layer) = fyl
     ŷ = optimization_layer(θ; kwargs...)
     Ωy_true = compute_regularization(optimization_layer, y_true)

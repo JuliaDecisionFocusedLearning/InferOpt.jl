@@ -1,7 +1,7 @@
 """
-    AbstractRegularized{parallel} <: AbstractOptimizationLayer
+    AbstractRegularized <: AbstractOptimizationLayer
 
-Convex regularization perturbation of a black box optimizer
+Convex regularization perturbation of a black box linear optimizer
 ```
 ŷ(θ) = argmax_{y ∈ C} {θᵀy - Ω(y)}
 ```
@@ -17,7 +17,29 @@ Convex regularization perturbation of a black box optimizer
 - [`SparseArgmax`](@ref)
 - [`RegularizedFrankWolfe`](@ref)
 """
-abstract type AbstractRegularized{O} <: AbstractOptimizationLayer end
+abstract type AbstractRegularized <: AbstractOptimizationLayer end
+
+"""
+    AbstractRegularizedGeneralizedMaximizer <: AbstractRegularized
+
+Convex regularization perturbation of a black box **generalized** optimizer
+```
+ŷ(θ) = argmax_{y ∈ C} {θᵀg(y) + h(y) - Ω(y)}
+with g and h functions of y.
+```
+
+# Interface
+
+- `(regularized::AbstractRegularized)(θ; kwargs...)`: return `ŷ(θ)`
+- `compute_regularization(regularized, y)`: return `Ω(y)`
+
+# Available implementations
+
+- [`SoftArgmax`](@ref)
+- [`SparseArgmax`](@ref)
+- [`RegularizedFrankWolfe`](@ref)
+"""
+abstract type AbstractRegularizedGeneralizedMaximizer <: AbstractRegularized end
 
 """
     compute_regularization(regularized, y)
@@ -26,9 +48,16 @@ Return the convex penalty `Ω(y)` associated with an `AbstractRegularized` layer
 """
 function compute_regularization end
 
+@required AbstractRegularized begin
+    #(regularized::AbstractRegularized)(θ::AbstractArray; kwargs...)
+    compute_regularization(::AbstractRegularized, ::AbstractArray)
+end
+
+"""
+TODO
+"""
 function get_maximizer end
 
-@required AbstractRegularized begin
-    compute_regularization(::AbstractRegularized, ::Any)
-    get_maximizer(::AbstractRegularized)
+@required AbstractRegularizedGeneralizedMaximizer begin
+    get_maximizer(::AbstractRegularizedGeneralizedMaximizer)
 end
