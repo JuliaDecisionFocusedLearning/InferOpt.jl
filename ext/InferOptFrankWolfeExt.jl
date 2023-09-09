@@ -1,40 +1,9 @@
 module InferOptFrankWolfeExt
 
 using DifferentiableFrankWolfe: DiffFW, LinearMaximizationOracleWithKwargs
-using FrankWolfe: FrankWolfe, LinearMinimizationOracle
-using ImplicitDifferentiation: IterativeLinearSolver
 using InferOpt: InferOpt, RegularizedFrankWolfe, FixedAtomsProbabilityDistribution
 using InferOpt: compute_expectation, compute_probability_distribution
 using LinearAlgebra: dot
-
-"""
-    LinearMaximizationOracleWithKwargs{F,K}
-
-Wraps a linear maximizer as a `FrankWolfe.LinearMinimizationOracle` with a sign switch and predefined keyword arguments.
-
-# Fields
-- `maximizer::F`: black box linear maximizer
-- `maximizer_kwargs::K`: keyword arguments passed to the maximizer whenever it is called
-"""
-struct LinearMaximizationOracleWithKwargs{F,K} <: LinearMinimizationOracle
-    maximizer::F
-    maximizer_kwargs::K
-end
-
-function LinearMaximizationOracleWithKwargs(maximizer)
-    return LinearMaximizationOracleWithKwargs(maximizer, NamedTuple())
-end
-
-"""
-    FrankWolfe.compute_extreme_point(lmokw::LinearMaximizationOracleWithKwargs, direction)
-"""
-function FrankWolfe.compute_extreme_point(
-    lmokw::LinearMaximizationOracleWithKwargs, direction; kwargs...
-)
-    opposite_direction = -direction
-    v = lmokw.maximizer(opposite_direction; lmokw.maximizer_kwargs...)
-    return v
-end
 
 """
     compute_probability_distribution(regularized::RegularizedFrankWolfe, θ; kwargs...)
