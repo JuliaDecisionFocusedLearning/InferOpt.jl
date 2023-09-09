@@ -4,7 +4,6 @@ using Flux
 using Flux.Losses
 using Graphs
 using GridGraphs
-using Infiltrator
 using LinearAlgebra
 using Statistics
 using Test

@@ -1,5 +1,5 @@
 @testitem "ImitationLoss vs SSVM" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -34,7 +34,7 @@
 end
 
 @testitem "ImitationLoss vs FYL SparseMax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -73,7 +73,7 @@ end
 end
 
 @testitem "ImitationLoss vs FYL SoftMax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -112,7 +112,7 @@ end
 end
 
 @testitem "ImitationLoss vs SPO+ (α = 1)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
@@ -161,7 +161,7 @@ end
 end
 
 @testitem "ImitationLoss vs SPO+ (α = 2)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 

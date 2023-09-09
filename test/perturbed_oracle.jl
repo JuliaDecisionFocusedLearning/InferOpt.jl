@@ -1,5 +1,5 @@
 @testitem "PerturbedOracle vs PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     using LinearAlgebra, Zygote, Distributions
     Random.seed!(63)
@@ -17,7 +17,7 @@
 end
 
 @testitem "Variance reduction" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     using LinearAlgebra, Zygote
     Random.seed!(63)

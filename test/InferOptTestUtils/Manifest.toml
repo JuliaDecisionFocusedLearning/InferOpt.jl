@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "035c4dbe22ccd4bb872df6805bd14d8d854f7a37"
+project_hash = "6582fd5f56597eabb11c5172113b1d688949275d"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -353,12 +353,6 @@ version = "0.6.0"
     [deps.InferOpt.weakdeps]
     DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
     FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
-
-[[deps.Infiltrator]]
-deps = ["InteractiveUtils", "Markdown", "REPL", "UUIDs"]
-git-tree-sha1 = "04de041e4590428cccbb026d86e5d670513be2e3"
-uuid = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
-version = "1.6.4"
 
 [[deps.Inflate]]
 git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
