@@ -13,8 +13,8 @@ include("const.jl")
 include("maximizers.jl")
 include("dataset.jl")
 include("error.jl")
-include("perf.jl")
 include("loss.jl")
+include("perf.jl")
 include("pipeline.jl")
 
 export DECREASE, EPOCHS, NB_FEATURES, NB_INSTANCES, NOISE_STD, VERBOSE

@@ -19,13 +19,15 @@ function generate_predictions(encoder, maximizer, X)
 end
 
 function update_perf!(
+    pl::PipelineLoss,
     perf_storage::NamedTuple;
     data_train,
     data_test,
     true_encoder,
     encoder,
     true_maximizer,
-    pipeline_loss,
+    maximizer,
+    loss,
     error_function,
     cost,
 )
@@ -42,8 +44,14 @@ function update_perf!(
     (X_train, thetas_train, Y_train) = data_train
     (X_test, thetas_test, Y_test) = data_test
 
-    train_loss = sum(pipeline_loss(x, θ, y) for (x, θ, y) in zip(data_train...))
-    test_loss = sum(pipeline_loss(x, θ, y) for (x, θ, y) in zip(data_test...))
+    train_loss = sum(
+        get_loss(pl, loss, maximizer(encoder(x)), x, θ, y) for
+        (x, θ, y) in zip(data_train...)
+    )
+    test_loss = sum(
+        get_loss(pl, loss, maximizer(encoder(x)), x, θ, y) for
+        (x, θ, y) in zip(data_test...)
+    )
 
     Y_train_pred = generate_predictions(encoder, true_maximizer, X_train)
     Y_test_pred = generate_predictions(encoder, true_maximizer, X_test)
