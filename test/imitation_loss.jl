@@ -7,7 +7,7 @@
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -18,7 +18,7 @@
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -42,7 +42,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -57,7 +57,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -81,7 +81,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -96,7 +96,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -132,7 +132,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -145,7 +145,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -181,7 +181,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -194,7 +194,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
