@@ -1,6 +1,6 @@
 module InferOptFrankWolfeExt
 
-using DifferentiableFrankWolfe: DiffFW
+using DifferentiableFrankWolfe: DiffFW, LinearMaximizationOracleWithKwargs
 using FrankWolfe: FrankWolfe, LinearMinimizationOracle
 using ImplicitDifferentiation: IterativeLinearSolver
 using InferOpt: InferOpt, RegularizedFrankWolfe, FixedAtomsProbabilityDistribution
@@ -50,8 +50,7 @@ function InferOpt.compute_probability_distribution(
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
     lmo = LinearMaximizationOracleWithKwargs(linear_maximizer, kwargs)
-    implicit_kwargs = (; linear_solver=IterativeLinearSolver(; accept_inconsistent=true))
-    dfw = DiffFW(f, f_grad1, lmo; implicit_kwargs)
+    dfw = DiffFW(f, f_grad1, lmo)
     weights, atoms = dfw.implicit(θ; frank_wolfe_kwargs=frank_wolfe_kwargs)
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
