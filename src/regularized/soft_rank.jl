@@ -143,7 +143,7 @@ Sort vector `θ` with kl regularization.
 """
 function soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
     ρ = length(θ):-1:1
-    return rev ? projection_kl(ρ ./ ε,-θ) : -projection_kl(ρ ./ ε, -θ)
+    return rev ? projection_kl(ρ ./ ε, -θ) : -projection_kl(ρ ./ ε, -θ)
 end
 
 """
