@@ -43,10 +43,9 @@ function isotonic_kl(s::AbstractVector, w::AbstractVector)
 end
 
 function ChainRulesCore.rrule(
-    rc::RuleConfig, ::typeof(isotonic_kl), s::AbstractVector, w::AbstractVector
+    ::typeof(isotonic_kl), s::AbstractVector, w::AbstractVector
 )
     ŷ = isotonic_kl(s, w)
-    # @show ŷ s w
 
     # TODO: probably can do better (without push! allocations)
     widths = [1]
@@ -60,22 +59,6 @@ function ChainRulesCore.rrule(
         widths[end] += 1
     end
 
-    # ! this is for forward autodiff
-    # function isotonic_pullback(Δy)
-    #     res_s = zeros(length(Δy))
-    #     res_w = zeros(length(Δy))
-    #     start = 1
-    #     for width in widths
-    #         slice = start:(start + width - 1)
-    #         @show ŷ widths slice softmax(s[slice]) Δy[slice] softmax(w[slice])
-    #         println()
-    #         res_s[slice] .= dot(softmax(s[slice]), Δy[slice])
-    #         res_w[slice] .= -dot(softmax(w[slice]), Δy[slice])
-    #         start += width
-    #     end
-    #     @show res_w
-    #     return NoTangent(), res_s, res_w
-    # end
     function isotonic_pullback(Δy)
         res_s = zeros(length(Δy))
         res_w = zeros(length(Δy))
@@ -88,9 +71,25 @@ function ChainRulesCore.rrule(
             res_w[slice] .= -sum(Δy[slice]) .* softmax(w[slice])
             start += width
         end
-        # @show res_w
         return NoTangent(), res_s, res_w
     end
 
     return ŷ, isotonic_pullback
 end
+
+# ! pullback using forawrd autodiff
+# function isotonic_pullback(Δy)
+#     res_s = zeros(length(Δy))
+#     res_w = zeros(length(Δy))
+#     start = 1
+#     for width in widths
+#         slice = start:(start + width - 1)
+#         @show ŷ widths slice softmax(s[slice]) Δy[slice] softmax(w[slice])
+#         println()
+#         res_s[slice] .= dot(softmax(s[slice]), Δy[slice])
+#         res_w[slice] .= -dot(softmax(w[slice]), Δy[slice])
+#         start += width
+#     end
+#     @show res_w
+#     return NoTangent(), res_s, res_w
+# end
