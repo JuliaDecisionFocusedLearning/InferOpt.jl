@@ -82,6 +82,8 @@ Fast differentiable sort of vector θ.
 - `ε::Float64=1.0`: size of the regularization
 - `rev::Bool=false`: sort in ascending order if false
 - `regularization=:l2`: use l2 regularization if :l2, and kl regularization if :kl
+
+See also [`soft_sort_l2`](@ref) and [`soft_sort_kl`](@ref).
 """
 function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:l2)
     if regularization == :l2
@@ -105,6 +107,8 @@ Fast differentiable ranking of vector θ.
 - `ε::Float64=1.0`: size of the regularization
 - `rev::Bool=false`: sort in ascending order if false
 - `regularization=:l2`: use l2 regularization if :l2, and kl regularization if :kl
+
+See also [`soft_rank_l2`](@ref) and [`soft_rank_kl`](@ref).
 """
 function soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:l2)
     if regularization == :l2
@@ -143,7 +147,7 @@ Sort vector `θ` with kl regularization.
 """
 function soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
     ρ = length(θ):-1:1
-    return rev ? projection_kl(ρ ./ ε, -θ) : -projection_kl(ρ ./ ε, -θ)
+    return rev ? projection_kl(ρ ./ ε, θ) : -projection_kl(ρ ./ ε, -θ)
 end
 
 """
