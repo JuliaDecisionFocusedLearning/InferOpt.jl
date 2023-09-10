@@ -1,5 +1,5 @@
 @testitem "ImitationLoss vs SSVM" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -7,7 +7,7 @@
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -18,7 +18,7 @@
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -34,7 +34,7 @@
 end
 
 @testitem "ImitationLoss vs FYL SparseMax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -42,7 +42,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -57,7 +57,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -73,7 +73,7 @@ end
 end
 
 @testitem "ImitationLoss vs FYL SoftMax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
@@ -81,7 +81,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -96,7 +96,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -112,7 +112,7 @@ end
 end
 
 @testitem "ImitationLoss vs SPO+ (α = 1)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
@@ -132,7 +132,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -145,7 +145,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -161,7 +161,7 @@ end
 end
 
 @testitem "ImitationLoss vs SPO+ (α = 2)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
@@ -181,7 +181,7 @@ end
 
     Random.seed!(67)
     perf = test_pipeline!(
-        PipelineLossImitationLoss;
+        PipelineLossImitationLoss();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
@@ -194,7 +194,7 @@ end
 
     Random.seed!(67)
     benchmark_perf = test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity,
