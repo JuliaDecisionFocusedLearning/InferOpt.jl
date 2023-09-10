@@ -31,16 +31,16 @@ end
     for _ in 1:100
         θ = randn(50)
 
-        sort_jac = Zygote.jacobian(soft_sort, θ)[1]
-        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort, θ)[1]
+        sort_jac = Zygote.jacobian(soft_sort_l2, θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort_l2, θ)[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
         sort_jac = Zygote.jacobian(soft_sort_kl, θ)[1]
         sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort_kl, θ)[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
-        rank_jac = Zygote.jacobian(soft_rank, θ)[1]
-        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank, θ)[1]
+        rank_jac = Zygote.jacobian(soft_rank_l2, θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank_l2, θ)[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
 
         rank_jac = Zygote.jacobian(soft_rank_kl, θ)[1]
@@ -79,7 +79,7 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=FenchelYoungLoss(SoftRank(1.0, false)),
+        loss=FenchelYoungLoss(SoftRank()),
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )
