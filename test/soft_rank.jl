@@ -1,9 +1,9 @@
 @testitem "Isotonic l2 compare to HiGHS" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, HiGHS, JuMP, Test
     Random.seed!(63)
 
-    function isotonic_custom(y; rev=false)
+    function isotonic_custom(y)
         model = Model(HiGHS.Optimizer)
         set_silent(model)
 
@@ -24,7 +24,7 @@
 end
 
 @testitem "Test jacobian against finite differences" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, FiniteDifferences, Random, Test, Zygote
     Random.seed!(63)
 
@@ -50,14 +50,14 @@ end
 end
 
 @testitem "Learn by experience soft rank" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=soft_rank,
@@ -69,13 +69,13 @@ end
 end
 
 @testitem "Fenchel-Young loss soft rank" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
