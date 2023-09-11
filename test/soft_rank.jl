@@ -31,25 +31,25 @@ end
     for _ in 1:100
         θ = randn(50)
 
-        sort_jac = Zygote.jacobian(soft_sort_l2, θ)[1]
-        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort_l2, θ)[1]
+        sort_jac = Zygote.jacobian(x -> soft_sort_l2(x; ε=10.0), θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_sort_l2(x; ε=10.0), θ)[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
-        sort_jac = Zygote.jacobian(soft_sort_kl, θ)[1]
-        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_sort_kl, θ)[1]
+        sort_jac = Zygote.jacobian(x -> soft_sort_kl(x; ε=10.0), θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_sort_kl(x; ε=10.0), θ)[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
-        rank_jac = Zygote.jacobian(soft_rank_l2, θ)[1]
-        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank_l2, θ)[1]
+        rank_jac = Zygote.jacobian(x -> soft_rank_l2(x; ε=10.0), θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_rank_l2(x; ε=10.0), θ)[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
 
-        rank_jac = Zygote.jacobian(soft_rank_kl, θ)[1]
-        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), soft_rank_kl, θ)[1]
+        rank_jac = Zygote.jacobian(x -> soft_rank_kl(x; ε=10.0), θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_rank_kl(x; ε=10.0), θ)[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
     end
 end
 
-@testitem "Learn by experience soft rank" default_imports = false begin
+@testitem "Learn by experience soft rank l2" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
@@ -68,7 +68,26 @@ end
     )
 end
 
-@testitem "Fenchel-Young loss soft rank" default_imports = false begin
+@testitem "Learn by experience soft rank kl" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=soft_rank_kl,
+        loss=cost,
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+    )
+end
+
+@testitem "Fenchel-Young loss soft rank L2" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
@@ -80,6 +99,23 @@ end
         true_maximizer=ranking,
         maximizer=identity,
         loss=FenchelYoungLoss(SoftRank()),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+    )
+end
+
+@testitem "Fenchel-Young loss soft rank kl" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    test_pipeline!(
+        PipelineLossImitation();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(SoftRank(; is_l2_regularized=false)),
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )

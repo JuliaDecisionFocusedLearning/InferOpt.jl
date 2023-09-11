@@ -88,16 +88,16 @@ function isotonic_l2_with_sizes(y::AbstractVector)
         i = k
     end
 
-    block_sizes = zeros(nb_blocks)
+    block_sizes = zeros(Int, nb_blocks)
     current_index = 1
     for i in eachindex(block_sizes)
         width = 1
         value = sol[current_index]
-        while current_index <= n && isapprox(value, sol[current_index+1])
+        while current_index < n && isapprox(value, sol[current_index + 1]; atol=1e-9)
             current_index += 1
             width += 1
         end
-        value = sol[current_index]
+        current_index += 1
         block_sizes[i] = width
     end
 
@@ -109,12 +109,12 @@ function isotonic_l2(s, w)
 end
 
 function ChainRulesCore.rrule(::typeof(isotonic_l2), y::AbstractVector)
-    ŷ, widths = isotonic_l2_with_sizes(y)
+    ŷ, sizes = isotonic_l2_with_sizes(y)
 
     function isotonic_pullback(Δy)
         res = zeros(length(Δy))
         start = 1
-        for width in widths
+        for width in sizes
             slice = start:(start + width - 1)
             res[slice] .= sum(Δy[slice]) / width
             start += width
