@@ -12,8 +12,11 @@ function generate_dataset(
 )
     X = [randn(Float32, nb_features, instance_dim...) for n in 1:nb_instances]
     thetas = [true_encoder(x) for x in X]
-    noiseless_Y = [true_maximizer(θ) for θ in thetas]
-    noisy_Y = [true_maximizer(θ + noise_std * randn(instance_dim...)) for θ in thetas]
+    noiseless_Y = [true_maximizer(θ; instance=x) for (x, θ) in zip(X, thetas)]
+    noisy_Y = [
+        true_maximizer(θ + noise_std * randn(instance_dim...); instance=x) for
+        (x, θ) in zip(X, thetas)
+    ]
 
     X_train, X_test = train_test_split(X)
     thetas_train, thetas_test = train_test_split(thetas)

@@ -14,7 +14,7 @@ function init_perf()
 end
 
 function generate_predictions(encoder, maximizer, X)
-    Y_pred = [maximizer(encoder(x)) for x in X]
+    Y_pred = [maximizer(encoder(x); instance=x) for x in X]
     return Y_pred
 end
 
@@ -45,11 +45,11 @@ function update_perf!(
     (X_test, thetas_test, Y_test) = data_test
 
     train_loss = sum(
-        get_loss(pl, loss, maximizer(encoder(x)), x, θ, y) for
+        get_loss(pl, loss, maximizer(encoder(x); instance=x), x, θ, y) for
         (x, θ, y) in zip(data_train...)
     )
     test_loss = sum(
-        get_loss(pl, loss, maximizer(encoder(x)), x, θ, y) for
+        get_loss(pl, loss, maximizer(encoder(x); instance=x), x, θ, y) for
         (x, θ, y) in zip(data_test...)
     )
 

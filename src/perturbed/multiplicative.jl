@@ -15,7 +15,7 @@ See [`AbstractPerturbed`](@ref) for more details.
 - `ε:Float64`: size of the perturbation
 """
 struct PerturbedMultiplicative{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
-       AbstractPerturbed{parallel}
+       AbstractPerturbed{O,parallel}
     perturbation::P
     grad_logdensity::G
     oracle::O

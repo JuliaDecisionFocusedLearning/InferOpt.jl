@@ -7,8 +7,8 @@ Corresponds to regularized prediction on the probability simplex with entropic p
 """
 struct SoftArgmax <: AbstractRegularized end
 
-(::SoftArgmax)(z) = soft_argmax(z)
-compute_regularization(::SoftArgmax, y) = soft_argmax_regularization(y)
+(::SoftArgmax)(z::AbstractVector; kwargs...) = soft_argmax(z)
+compute_regularization(::SoftArgmax, y::AbstractArray) = soft_argmax_regularization(y)
 
 function soft_argmax(z::AbstractVector)
     s = exp.(z)
