@@ -34,7 +34,8 @@ end
 
 (l::SoftRank{true})(θ; ε=l.ε, rev=l.rev) = soft_rank_l2(θ; ε, rev)
 (l::SoftRank{false})(θ; ε=l.ε, rev=l.rev) = soft_rank_kl(θ; ε, rev)
-compute_regularization(l::SoftRank, y) = l.ε * half_square_norm(y)
+compute_regularization(l::SoftRank{true}, y) = l.ε * half_square_norm(y)
+compute_regularization(l::SoftRank{false}, y) = l.ε * dot(y, log.(y) .- 1)
 
 """
     SoftSort{is_l2_regularized} <: AbstractOptimizationLayer
