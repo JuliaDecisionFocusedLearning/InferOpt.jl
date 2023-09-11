@@ -2,7 +2,7 @@ dropfirstdim(z::AbstractArray) = dropdims(z; dims=1)
 make_positive(z::AbstractArray) = softplus.(z)
 
 function test_pipeline!(
-    ::Type{PL};
+    pl::PipelineLoss;
     instance_dim,
     true_maximizer,
     maximizer,
@@ -13,27 +13,33 @@ function test_pipeline!(
     epochs=EPOCHS,
     decrease=DECREASE,
     verbose=VERBOSE,
-) where {PL<:PipelineLoss}
+)
     data_train, data_test = generate_dataset(true_encoder, true_maximizer; instance_dim)
 
     encoder = encoder_factory()
-    pipeline_loss = PL(encoder, maximizer, loss)
-    opt = Flux.Adam()
+    opt_state = Flux.setup(Flux.Adam(), encoder)
     perf_storage = init_perf()
 
-    for _ in 1:epochs
+    for ep in 1:epochs
         update_perf!(
+            pl,
             perf_storage;
             data_train,
             data_test,
             true_encoder,
             true_maximizer,
+            maximizer,
             encoder,
-            pipeline_loss,
+            loss,
             error_function,
             cost,
         )
-        Flux.train!(pipeline_loss, Flux.params(encoder), zip(data_train...), opt)
+        for (x, θ, y) in zip(data_train...)
+            _, grads = Flux.withgradient(encoder) do _encoder
+                get_loss(pl, loss, maximizer(_encoder(x); instance=x), x, θ, y)
+            end
+            Flux.update!(opt_state, encoder, grads[1])
+        end
     end
 
     test_perf(perf_storage; decrease=decrease)

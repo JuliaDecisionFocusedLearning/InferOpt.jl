@@ -1,10 +1,10 @@
 @testitem "Paths - imit - SPO+ (θ)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitationθ;
+        PipelineLossImitationθ();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -14,12 +14,12 @@
 end
 
 @testitem "Paths - imit - SPO+ (θ & y)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -29,12 +29,12 @@ end
 end
 
 @testitem "Paths - imit - MSE IdentityRelaxation" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=normalize ∘ IdentityRelaxation(shortest_path_maximizer),
@@ -44,7 +44,7 @@ end
 end
 
 # @testitem "Paths - imit - MSE Interpolation" default_imports = false begin
-#     include("InferOptTestUtils/InferOptTestUtils.jl")
+#     include("InferOptTestUtils/src/InferOptTestUtils.jl")
 #     using InferOpt, .InferOptTestUtils, Random
 #     Random.seed!(63)
 
@@ -59,12 +59,12 @@ end
 # end  # TODO: make it work (doesn't seem to depend on λ)
 
 @testitem "Paths - imit - MSE PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=PerturbedAdditive(shortest_path_maximizer; ε=1.0, nb_samples=10),
@@ -74,12 +74,12 @@ end
 end
 
 @testitem "Paths - imit - MSE PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=PerturbedMultiplicative(shortest_path_maximizer; ε=1.0, nb_samples=10),
@@ -89,12 +89,12 @@ end
 end
 
 @testitem "Paths - imit - MSE RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=RegularizedFrankWolfe(
@@ -109,12 +109,12 @@ end
 end
 
 @testitem "Paths - imit - FYL PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -126,12 +126,12 @@ end
 end
 
 @testitem "Paths - imit - FYL PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -144,12 +144,12 @@ end
 end
 
 @testitem "Paths - imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Distributions
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -163,12 +163,12 @@ end
 end
 
 @testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -186,14 +186,14 @@ end
 end
 
 @testitem "Paths - exp - Pushforward PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -208,14 +208,14 @@ end
 end
 
 @testitem "Paths - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,
@@ -230,7 +230,7 @@ end
 end
 
 @testitem "Paths - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -238,7 +238,7 @@ end
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=(5, 5),
         true_maximizer=shortest_path_maximizer,
         maximizer=identity_kw,

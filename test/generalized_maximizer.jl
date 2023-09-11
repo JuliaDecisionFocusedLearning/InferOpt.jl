@@ -1,5 +1,5 @@
 @testitem "Generalized maximizer basics" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Test
 
     instance = [
@@ -23,7 +23,7 @@
 end
 
 @testitem "Generalized maximizer - imit - MSE PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -35,7 +35,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10),
@@ -48,7 +48,7 @@ end
 
 @testitem "Generalized maximizer - imit - MSE PerturbedMultiplicative" default_imports =
     false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -60,7 +60,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=PerturbedMultiplicative(generalized_maximizer; ε=1.0, nb_samples=10),
@@ -72,7 +72,7 @@ end
 end
 
 @testitem "Generalized maximizer - imit - FYL PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -84,7 +84,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -99,7 +99,7 @@ end
 
 @testitem "Generalized maximizer - imit - FYL PerturbedMultiplicative" default_imports =
     false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -111,7 +111,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -125,7 +125,7 @@ end
 end
 
 @testitem "Generalized maximizer - imit - SPO+ (θ)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -137,7 +137,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitationθ;
+        PipelineLossImitationθ();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -149,7 +149,7 @@ end
 end
 
 @testitem "Generalized maximizer - imit - SPO+ (θ & y)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
@@ -161,7 +161,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -174,7 +174,7 @@ end
 
 @testitem "Generalized maximizer - exp - Pushforward PerturbedAdditive" default_imports =
     false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
@@ -186,7 +186,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -201,7 +201,7 @@ end
 
 @testitem "Generalized maximizer - exp - Pushforward PerturbedMultiplicative" default_imports =
     false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
@@ -213,7 +213,7 @@ end
     end
 
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
@@ -227,7 +227,7 @@ end
 end
 
 @testitem "Regularized with a GeneralizedMaximizer" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, RequiredInterfaces, Test
     const RI = RequiredInterfaces
     Random.seed!(63)
@@ -247,7 +247,7 @@ end
     regularized = MyRegularized(GeneralizedMaximizer(sparse_argmax))
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,

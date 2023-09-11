@@ -1,10 +1,10 @@
 @testitem "Argmax - imit - SPO+ (θ)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitationθ;
+        PipelineLossImitationθ();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -14,12 +14,12 @@
 end
 
 @testitem "Argmax - imit - SPO+ (θ & y)" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitationθy;
+        PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -29,12 +29,12 @@ end
 end
 
 @testitem "Argmax - imit - SSVM" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -44,12 +44,12 @@ end
 end
 
 @testitem "Argmax - imit - MSE SparseArgmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=SparseArgmax(),
@@ -59,12 +59,12 @@ end
 end
 
 @testitem "Argmax - imit - MSE SoftArgmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=SoftArgmax(),
@@ -74,12 +74,12 @@ end
 end
 
 @testitem "Argmax - imit - MSE PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=10),
@@ -89,12 +89,12 @@ end
 end
 
 @testitem "Argmax - imit - MSE PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=10),
@@ -104,12 +104,12 @@ end
 end
 
 @testitem "Argmax - imit - MSE RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=RegularizedFrankWolfe(
@@ -124,12 +124,12 @@ end
 end
 
 @testitem "Argmax - imit - FYL SparseArgmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -139,12 +139,12 @@ end
 end
 
 @testitem "Argmax - imit - FYL SoftArgmax" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -154,12 +154,12 @@ end
 end
 
 @testitem "Argmax - imit - FYL PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -169,12 +169,12 @@ end
 end
 
 @testitem "Argmax - imit - FYL PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -184,12 +184,12 @@ end
 end
 
 @testitem "Argmax - imit - FYL RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
-        PipelineLossImitation;
+        PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -206,14 +206,14 @@ end
 end
 
 @testitem "Argmax - exp - Pushforward PerturbedAdditive" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -225,14 +225,14 @@ end
 end
 
 @testitem "Argmax - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
@@ -246,7 +246,7 @@ end
 end
 
 @testitem "Argmax - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
-    include("InferOptTestUtils/InferOptTestUtils.jl")
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -254,7 +254,7 @@ end
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
     test_pipeline!(
-        PipelineLossExperience;
+        PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=identity_kw,
