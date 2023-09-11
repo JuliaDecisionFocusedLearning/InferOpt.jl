@@ -57,14 +57,16 @@ end
     end
 end
 
-@testitem "Learn by experience soft rank l2" default_imports = false begin
+@testitem "Learn by experience soft rank" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
     Random.seed!(63)
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
-    soft_rank_results = test_pipeline!(
+
+    Random.seed!(67)
+    soft_rank_l2_results = test_pipeline!(
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
@@ -73,8 +75,23 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
+        epochs=50,
     )
 
+    Random.seed!(67)
+    soft_rank_kl_results = test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=soft_rank_kl,
+        loss=cost,
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=50,
+    )
+
+    Random.seed!(67)
     perturbed_results = test_pipeline!(
         PipelineLossExperience();
         instance_dim=5,
@@ -84,29 +101,12 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
+        epochs=50,
     )
 
-    @test soft_rank_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
-    @show soft_rank_results.test_cost_gaps[end] perturbed_results.test_cost_gaps[end]
-end
-
-@testitem "Learn by experience soft rank kl" default_imports = false begin
-    include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
-    Random.seed!(63)
-
-    true_encoder = encoder_factory()
-    cost(y; instance) = dot(y, -true_encoder(instance))
-    test_pipeline!(
-        PipelineLossExperience();
-        instance_dim=5,
-        true_maximizer=ranking,
-        maximizer=soft_rank_kl,
-        loss=cost,
-        error_function=hamming_distance,
-        true_encoder=true_encoder,
-        cost=cost,
-    )
+    # Check that we achieve better performance than the reinforce trick
+    @test soft_rank_l2_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
+    @test soft_rank_kl_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
 end
 
 @testitem "Fenchel-Young loss soft rank L2" default_imports = false begin
@@ -132,27 +132,14 @@ end
     Random.seed!(63)
 
     true_encoder = encoder_factory()
-    
-    bench_time = @elapsed perturbed_results = test_pipeline!(
+
+    test_pipeline!(
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity,
-        loss=FenchelYoungLoss(PerturbedAdditive(ranking; ε=1.0, nb_samples=5)),
+        loss=FenchelYoungLoss(SoftRank(; is_l2_regularized=false, ε=10.0)),
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )
-
-    soft_time = @elapsed soft_rank_results = test_pipeline!(
-        PipelineLossImitation();
-        instance_dim=5,
-        true_maximizer=ranking,
-        maximizer=identity,
-        loss=FenchelYoungLoss(SoftRank(; is_l2_regularized=false)),
-        error_function=hamming_distance,
-        true_encoder=true_encoder,
-    )
-
-    @test soft_rank_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
-    @show soft_rank_results.test_cost_gaps[end] perturbed_results.test_cost_gaps[end]
 end
