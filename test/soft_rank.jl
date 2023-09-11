@@ -32,19 +32,27 @@ end
         θ = randn(50)
 
         sort_jac = Zygote.jacobian(x -> soft_sort_l2(x; ε=10.0), θ)[1]
-        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_sort_l2(x; ε=10.0), θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(
+            central_fdm(2, 1), x -> soft_sort_l2(x; ε=10.0), θ
+        )[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
         sort_jac = Zygote.jacobian(x -> soft_sort_kl(x; ε=10.0), θ)[1]
-        sort_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_sort_kl(x; ε=10.0), θ)[1]
+        sort_jac_fd = FiniteDifferences.jacobian(
+            central_fdm(2, 1), x -> soft_sort_kl(x; ε=10.0), θ
+        )[1]
         @test all(isapprox.(sort_jac, sort_jac_fd, atol=1e-4))
 
         rank_jac = Zygote.jacobian(x -> soft_rank_l2(x; ε=10.0), θ)[1]
-        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_rank_l2(x; ε=10.0), θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(
+            central_fdm(2, 1), x -> soft_rank_l2(x; ε=10.0), θ
+        )[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
 
         rank_jac = Zygote.jacobian(x -> soft_rank_kl(x; ε=10.0), θ)[1]
-        rank_jac_fd = FiniteDifferences.jacobian(central_fdm(2, 1), x -> soft_rank_kl(x; ε=10.0), θ)[1]
+        rank_jac_fd = FiniteDifferences.jacobian(
+            central_fdm(2, 1), x -> soft_rank_kl(x; ε=10.0), θ
+        )[1]
         @test all(isapprox.(rank_jac, rank_jac_fd, atol=1e-4))
     end
 end
