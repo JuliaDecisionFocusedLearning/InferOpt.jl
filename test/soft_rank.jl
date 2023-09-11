@@ -64,7 +64,7 @@ end
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
-    test_pipeline!(
+    soft_rank_results = test_pipeline!(
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
@@ -74,6 +74,20 @@ end
         true_encoder=true_encoder,
         cost=cost,
     )
+
+    perturbed_results = test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=Pushforward(PerturbedAdditive(ranking; ε=1.0, nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+    )
+
+    @test soft_rank_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
+    @show soft_rank_results.test_cost_gaps[end] perturbed_results.test_cost_gaps[end]
 end
 
 @testitem "Learn by experience soft rank kl" default_imports = false begin
@@ -118,7 +132,18 @@ end
     Random.seed!(63)
 
     true_encoder = encoder_factory()
-    test_pipeline!(
+    
+    bench_time = @elapsed perturbed_results = test_pipeline!(
+        PipelineLossImitation();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity,
+        loss=FenchelYoungLoss(PerturbedAdditive(ranking; ε=1.0, nb_samples=5)),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+    )
+
+    soft_time = @elapsed soft_rank_results = test_pipeline!(
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=ranking,
@@ -127,4 +152,7 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )
+
+    @test soft_rank_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
+    @show soft_rank_results.test_cost_gaps[end] perturbed_results.test_cost_gaps[end]
 end
