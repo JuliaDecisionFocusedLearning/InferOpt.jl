@@ -14,6 +14,7 @@ using LinearAlgebra: dot
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
+using StatsFuns: logaddexp, softmax
 using ThreadsX: ThreadsX
 using RequiredInterfaces
 
@@ -23,6 +24,9 @@ include("utils/some_functions.jl")
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
 include("utils/generalized_maximizer.jl")
+include("utils/isotonic_regression/isotonic_l2.jl")
+include("utils/isotonic_regression/isotonic_kl.jl")
+include("utils/isotonic_regression/projection.jl")
 
 include("simple/interpolation.jl")
 include("simple/identity.jl")
@@ -30,6 +34,7 @@ include("simple/identity.jl")
 include("regularized/abstract_regularized.jl")
 include("regularized/soft_argmax.jl")
 include("regularized/sparse_argmax.jl")
+include("regularized/soft_rank.jl")
 include("regularized/regularized_frank_wolfe.jl")
 
 include("perturbed/abstract_perturbed.jl")
@@ -63,6 +68,8 @@ export Interpolation
 export AbstractRegularized, AbstractRegularizedGeneralizedMaximizer
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
+export SoftRank, soft_rank, soft_rank_l2, soft_rank_kl
+export SoftSort, soft_sort, soft_sort_l2, soft_sort_kl
 export RegularizedFrankWolfe
 
 export PerturbedAdditive

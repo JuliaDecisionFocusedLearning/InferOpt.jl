@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.3"
+julia_version = "1.9.1"
 manifest_format = "2.0"
 project_hash = "6582fd5f56597eabb11c5172113b1d688949275d"
 
@@ -82,6 +82,12 @@ git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
 
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.1"
+
 [[deps.ChainRules]]
 deps = ["Adapt", "ChainRulesCore", "Compat", "Distributed", "GPUArraysCore", "IrrationalConstants", "LinearAlgebra", "Random", "RealDot", "SparseArrays", "SparseInverseSubset", "Statistics", "StructArrays", "SuiteSparse"]
 git-tree-sha1 = "dbeca245b0680f5393b4e6c40dcead7230ab0b3b"
@@ -141,7 +147,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.5+0"
+version = "1.0.2+0"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -246,6 +252,12 @@ deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.6.0"
 
+[[deps.DualNumbers]]
+deps = ["Calculus", "NaNMath", "SpecialFunctions"]
+git-tree-sha1 = "5837a837389fccf076445fce071c8ddaea35a566"
+uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
+version = "0.6.8"
+
 [[deps.FLoops]]
 deps = ["BangBang", "Compat", "FLoopsBase", "InitialValues", "JuliaVariables", "MLStyle", "Serialization", "Setfield", "Transducers"]
 git-tree-sha1 = "ffb97765602e3cbe59a0589d237bf07f245a8576"
@@ -335,6 +347,12 @@ git-tree-sha1 = "858b2a7a7798e649dc5612792969541e3a88379a"
 uuid = "dd2b58c7-5af7-4f17-9e46-57c68ac813fb"
 version = "0.9.1"
 
+[[deps.HypergeometricFunctions]]
+deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
+git-tree-sha1 = "f218fe3736ddf977e0e772bc9a586b2383da2685"
+uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+version = "0.3.23"
+
 [[deps.IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
 git-tree-sha1 = "eac00994ce3229a464c2847e956d77a2c64ad3a5"
@@ -342,17 +360,16 @@ uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
 version = "0.4.10"
 
 [[deps.InferOpt]]
-deps = ["ChainRulesCore", "DensityInterface", "LinearAlgebra", "Random", "Statistics", "StatsBase", "ThreadsX"]
+deps = ["ChainRulesCore", "DensityInterface", "LinearAlgebra", "Random", "Statistics", "StatsBase", "StatsFuns", "ThreadsX"]
 path = "../.."
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
-version = "0.6.0"
+version = "0.5.2"
 
     [deps.InferOpt.extensions]
-    InferOptFrankWolfeExt = ["DifferentiableFrankWolfe", "FrankWolfe"]
+    InferOptFrankWolfeExt = "DifferentiableFrankWolfe"
 
     [deps.InferOpt.weakdeps]
     DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
-    FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
 
 [[deps.Inflate]]
 git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
@@ -588,7 +605,7 @@ version = "1.6.2"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.9.2"
+version = "1.9.0"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -647,6 +664,18 @@ deps = ["UUIDs"]
 git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
+
+[[deps.Rmath]]
+deps = ["Random", "Rmath_jll"]
+git-tree-sha1 = "f65dcb5fa46aee0cf9ed6274ccbd597adc49aa7b"
+uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
+version = "0.7.1"
+
+[[deps.Rmath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "6ed52fdd3382cf21947b15e8870ac0ddbff736da"
+uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
+version = "0.4.0+0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -742,6 +771,17 @@ deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missin
 git-tree-sha1 = "75ebe04c5bed70b91614d684259b661c9e6274a4"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.34.0"
+
+[[deps.StatsFuns]]
+deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
+uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+version = "1.3.0"
+weakdeps = ["ChainRulesCore", "InverseFunctions"]
+
+    [deps.StatsFuns.extensions]
+    StatsFunsChainRulesCoreExt = "ChainRulesCore"
+    StatsFunsInverseFunctionsExt = "InverseFunctions"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]

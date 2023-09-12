@@ -50,7 +50,7 @@ function Base.show(io::IO, regularized::RegularizedFrankWolfe)
     )
 end
 
-function compute_regularization(regularized::RegularizedFrankWolfe, y::AbstractArray)
+function compute_regularization(regularized::RegularizedFrankWolfe, y)
     return regularized.Ω(y)
 end
 
