@@ -237,7 +237,7 @@ end
     end
 
     (regularized::MyRegularized)(θ; kwargs...) = regularized.maximizer(θ; kwargs...)
-    function InferOpt.compute_regularization(regularized::MyRegularized, y::AbstractArray)
+    function InferOpt.compute_regularization(regularized::MyRegularized, y)
         return InferOpt.sparse_argmax_regularization(y)
     end
     InferOpt.get_maximizer(regularized::MyRegularized) = regularized.maximizer
