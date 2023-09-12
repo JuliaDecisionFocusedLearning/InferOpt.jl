@@ -22,7 +22,7 @@ To install the stable version, open a Julia REPL and run the following command:
 julia> using Pkg; Pkg.add("InferOpt")
 ```
 
-To install the development version (*recommended for now*), run this command instead:
+To install the development version, run this command instead:
 
 ```julia
 julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
