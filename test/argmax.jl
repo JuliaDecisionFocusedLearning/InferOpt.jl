@@ -7,7 +7,7 @@
         PipelineLossImitationθ();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(one_hot_argmax),
         error_function=hamming_distance,
     )
@@ -22,7 +22,7 @@ end
         PipelineLossImitationθy();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=SPOPlusLoss(one_hot_argmax),
         error_function=hamming_distance,
     )
@@ -37,7 +37,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=InferOpt.ZeroOneStructuredSVMLoss(),
         error_function=hamming_distance,
     )
@@ -53,7 +53,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=SparseArgmax(),
-        loss=mse,
+        loss=mse_kw,
         error_function=hamming_distance,
     )
 end
@@ -68,7 +68,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=SoftArgmax(),
-        loss=mse,
+        loss=mse_kw,
         error_function=hamming_distance,
     )
 end
@@ -83,7 +83,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=10),
-        loss=mse,
+        loss=mse_kw,
         error_function=hamming_distance,
     )
 end
@@ -98,7 +98,7 @@ end
         instance_dim=5,
         true_maximizer=one_hot_argmax,
         maximizer=PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=10),
-        loss=mse,
+        loss=mse_kw,
         error_function=hamming_distance,
     )
 end
@@ -115,10 +115,10 @@ end
         maximizer=RegularizedFrankWolfe(
             one_hot_argmax;
             Ω=half_square_norm,
-            Ω_grad=identity,
+            Ω_grad=identity_kw,
             frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
         ),
-        loss=mse,
+        loss=mse_kw,
         error_function=hamming_distance,
     )
 end
@@ -132,7 +132,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(SparseArgmax()),
         error_function=hamming_distance,
     )
@@ -147,7 +147,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(SoftArgmax()),
         error_function=hamming_distance,
     )
@@ -162,7 +162,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=5)),
         error_function=hamming_distance,
     )
@@ -177,7 +177,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=5)),
         error_function=hamming_distance,
     )
@@ -192,12 +192,12 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(
             RegularizedFrankWolfe(
                 one_hot_argmax;
                 Ω=half_square_norm,
-                Ω_grad=identity,
+                Ω_grad=identity_kw,
                 frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
         ),
@@ -216,7 +216,7 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=10), cost),
         error_function=hamming_distance,
         true_encoder=true_encoder,
@@ -235,7 +235,7 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(
             PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=10), cost
         ),
@@ -257,12 +257,12 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=one_hot_argmax,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(
             RegularizedFrankWolfe(
                 one_hot_argmax;
                 Ω=half_square_norm,
-                Ω_grad=identity,
+                Ω_grad=identity_kw,
                 frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
             ),
             cost,

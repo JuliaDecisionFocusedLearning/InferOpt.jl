@@ -1,7 +1,7 @@
 """
-    AbstractPerturbed{parallel} <: AbstractOptimizationLayer
+    AbstractPerturbed{F,parallel} <: AbstractOptimizationLayer
 
-Differentiable perturbation of a black box optimizer.
+Differentiable perturbation of a black box optimizer of type `F`.
 
 The parameter `parallel` is a boolean value indicating if the perturbations are run in parallel.
 This is particularly useful if your black box optimizer running time is high.
@@ -26,17 +26,19 @@ This is particularly useful if your black box optimizer running time is high.
     The `perturbation` field does not mean the same thing for a [`PerturbedOracle`](@ref)
     than for a [`PerturbedAdditive`](@ref)/[`PerturbedMultiplicative`](@ref). See their respective docs.
 """
-abstract type AbstractPerturbed{parallel} <: AbstractOptimizationLayer end
+abstract type AbstractPerturbed{O,parallel} <: AbstractOptimizationLayer end
 
+# Non parallelized version
 function compute_atoms(
-    perturbed::AbstractPerturbed{false}, η_samples::Vector{<:AbstractArray}; kwargs...
-)
+    perturbed::AbstractPerturbed{O,false}, η_samples::Vector{<:AbstractArray}; kwargs...
+) where {O}
     return [perturbed.oracle(η; kwargs...) for η in η_samples]
 end
 
+# Parallelized version
 function compute_atoms(
-    perturbed::AbstractPerturbed{true}, η_samples::Vector{<:AbstractArray}; kwargs...
-)
+    perturbed::AbstractPerturbed{O,true}, η_samples::Vector{<:AbstractArray}; kwargs...
+) where {O}
     return ThreadsX.map(η -> perturbed.oracle(η; kwargs...), η_samples)
 end
 

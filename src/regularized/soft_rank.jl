@@ -26,14 +26,20 @@ Constructor for [`SoftRank`](@ref).
 # Arguments
 - `ε::Float64=1.0`: size of the regularization
 - `rev::Bool=false`: rank in ascending order if false
-- `is_l2_regularized::Bool=true`: use l2 regularization if true, else kl regularization
+- `regularization="l2": used regularization, either "l2" or "kl"
 """
-function SoftRank(; ε::Float64=1.0, rev::Bool=false, is_l2_regularized::Bool=true)
-    return SoftRank{is_l2_regularized}(ε, rev)
+function SoftRank(; ε::Float64=1.0, rev::Bool=false, regularization="l2")
+    if regularization == "l2"
+        return SoftRank{true}(ε, rev)
+    elseif regularization == "kl"
+        return SoftRank{false}(ε, rev)
+    else
+        throw(ArgumentError("Choose eaither l2 or kl regularization"))
+    end
 end
 
-(l::SoftRank{true})(θ; ε=l.ε, rev=l.rev) = soft_rank_l2(θ; ε, rev)
-(l::SoftRank{false})(θ; ε=l.ε, rev=l.rev) = soft_rank_kl(θ; ε, rev)
+(l::SoftRank{true})(θ; ε=l.ε, rev=l.rev, kwargs...) = soft_rank_l2(θ; ε, rev)
+(l::SoftRank{false})(θ; ε=l.ε, rev=l.rev, kwargs...) = soft_rank_kl(θ; ε, rev)
 compute_regularization(l::SoftRank{true}, y) = l.ε * half_square_norm(y)
 compute_regularization(l::SoftRank{false}, y) = l.ε * dot(y, log.(y) .- 1)
 

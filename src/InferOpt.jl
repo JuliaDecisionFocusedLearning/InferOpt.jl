@@ -16,12 +16,14 @@ using Statistics: mean
 using StatsBase: StatsBase, sample
 using StatsFuns: logaddexp, softmax
 using ThreadsX: ThreadsX
+using RequiredInterfaces
 
 include("interface.jl")
 
 include("utils/some_functions.jl")
 include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
+include("utils/generalized_maximizer.jl")
 include("utils/isotonic_regression/isotonic_l2.jl")
 include("utils/isotonic_regression/isotonic_kl.jl")
 include("utils/isotonic_regression/projection.jl")
@@ -53,6 +55,7 @@ end
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
+export GeneralizedMaximizer, objective_value
 
 export FixedAtomsProbabilityDistribution
 export compute_expectation
@@ -62,7 +65,7 @@ export Pushforward
 export IdentityRelaxation
 export Interpolation
 
-export AbstractRegularized
+export AbstractRegularized, AbstractRegularizedGeneralizedMaximizer
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
 export SoftRank, soft_rank, soft_rank_l2, soft_rank_kl
@@ -75,7 +78,7 @@ export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss
-export ImitationLoss
+export ImitationLoss, get_y_true
 export SPOPlusLoss
 
 end

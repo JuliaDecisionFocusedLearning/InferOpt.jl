@@ -36,7 +36,7 @@ function test_pipeline!(
         )
         for (x, θ, y) in zip(data_train...)
             _, grads = Flux.withgradient(encoder) do _encoder
-                get_loss(pl, loss, maximizer(_encoder(x)), x, θ, y)
+                get_loss(pl, loss, maximizer(_encoder(x); instance=x), x, θ, y)
             end
             Flux.update!(opt_state, encoder, grads[1])
         end

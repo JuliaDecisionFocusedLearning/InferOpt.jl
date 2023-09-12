@@ -8,7 +8,7 @@ Differentiable perturbed black-box oracle. The `oracle` input `θ` is perturbed 
 See [`AbstractPerturbed`](@ref) for more details about its fields.
 """
 struct PerturbedOracle{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
-       AbstractPerturbed{parallel}
+       AbstractPerturbed{O,parallel}
     perturbation::P
     grad_logdensity::G
     oracle::O

@@ -4,3 +4,16 @@ function shortest_path_maximizer(θ::AbstractMatrix; kwargs...)
     y = path_to_matrix(g, path)
     return y
 end
+
+function max_pricing(θ::AbstractVector; instance::AbstractMatrix)
+    @assert length(θ) == size(instance, 1)
+    @assert length(θ) == size(instance, 2)
+    weights = θ .- instance
+    return weights .>= 0
+end
+
+g(y; kwargs...) = vec(sum(y; dims=2))
+h(y; instance) = -sum(dij * yij for (dij, yij) in zip(instance, y))
+
+identity_kw(x; kwargs...) = identity(x)
+mse_kw(x, y; agg=mean, kwargs...) = mse(x, y; agg)

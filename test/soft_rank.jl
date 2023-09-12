@@ -82,7 +82,7 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=soft_rank,
+        maximizer=SoftRank(),
         loss=cost,
         error_function=hamming_distance,
         true_encoder=true_encoder,
@@ -95,7 +95,7 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=soft_rank_kl,
+        maximizer=SoftRank(; regularization="kl"),
         loss=cost,
         error_function=hamming_distance,
         true_encoder=true_encoder,
@@ -108,7 +108,7 @@ end
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=Pushforward(PerturbedAdditive(ranking; ε=1.0, nb_samples=10), cost),
         error_function=hamming_distance,
         true_encoder=true_encoder,
@@ -131,7 +131,7 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=identity,
+        maximizer=identity_kw,
         loss=FenchelYoungLoss(SoftRank()),
         error_function=hamming_distance,
         true_encoder=true_encoder,
@@ -149,8 +149,8 @@ end
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=ranking,
-        maximizer=identity,
-        loss=FenchelYoungLoss(SoftRank(; is_l2_regularized=false, ε=10.0)),
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(SoftRank(; regularization="kl", ε=10.0)),
         error_function=hamming_distance,
         true_encoder=true_encoder,
     )
