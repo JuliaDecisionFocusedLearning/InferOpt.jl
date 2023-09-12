@@ -1,3 +1,15 @@
+@testitem "Basic tests" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, Random, HiGHS, JuMP, Test
+    Random.seed!(63)
+
+    values = [5.0, 1.0, 2.0]
+    @test all(isapprox.(soft_sort(values; ε=1.0), [5 / 3, 8 / 3, 11 / 3]))
+    @test all(soft_sort(values; ε=0.1) .== [1.0, 2.0, 5.0])
+    @test all(soft_rank(values; ε=2.0) .== [3.0, 1.25, 1.75])
+    @test all(soft_rank(values; ε=1.0) .== [3.0, 1.0, 2.0])
+end
+
 @testitem "Isotonic l2 compare to HiGHS" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, HiGHS, JuMP, Test
