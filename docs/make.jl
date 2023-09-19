@@ -45,7 +45,6 @@ makedocs(;
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
-    #warnonly=[:cross_references],
 )
 
 for file in
