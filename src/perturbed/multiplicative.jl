@@ -4,7 +4,7 @@
 Differentiable multiplicative perturbation of a black-box oracle:
 the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ perturbation`.
 
-This [`OptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
+This [`AbstractOptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
 if the oracle is an optimization maximizer with a linear objective.
 
 Reference: <https://arxiv.org/abs/2207.13513>

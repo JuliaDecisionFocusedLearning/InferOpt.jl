@@ -3,7 +3,7 @@
 
 Differentiable normal perturbation of a black-box maximizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
-This [`OptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
+This [`AbstractOptimizationLayer`](@ref) is compatible with [`FenchelYoungLoss`](@ref),
 if the oracle is an optimization maximizer with a linear objective.
 
 Reference: <https://arxiv.org/abs/2002.08676>
@@ -39,7 +39,7 @@ end
 
 # Arguments
 - `oracle`: the black-box oracle we want to differentiate through.
-    It should be a linear maximizer if you want to use it inside a [`FenchelYoungLoss`].
+    It should be a linear maximizer if you want to use it inside a [`FenchelYoungLoss`](@ref).
 
 # Keyword arguments (optional)
 - `ε=1.0`: size of the perturbation.

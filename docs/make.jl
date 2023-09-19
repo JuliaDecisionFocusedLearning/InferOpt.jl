@@ -36,6 +36,7 @@ makedocs(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://axelparmentier.github.io/InferOpt.jl",
         assets=String[],
+        repolink="https://github.com/axelparmentier/InferOpt.jl",
     ),
     pages=[
         "Home" => "index.md",
@@ -44,6 +45,7 @@ makedocs(;
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
+    #warnonly=[:cross_references],
 )
 
 for file in
