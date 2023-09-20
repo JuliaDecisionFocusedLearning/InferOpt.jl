@@ -19,7 +19,7 @@
 
     val = InferOpt.objective_value(generalized_maximizer, θ, y; instance)
 
-    @test val == θ' * g(y) + h(y; instance)
+    @test val == θ' * g(y; instance) + h(y; instance)
 end
 
 @testitem "Generalized maximizer - imit - MSE PerturbedAdditive" default_imports = false begin

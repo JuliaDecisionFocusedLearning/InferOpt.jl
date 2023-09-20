@@ -12,7 +12,7 @@ function max_pricing(θ::AbstractVector; instance::AbstractMatrix)
     return weights .>= 0
 end
 
-g(y; kwargs...) = vec(sum(y; dims=2))
+g(y; instance, kwargs...) = vec(sum(y; dims=2))
 h(y; instance) = -sum(dij * yij for (dij, yij) in zip(instance, y))
 
 identity_kw(x; kwargs...) = identity(x)
