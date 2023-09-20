@@ -141,7 +141,7 @@ function fenchel_young_F_and_first_part_of_grad(
     η = θ .+ ε .* Z
     y = oracle(η; kwargs...)
     F = objective_value(oracle, η, y; kwargs...)
-    return F, oracle.g(y)
+    return F, oracle.g(y; kwargs...)
 end
 
 function fenchel_young_F_and_first_part_of_grad(
@@ -165,5 +165,5 @@ function fenchel_young_F_and_first_part_of_grad(
     y = oracle(η; kwargs...)
     F = objective_value(oracle, η, y; kwargs...)
     y_scaled = y .* eZ
-    return F, oracle.g(y_scaled)
+    return F, oracle.g(y_scaled; kwargs...)
 end
