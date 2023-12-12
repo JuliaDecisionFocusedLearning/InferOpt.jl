@@ -39,7 +39,7 @@ Since the cost of a move is defined as the cost of the arrival vertex, any grid 
 =#
 
 h, w = 50, 100
-queen_directions = GridGraphs.QUEEN_ACYCLIC_DIRECTIONS
+queen_directions = GridGraphs.QUEEN_DIRECTIONS_ACYCLIC
 g = GridGraph(rand(h, w); directions=queen_directions);
 
 #=
