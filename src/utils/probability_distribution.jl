@@ -1,16 +1,17 @@
 """
-    FixedAtomsProbabilityDistribution{A,W}
+$TYPEDEF
 
 Encodes a probability distribution with finite support and fixed atoms.
 
 See [`compute_expectation`](@ref) to understand the name of this struct.
 
 # Fields
-- `atoms::Vector{A}`: elements of the support
-- `weights::Vector{W}`: probability values for each atom (must sum to 1)
+$TYPEDFIELDS
 """
 struct FixedAtomsProbabilityDistribution{A,W}
+    "elements of the support"
     atoms::Vector{A}
+    "probability values for each atom (must sum to 1)"
     weights::Vector{W}
 
     function FixedAtomsProbabilityDistribution(
@@ -25,7 +26,7 @@ end
 Base.length(probadist::FixedAtomsProbabilityDistribution) = length(probadist.atoms)
 
 """
-    rand([rng,] probadist)
+$TYPEDSIGNATURES
 
 Sample from the atoms of `probadist` according to their weights.
 """
@@ -37,7 +38,7 @@ end
 Base.rand(probadist::FixedAtomsProbabilityDistribution) = rand(GLOBAL_RNG, probadist)
 
 """
-    apply_on_atoms(post_processing, probadist)
+$TYPEDSIGNATURES
 
 Create a new distribution by applying the function `post_processing` to each atom of `probadist` (the weights remain the same).
 """

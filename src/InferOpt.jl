@@ -1,16 +1,17 @@
 """
     InferOpt
 
-A toolbox for using combinatorial optimization algorithms within machine learning pipelines.
+$README
 
-See our preprint <https://arxiv.org/abs/2207.13513>
+# Exported names
+$EXPORTS
 """
 module InferOpt
 
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
 using DensityInterface: logdensityof
-using DocStringExtensions: TYPEDFIELDS, FIELDS, TYPEDSIGNATURES, TYPEDEF
+using DocStringExtensions
 using LinearAlgebra: dot
 using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean

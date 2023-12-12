@@ -1,5 +1,5 @@
 """
-    PerturbedAdditive{P,G,O,R,S,parallel} <: AbstractPerturbed{parallel}
+$TYPEDEF
 
 Differentiable normal perturbation of a black-box maximizer: the input undergoes `θ -> θ + εZ` where `Z ∼ N(0, I)`.
 
@@ -10,8 +10,8 @@ Reference: <https://arxiv.org/abs/2002.08676>
 
 See [`AbstractPerturbed`](@ref) for more details.
 
-# Specific field
-- `ε:Float64`: size of the perturbation
+# Fields
+$TYPEDFIELDS
 """
 struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{O,parallel}
@@ -21,6 +21,7 @@ struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
     rng::R
     seed::S
     nb_samples::Int
+    "size of the perturbation"
     ε::Float64
 end
 

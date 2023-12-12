@@ -1,5 +1,5 @@
 """
-    GeneralizedMaximizer{F,G,H}
+$TYPEDEF
 
 Wrapper for generalized maximizers `maximizer` of the form argmax_y θᵀg(y) + h(y).
 It is compatible with the following layers
@@ -26,7 +26,7 @@ function (f::GeneralizedMaximizer)(θ::AbstractArray{<:Real}; kwargs...)
 end
 
 """
-    objective_value(f, θ, y, kwargs...)
+$TYPEDSIGNATURES
 
 Computes the objective value of given GeneralizedMaximizer `f`, knowing weights `θ` and solution `y`.
 """

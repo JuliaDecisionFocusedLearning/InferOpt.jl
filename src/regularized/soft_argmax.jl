@@ -1,5 +1,5 @@
 """
-    SoftArgmax <: Regularized
+$TYPEDEF
 
 Soft argmax activation function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 

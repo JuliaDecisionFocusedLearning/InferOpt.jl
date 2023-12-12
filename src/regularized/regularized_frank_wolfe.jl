@@ -1,5 +1,5 @@
 """
-    RegularizedFrankWolfe <: AbstractRegularized
+$TYPEDEF
 
 Regularized optimization layer which relies on the Frank-Wolfe algorithm to define a probability distribution while solving
 ```
@@ -10,11 +10,7 @@ Regularized optimization layer which relies on the Frank-Wolfe algorithm to defi
     Since this is a conditional dependency, you need to have loaded the package DifferentiableFrankWolfe.jl before using `RegularizedFrankWolfe`.
 
 # Fields
-
-- `linear_maximizer`: linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`
-- `Ω`: regularization function `Ω(y)`
-- `Ω_grad`: gradient function of the regularization function `∇Ω(y)`
-- `frank_wolfe_kwargs`: named tuple of keyword arguments passed to the Frank-Wolfe algorithm
+$TYPEDFIELDS
 
 # Frank-Wolfe parameters
 
@@ -30,9 +26,13 @@ Some values you can tune:
 See the documentation of FrankWolfe.jl for details.
 """
 struct RegularizedFrankWolfe{M,RF,RG,FWK} <: AbstractRegularized
+    "linear maximization oracle `θ -> argmax_{x ∈ C} θᵀx`, implicitly defines the polytope `C`"
     linear_maximizer::M
+    "regularization function `Ω(y)`"
     Ω::RF
+    "gradient function of the regularization function `∇Ω(y)`"
     Ω_grad::RG
+    "named tuple of keyword arguments passed to the Frank-Wolfe algorithm"
     frank_wolfe_kwargs::FWK
 end
 

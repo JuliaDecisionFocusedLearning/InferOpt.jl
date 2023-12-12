@@ -1,5 +1,5 @@
 """
-    ImitationLoss <: AbstractLossLayer
+$TYPEDEF
 
 Generic imitation loss of the form
 ```
@@ -12,16 +12,16 @@ L(θ, t_true) = max_y {δ(y, t_true) + α θᵀ(y - y_true) - (Ω(y) - Ω(y_true
 Note: by default, `t_true` is a named tuple with field `y_true`, but it can be any data structure for which the [`get_y_true`](@ref) method is implemented.
 
 # Fields
-
-- `aux_loss_maximizer`: function of `(θ, t_true, α)` that computes the argmax in the problem above
-- `δ`: base loss function
-- `Ω`: regularization function
-- `α::Float64`: hyperparameter with a default value of 1.0
+$TYPEDFIELDS
 """
 struct ImitationLoss{M,L,R} <: AbstractLossLayer
+    "function of `(θ, t_true, α)` that computes the argmax in the problem above"
     aux_loss_maximizer::M
+    "base loss function"
     δ::L
+    "regularization function"
     Ω::R
+    "hyperparameter with a default value of 1.0"
     α::Float64
 end
 
@@ -40,7 +40,7 @@ function ImitationLoss(; aux_loss_maximizer, δ, Ω, α=1.0)
 end
 
 """
-    get_y_true(t_true::Any)
+    $FUNCTIONNAME(t_true::Any)
 
 Retrieve `y_true` from `t_true`.
 

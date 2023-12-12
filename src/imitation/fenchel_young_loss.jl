@@ -9,7 +9,6 @@ L(θ, y_true) = (Ω(y_true) - θᵀy_true) - (Ω(ŷ) - θᵀŷ)
 Reference: <https://arxiv.org/abs/1901.02324>
 
 # Fields
-
 $TYPEDFIELDS
 """
 struct FenchelYoungLoss{O<:AbstractOptimizationLayer} <: AbstractLossLayer
@@ -25,7 +24,7 @@ end
 ## Forward pass
 
 """
-    (fyl::FenchelYoungLoss)(θ, y_true[; kwargs...])
+    (fyl::$FUNCTIONNAME)(θ, y_true[; kwargs...])
 """
 function (fyl::FenchelYoungLoss)(θ::AbstractArray, y_true::AbstractArray; kwargs...)
     l, _ = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)

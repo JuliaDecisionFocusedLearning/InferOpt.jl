@@ -1,5 +1,5 @@
 """
-    SoftRank{is_l2_regularized} <: AbstractRegularized
+$TYPEDEF
 
 Fast differentiable ranking regularized layer.
 It uses an L2 regularization if `is_l2_regularized` is true, else it uses an entropic (kl) regularization.
@@ -7,14 +7,15 @@ It uses an L2 regularization if `is_l2_regularized` is true, else it uses an ent
 As an [`AbstractRegularized`](@ref) layer, it can also be used for supervised learning with
 a [`FenchelYoungLoss`](@ref).
 
-# Fields
-- `ε::Float64`: size of the regularization
-- `rev::Bool`: rank in ascending order if false
-
 Reference: <https://arxiv.org/abs/2002.08871>
+
+# Fields
+$TYPEDFIELDS
 """
 struct SoftRank{is_l2_regularized} <: AbstractRegularized
+    "size of the regularization"
     ε::Float64
+    "rank in ascending order if false"
     rev::Bool
 end
 
@@ -44,7 +45,7 @@ compute_regularization(l::SoftRank{true}, y) = l.ε * half_square_norm(y)
 compute_regularization(l::SoftRank{false}, y) = l.ε * dot(y, log.(y) .- 1)
 
 """
-    SoftSort{is_l2_regularized} <: AbstractOptimizationLayer
+$TYPEDEF
 
 Fast differentiable sorting optimization layer.
 It uses an L2 regularization if `is_l2_regularized` is true, else it uses an entropic (kl) regularization.
@@ -52,11 +53,12 @@ It uses an L2 regularization if `is_l2_regularized` is true, else it uses an ent
 Reference <https://arxiv.org/abs/2002.08871>
 
 # Fields
-- `ε::Float64`: size of the regularization
-- `rev::Bool`: sort in ascending order if false
+$TYPEDFIELDS
 """
 struct SoftSort{is_l2_regularized} <: AbstractOptimizationLayer
+    "size of the regularization"
     ε::Float64
+    "sort in ascending order if false"
     rev::Bool
 end
 

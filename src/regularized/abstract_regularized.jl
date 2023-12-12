@@ -1,5 +1,5 @@
 """
-    AbstractRegularized <: AbstractOptimizationLayer
+$TYPEDEF
 
 Convex regularization perturbation of a black box linear optimizer
 ```
@@ -20,7 +20,7 @@ Convex regularization perturbation of a black box linear optimizer
 abstract type AbstractRegularized <: AbstractOptimizationLayer end
 
 """
-    AbstractRegularizedGeneralizedMaximizer <: AbstractRegularized
+$TYPEDEF
 
 Convex regularization perturbation of a black box **generalized** optimizer
 ```
@@ -37,18 +37,20 @@ with g and h functions of y.
 abstract type AbstractRegularizedGeneralizedMaximizer <: AbstractRegularized end
 
 """
-    compute_regularization(regularized, y)
+    $FUNCTIONNAME(regularized, y)
 
 Return the convex penalty `Ω(y)` associated with an `AbstractRegularized` layer.
 """
 function compute_regularization end
 
 """
-    get_maximizer(regularized)
+    $FUNCTIONNAME(regularized)
 
 Return the associated optimizer.
 """
 function get_maximizer end
+
+# Required interface
 
 @required AbstractRegularized begin
     # (regularized::AbstractRegularized)(θ::AbstractArray; kwargs...) # waiting for RequiredInterfaces to support this (see https://github.com/Seelengrab/RequiredInterfaces.jl/issues/11)

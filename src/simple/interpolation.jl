@@ -1,16 +1,17 @@
 """
-    Interpolation <: AbstractOptimizationLayer
+$TYPEDEF
 
 Piecewise-linear interpolation of a black-box optimizer.
 
-# Fields
-- `maximizer`: underlying argmax function
-- `λ::Float64`: smoothing parameter (smaller = more faithful approximation, larger = more informative gradients)
-
 Reference: <https://arxiv.org/abs/1912.02175>
+
+# Fields
+$TYPEDFIELDS
 """
 struct Interpolation{F} <: AbstractOptimizationLayer
+    "underlying argmax function"
     maximizer::F
+    "smoothing parameter (smaller = more faithful approximation, larger = more informative gradients)"
     λ::Float64
 end
 

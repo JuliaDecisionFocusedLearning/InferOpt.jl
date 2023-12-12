@@ -1,5 +1,5 @@
 """
-    SparseArgmax <: AbstractRegularized
+$TYPEDEF
 
 Compute the Euclidean projection of the vector `z` onto the probability simplex.
 
@@ -20,7 +20,7 @@ function sparse_argmax_regularization(y::AbstractVector)
 end
 
 """
-    simplex_projection_and_support(z)
+$TYPEDSIGNATURES
 
 Compute the Euclidean projection `p` of `z` on the probability simplex (also called `sparse_argmax`), and the indicators `s` of its support.
 

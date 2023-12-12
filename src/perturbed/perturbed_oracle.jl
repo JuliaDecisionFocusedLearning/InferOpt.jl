@@ -1,11 +1,14 @@
 """
-    PerturbedOracle{P,G,O,R,S,parallel} <: AbstractPerturbed{parallel}
+$TYPEDEF
 
 Differentiable perturbed black-box oracle. The `oracle` input `θ` is perturbed as `η ∼ perturbation(⋅|θ)`.
 [`PerturbedAdditive`](@ref) is a special case of `PerturbedOracle` with `perturbation(θ) = MvNormal(θ, ε * I)`.
 [`PerturbedMultiplicative`] is also a special case of `PerturbedOracle`.
 
 See [`AbstractPerturbed`](@ref) for more details about its fields.
+
+# Fields
+$TYPEDFIELDS
 """
 struct PerturbedOracle{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{O,parallel}

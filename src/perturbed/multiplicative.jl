@@ -1,5 +1,5 @@
 """
-    PerturbedMultiplicative{P,G,O,R,S,parallel} <: AbstractPerturbed{parallel}
+$TYPEDEF
 
 Differentiable multiplicative perturbation of a black-box oracle:
 the input undergoes `θ -> θ ⊙ exp[εZ - ε²/2]` where `Z ∼ perturbation`.
@@ -11,8 +11,8 @@ Reference: <https://arxiv.org/abs/2207.13513>
 
 See [`AbstractPerturbed`](@ref) for more details.
 
-# Specific field
-- `ε:Float64`: size of the perturbation
+# Fields
+$TYPEDFIELDS
 """
 struct PerturbedMultiplicative{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
        AbstractPerturbed{O,parallel}
@@ -22,6 +22,7 @@ struct PerturbedMultiplicative{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parall
     rng::R
     seed::S
     nb_samples::Int
+    "size of the perturbation"
     ε::Float64
 end
 
