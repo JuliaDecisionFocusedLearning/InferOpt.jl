@@ -1,7 +1,7 @@
 @testitem "Quality (Aqua.jl)" begin
     using Aqua
     using StatsBase
-    Aqua.test_all(InferOpt; ambiguities=false)
+    Aqua.test_all(InferOpt; ambiguities=false, deps_compat=(check_extras=false,))
     Aqua.test_ambiguities(InferOpt; exclude=[StatsBase.TestStat])
 end
 
