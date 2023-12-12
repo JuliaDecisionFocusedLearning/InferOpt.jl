@@ -49,7 +49,7 @@ This method should be implemented when using a custom data structure for `t_true
 function get_y_true end
 
 """
-    get_y_true(t_true::NamedTuple)
+$TYPEDSIGNATURES
 
 Retrieve `y_true` from `t_true`. `t_true` must contain an `y_true` field.
 """
