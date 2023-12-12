@@ -10,6 +10,9 @@ struct SparseArgmax <: AbstractRegularized end
 (::SparseArgmax)(z::AbstractVector; kwargs...) = sparse_argmax(z)
 compute_regularization(::SparseArgmax, y) = sparse_argmax_regularization(y)
 
+"""
+$TYPEDSIGNATURES
+"""
 function sparse_argmax(z::AbstractVector; kwargs...)
     p, _ = simplex_projection_and_support(z)
     return p
