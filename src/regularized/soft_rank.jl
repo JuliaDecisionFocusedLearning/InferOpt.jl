@@ -80,7 +80,7 @@ end
 (l::SoftSort{false})(θ; ε=l.ε, rev=l.rev) = soft_sort_kl(θ; ε, rev)
 
 """
-    soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:l2)
+$TYPEDSIGNATURES
 
 Fast differentiable sort of vector θ.
 
@@ -105,7 +105,7 @@ function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:
 end
 
 """
-    soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Fast differentiable ranking of vector θ.
 
@@ -130,7 +130,7 @@ function soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:
 end
 
 """
-    soft_sort_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Sort vector `θ` with l2 regularization.
 """
@@ -140,7 +140,7 @@ function soft_sort_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_rank_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Rank vector `θ` with l2 regularization.
 """
@@ -150,7 +150,7 @@ function soft_rank_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Sort vector `θ` with kl regularization.
 """
@@ -160,7 +160,7 @@ function soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_rank_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Rank vector `θ` with kl regularization.
 """
