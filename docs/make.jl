@@ -1,5 +1,3 @@
-# ENV["PLOTS_TEST"] = "true"
-# ENV["GKSwstype"] = "100"
 using Documenter
 using InferOpt
 using Literate
@@ -25,13 +23,15 @@ end
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
-tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial.jl")
-tuto_md_dir = joinpath(@__DIR__, "src")
-Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+tutorial_directory = "examples"
+tutorial_files = readdir(tutorial_directory)
+tutorial_names = [first(split(file, ".")) for file in tutorial_files]
 
-tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "basics.jl")
-tuto_md_dir = joinpath(@__DIR__, "src")
-Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+for name in tutorial_names
+    tuto_jl_file = joinpath(dirname(@__DIR__), tutorial_directory, "$name.jl")
+    tuto_md_dir = joinpath(@__DIR__, "src")
+    Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+end
 
 makedocs(;
     modules=[InferOpt],
@@ -40,21 +40,25 @@ makedocs(;
     sitename="InferOpt.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://axelparmentier.github.io/InferOpt.jl",
+        canonical="https://axelparmentier.github.io/InferOpt.jl/stable",
         assets=String[],
         repolink="https://github.com/axelparmentier/InferOpt.jl",
+        warn_outdated=true,
+        example_size_threshold=0,
     ),
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
-        "Examples" => ["basics.md", "tutorial.md", "advanced_applications.md"],
+        "Examples" => ["basics.md", "tutorial.md", "advanced_applications.md"], # ! hardcoded?
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
 )
 
-for file in
-    [joinpath(@__DIR__, "src", "index.md"), joinpath(@__DIR__, "src", "tutorial.md")]
+for file in vcat(
+    joinpath(@__DIR__, "src", "index.md"),
+    [joinpath(@__DIR__, "src", "$name.md") for name in tutorial_names],
+)
     rm(file)
 end
 
