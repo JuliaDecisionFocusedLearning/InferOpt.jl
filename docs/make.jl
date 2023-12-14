@@ -1,3 +1,5 @@
+# ENV["PLOTS_TEST"] = "true"
+# ENV["GKSwstype"] = "100"
 using Documenter
 using InferOpt
 using Literate
@@ -27,6 +29,10 @@ tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial.jl")
 tuto_md_dir = joinpath(@__DIR__, "src")
 Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
 
+tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "basics.jl")
+tuto_md_dir = joinpath(@__DIR__, "src")
+Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+
 makedocs(;
     modules=[InferOpt],
     authors="Guillaume Dalle, Léo Baty, Louis Bouvier, Axel Parmentier",
@@ -41,7 +47,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
-        "Examples" => ["tutorial.md", "advanced_applications.md"],
+        "Examples" => ["basics.md", "tutorial.md", "advanced_applications.md"],
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
