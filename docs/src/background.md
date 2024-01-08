@@ -1,8 +1,8 @@
-# Background
+# Old Background
 
 The goal of InferOpt.jl is to make machine learning pipelines more expressive by incorporating combinatorial optimization layers.
 
-## How the math works
+### How the math works
 
 Consider the following combinatorial optimization problem:
 ```math
@@ -29,7 +29,7 @@ For a broader perspective on the interactions between machine learning and combi
 !!! note "Reference"
     [End-to-end Constrained Optimization Learning: A Survey](https://arxiv.org/abs/2103.16378)
 
-## How the code works
+### How the code works
 
 Since we want our package to be as generic as possible, we don't make any assumptions on the oracle used for $f$.
 That way, the best solver can be selected for each use case.

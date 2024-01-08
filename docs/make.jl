@@ -40,25 +40,22 @@ makedocs(;
     sitename="InferOpt.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://axelparmentier.github.io/InferOpt.jl/stable",
+        canonical="https://axelparmentier.github.io/InferOpt.jl",
         assets=String[],
         repolink="https://github.com/axelparmentier/InferOpt.jl",
-        warn_outdated=true,
-        example_size_threshold=0,
     ),
     pages=[
         "Home" => "index.md",
-        "Background" => "background.md",
+        "background.md",
+        "maths.md",
         "Examples" => ["basics.md", "tutorial.md", "advanced_applications.md"], # ! hardcoded?
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
 )
 
-for file in vcat(
-    joinpath(@__DIR__, "src", "index.md"),
-    [joinpath(@__DIR__, "src", "$name.md") for name in tutorial_names],
-)
+for file in
+    [joinpath(@__DIR__, "src", "index.md"), joinpath(@__DIR__, "src", "tutorial.md")]
     rm(file)
 end
 

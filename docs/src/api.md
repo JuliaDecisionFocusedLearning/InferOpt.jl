@@ -74,7 +74,7 @@ Public = false
 Order = [:function]
 ```
 
-### Is exported but should be private?
+## Is exported but should be private?
 
 ```@docs
 soft_rank_kl
