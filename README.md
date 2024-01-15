@@ -12,7 +12,7 @@
 InferOpt.jl is a toolbox for using combinatorial optimization algorithms within machine learning pipelines.
 
 It allows you to create differentiable layers from optimization oracles that do not have meaningful derivatives.
-Typical examples include mixed integer linear programs or graph algorithms, any discrete function is compatible.
+Typical examples include mixed integer linear programs or graph algorithms, but any discrete function is compatible.
 
 ## Getting started
 

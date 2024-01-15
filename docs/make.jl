@@ -47,7 +47,6 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "background.md",
-        "maths.md",
         "Examples" => ["basics.md", "tutorial.md", "advanced_applications.md"], # ! hardcoded?
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
