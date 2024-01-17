@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "f8314e79854f7cf768fd89afd2d954be830ab37a"
+project_hash = "e8ee63b10db2c3c9dd45599a54ceebfa2c1cc58e"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -94,9 +94,9 @@ version = "0.1.8"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
+git-tree-sha1 = "9e2a6b69137e6969bab0152632dcb3bc108c8bdd"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
-version = "1.0.8+0"
+version = "1.0.8+1"
 
 [[deps.CEnum]]
 git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
@@ -123,9 +123,9 @@ version = "1.58.1"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
-git-tree-sha1 = "2118cb2765f8197b08e5958cdd17c165427425ee"
+git-tree-sha1 = "c1deebd76f7a443d527fc0430d5758b8b2112ed8"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.19.0"
+version = "1.19.1"
 weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
@@ -178,10 +178,10 @@ uuid = "bbf7d656-a473-5ed7-a52c-81e309532950"
 version = "0.3.0"
 
 [[deps.Compat]]
-deps = ["UUIDs"]
-git-tree-sha1 = "886826d76ea9e72b35fcd000e535588f7b60f21d"
+deps = ["TOML", "UUIDs"]
+git-tree-sha1 = "75bd5b6fc5089df449b5d35fa501c846c9b6549b"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.10.1"
+version = "4.12.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -372,9 +372,9 @@ version = "0.8.4"
 
 [[deps.Flux]]
 deps = ["Adapt", "ChainRulesCore", "Compat", "Functors", "LinearAlgebra", "MLUtils", "MacroTools", "NNlib", "OneHotArrays", "Optimisers", "Preferences", "ProgressLogging", "Random", "Reexport", "SparseArrays", "SpecialFunctions", "Statistics", "Zygote"]
-git-tree-sha1 = "e3b646440f6d0af12c44402c1b9a73f7dcd1157d"
+git-tree-sha1 = "2827339fbc2291d541a9c62ffbf28da7f3621ae4"
 uuid = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-version = "0.14.8"
+version = "0.14.9"
 
     [deps.Flux.extensions]
     FluxAMDGPUExt = "AMDGPU"
@@ -476,9 +476,9 @@ version = "1.3.0"
 
 [[deps.Git_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "LibCURL_jll", "Libdl", "Libiconv_jll", "OpenSSL_jll", "PCRE2_jll", "Zlib_jll"]
-git-tree-sha1 = "bb8f7cc77ec1152414b2af6db533d9471cfbb2d1"
+git-tree-sha1 = "b30c473c97fcc1e1e44fab8f3e88fd1b89c9e9d1"
 uuid = "f8c6e375-362e-5223-8a59-34ff63f689eb"
-version = "2.42.0+0"
+version = "2.43.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Zlib_jll"]
@@ -607,9 +607,9 @@ version = "3.0.1+0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "e49bce680c109bc86e3e75ebcb15040d6ad9e1d3"
+git-tree-sha1 = "04663b9e1eb0d0eabf76a6d0752e0dac83d53b36"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.27"
+version = "0.9.28"
 
 [[deps.JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]
@@ -619,9 +619,9 @@ version = "0.2.4"
 
 [[deps.KernelAbstractions]]
 deps = ["Adapt", "Atomix", "InteractiveUtils", "LinearAlgebra", "MacroTools", "PrecompileTools", "Requires", "SparseArrays", "StaticArrays", "UUIDs", "UnsafeAtomics", "UnsafeAtomicsLLVM"]
-git-tree-sha1 = "653e0824fc9ab55b3beec67a6dbbe514a65fb954"
+git-tree-sha1 = "4e0cb2f5aad44dcfdc91088e85dee4ecb22c791c"
 uuid = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
-version = "0.9.15"
+version = "0.9.16"
 
     [deps.KernelAbstractions.extensions]
     EnzymeExt = "EnzymeCore"
@@ -828,9 +828,9 @@ version = "0.4.4"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "b211c553c199c111d998ecdaf7623d1b89b69f93"
+git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.12"
+version = "0.5.13"
 
 [[deps.MarchingCubes]]
 deps = ["PrecompileTools", "StaticArrays"]
@@ -1105,9 +1105,9 @@ version = "1.2.2"
 
 [[deps.Referenceables]]
 deps = ["Adapt"]
-git-tree-sha1 = "e681d3bfa49cd46c3c161505caddf20f0e62aaa9"
+git-tree-sha1 = "02d31ad62838181c1a3a5fd23a1ce5914a643601"
 uuid = "42d2dcc6-99eb-4e98-b66c-637b7d73030e"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.RegistryInstances]]
 deps = ["LazilyInitializedFields", "Pkg", "TOML", "Tar"]
@@ -1234,9 +1234,9 @@ version = "0.1.15"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "4e17a790909b17f7bf1496e3aec138cf01b60b3b"
+git-tree-sha1 = "f68dd04d131d9a8a8eb836173ee8f105c360b0c5"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.0"
+version = "1.9.1"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
@@ -1340,9 +1340,9 @@ weakdeps = ["Random", "Test"]
 
 [[deps.Transducers]]
 deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "ConstructionBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "e579d3c991938fecbb225699e8f611fa3fbf2141"
+git-tree-sha1 = "3064e780dbb8a9296ebb3af8f440f787bb5332af"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.79"
+version = "0.4.80"
 
     [deps.Transducers.extensions]
     TransducersBlockArraysExt = "BlockArrays"
@@ -1639,9 +1639,9 @@ version = "0.6.68"
 
 [[deps.ZygoteRules]]
 deps = ["ChainRulesCore", "MacroTools"]
-git-tree-sha1 = "9d749cd449fb448aeca4feee9a2f4186dbb5d184"
+git-tree-sha1 = "27798139afc0a2afa7b1824c206d5e87ea587a00"
 uuid = "700de1a5-db45-46bc-99cf-38207098b444"
-version = "0.2.4"
+version = "0.2.5"
 
 [[deps.eudev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "gperf_jll"]

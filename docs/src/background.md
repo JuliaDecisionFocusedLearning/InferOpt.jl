@@ -1,6 +1,6 @@
 # Introduction
 
-The goal of InferOpt.jl is to make machine learning pipelines more expressive by incorporating combinatorial optimization layers.
+The goal of InferOpt.jl is to provide tools to use discrete functions into machine learning pipelines.
 
 ### How the math works
 
@@ -14,8 +14,8 @@ where $\mathcal{Y} \subset \mathbb{R}^d$ is a finite set of feasible solutions, 
     Note that many discrete functions can be formulated this way. For instance:
     - The regular argmax function.
     - Ranking or sorting a vector.
-    - Any optimization algorithms over graphs, such as shortest paths algorithms.
-    - Any linear program (LP) or mixed integer linear program (MILP).
+    - Optimization algorithms over graphs, such as shortest paths algorithms.
+    - Linear program (LP) or mixed integer linear program (MILP).
 
 Unfortunately, the optimal solution $f(\theta)$ is often a piecewise constant function of $\theta$, which means its derivative is either zero or undefined.
 Starting from a given oracle for $f$, InferOpt.jl approximates it with a differentiable "layer", whose derivatives convey meaningful slope information.
@@ -44,22 +44,23 @@ We only ask the user to provide a black box function called `maximizer`, taking 
 This function is then wrapped into a callable Julia `struct`, which can be used (for instance) within neural networks from the [Flux.jl](https://github.com/FluxML/Flux.jl) or [Lux.jl](https://github.com/LuxDL/Lux.jl) library.
 To achieve this compatibility, we leverage Julia's automatic differentiation (AD) ecosystem, which revolves around the [ChainRules.jl](https://github.com/JuliaDiff/ChainRules.jl) package.
 
-### Using InferOpt from a machine learning perspective
+### Using InferOpt in machine learning applications
 
-InferOpt can be used to enhance machine learning predictor capabilities such as neural networks.
+InferOpt can be used to make machine learning pipelines more expressive by incorporating combinatorial optimization layers.
 
-Typically, a Combinatorial Optimization algorithm can be put as the last layer of a Machine Learning pipeline, after a statistical model.
+Typically, a Combinatorial Optimization algorithm can be put as the last layer of a Machine Learning pipeline, after a statistical model (e.g. a neural network).
 This gives discrete structured outputs, which enables several applications such as:
-- Using an argmax instead of a softmax
+- Using an argmax layer instead of a softmax
+- Learning to rank/learning to rank
 - Multilabel classification
 - Pathfinding on a map from an image
 
-### Using InferOpt from a combinatorial optimization perspective
+### Using InferOpt in combinatorial optimization applications
 
 InferOpt has been mostly used to help solve hard variants of well-known combinatorial optimization problems.
 
 For instance, it can be used for:
 - Stochastic vehicle scheduling
 - Multi-stage dynamic vehicle routing
-- Two-stage minimum wright spanning tree
+- Two-stage minimum weight spanning tree
 - Single machine scheduling

@@ -26,10 +26,10 @@ struct PerturbedAdditive{P,G,O,R<:AbstractRNG,S<:Union{Nothing,Int},parallel} <:
 end
 
 function Base.show(io::IO, perturbed::PerturbedAdditive)
-    (; oracle, ε, rng, seed, nb_samples, perturbation) = perturbed
-    perturb = isnothing(perturbation) ? "Normal(0, 1)" : "$perturbation"
+    (; oracle, ε, seed, nb_samples, perturbation) = perturbed
+    perturb = isnothing(perturbation) ? "𝓝(0, 1)" : "$perturbation"
     return print(
-        io, "PerturbedAdditive($oracle, $ε, $nb_samples, $(typeof(rng)), $seed, $perturb)"
+        io, "PerturbedAdditive($oracle, ε=$ε, nb_samples=$nb_samples, seed=$seed, $perturb)"
     )
 end
 
