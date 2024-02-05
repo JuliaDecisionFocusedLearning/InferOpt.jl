@@ -1,5 +1,5 @@
 """
-    AbstractPerturbed{F,parallel} <: AbstractOptimizationLayer
+$TYPEDEF
 
 Differentiable perturbation of a black box optimizer of type `F`.
 
@@ -43,14 +43,14 @@ function compute_atoms(
 end
 
 """
-    sample_perturbations(perturbed::AbstractPerturbed, θ::AbstractArray)
+    $FUNCTIONNAME(perturbed::AbstractPerturbed, θ::AbstractArray)
 
 Draw `nb_samples` random perturbations from the `perturbation` distribution.
 """
 function sample_perturbations end
 
 """
-    perturbation_grad_logdensity(
+    $FUNCTIONNAME(
         ::RuleConfig,
         ::AbstractPerturbed,
         θ::AbstractArray,
@@ -63,7 +63,7 @@ distribution evaluated in the observed perturbation sample `η`.
 function perturbation_grad_logdensity end
 
 """
-    compute_probability_distribution_from_samples(
+    $FUNCTIONNAME(
         ::AbstractPerturbed,
         θ::AbstractArray,
         samples::Vector{<:AbstractArray};
@@ -75,7 +75,7 @@ Create a probability distributions from `samples` drawn from `perturbation`.
 function compute_probability_distribution_from_samples end
 
 """
-    compute_probability_distribution(perturbed::AbstractPerturbed, θ; kwargs...)
+$TYPEDSIGNATURES
 
 Turn random perturbations of `θ` into a distribution on polytope vertices.
 

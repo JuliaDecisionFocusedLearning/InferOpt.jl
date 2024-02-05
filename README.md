@@ -12,20 +12,20 @@
 InferOpt.jl is a toolbox for using combinatorial optimization algorithms within machine learning pipelines.
 
 It allows you to create differentiable layers from optimization oracles that do not have meaningful derivatives.
-Typical examples include mixed integer linear programs or graph algorithms.
+Typical examples include mixed integer linear programs or graph algorithms, but any discrete function is compatible.
 
 ## Getting started
 
 To install the stable version, open a Julia REPL and run the following command:
 
 ```julia
-julia> using Pkg; Pkg.add("InferOpt")
+julia> import Pkg; Pkg.add("InferOpt")
 ```
 
 To install the development version, run this command instead:
 
 ```julia
-julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
+julia> import Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
 ```
 
 ## Citing us

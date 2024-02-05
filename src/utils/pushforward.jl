@@ -1,18 +1,19 @@
 """
-    Pushforward <: AbstractLayer
+$TYPEDEF
 
 Differentiable pushforward of a probabilistic optimization layer with an arbitrary function post-processing function.
 
 `Pushforward` can be used for direct regret minimization (aka learning by experience) when the post-processing returns a cost.
 
 # Fields
-- `optimization_layer::AbstractOptimizationLayer`: probabilistic optimization layer
-- `post_processing`: callable
+$TYPEDFIELDS
 
 See also: [`FixedAtomsProbabilityDistribution`](@ref).
 """
 struct Pushforward{O<:AbstractOptimizationLayer,P} <: AbstractLayer
+    "probabilistic optimization layer"
     optimization_layer::O
+    "callable post-processing cost"
     post_processing::P
 end
 
@@ -22,7 +23,7 @@ function Base.show(io::IO, pushforward::Pushforward)
 end
 
 """
-    compute_probability_distribution(pushforward, θ)
+$TYPEDSIGNATURES
 
 Output the distribution of `pushforward.post_processing(X)`, where `X` follows the distribution defined by `pushforward.optimization_layer` applied to `θ`.
 

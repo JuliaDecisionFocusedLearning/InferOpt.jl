@@ -1,5 +1,5 @@
 """
-    zero_one_loss(y, y_true)
+$TYPEDSIGNATURES
 
 0-1 loss for multiclass classification: `δ(y, y_true) = 0` if `y = y_true`, and `1` otherwise.
 """
@@ -8,7 +8,7 @@ function zero_one_loss(y::AbstractArray, y_true::AbstractArray)
 end
 
 """
-    zero_one_loss_maximizer(y, y_true; α)
+$TYPEDSIGNATURES
 
 For `δ = zero_one_loss`, compute
 ```
@@ -33,22 +33,22 @@ function zero_one_loss_maximizer(
 end
 
 """
-    ZeroOneStructuredSVMLoss
+    ZeroOneStructuredSVMLoss(α=1.0)
 
 Implementation of the [`StructuredSVMLoss`](@ref) based on a 0-1 loss for multiclass classification.
 """
-function ZeroOneStructuredSVMLoss(α=1)
+function ZeroOneStructuredSVMLoss(α=1.0)
     return StructuredSVMLoss(;
         aux_loss_maximizer=zero_one_loss_maximizer, δ=zero_one_loss, α=α
     )
 end
 
 """
-    ZeroOneStructuredSVMLoss(α)
+    ZeroOneStructuredSVMLoss(α=1.0)
 
 Implementation of the [`ImitationLoss`](@ref) based on a 0-1 loss for multiclass classification with no regularization.
 """
-function ZeroOneImitationLoss(α=1)
+function ZeroOneImitationLoss(α=1.0)
     return ImitationLoss(;
         δ=(y, t_true) -> zero_one_loss(y, get_y_true(t_true)),
         Ω=y -> 0,

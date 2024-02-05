@@ -23,9 +23,15 @@ end
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
-tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial.jl")
+tutorial_directory = "examples"
+tutorial_files = readdir(tutorial_directory)
+tutorial_names = [first(split(file, ".")) for file in tutorial_files]
 tuto_md_dir = joinpath(@__DIR__, "src")
-Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+
+for name in tutorial_names
+    tuto_jl_file = joinpath(dirname(@__DIR__), tutorial_directory, "$name.jl")
+    Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+end
 
 makedocs(;
     modules=[InferOpt],
@@ -40,15 +46,17 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Background" => "background.md",
-        "Examples" => ["tutorial.md", "advanced_applications.md"],
-        "Algorithms" => ["optim.md", "losses.md"],
+        "background.md",
+        "Tutorials" => ["basics.md", "tutorial.md", "advanced_applications.md"], # ! hardcoded?
+        "Algorithms" => ["choosetherighttool.md", "optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
 )
 
-for file in
-    [joinpath(@__DIR__, "src", "index.md"), joinpath(@__DIR__, "src", "tutorial.md")]
+for file in vcat(
+    joinpath(tuto_md_dir, "index.md"),
+    [joinpath(tuto_md_dir, "$name.md") for name in tutorial_names],
+)
     rm(file)
 end
 

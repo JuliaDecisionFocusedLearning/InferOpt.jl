@@ -1,5 +1,5 @@
 """
-    SoftArgmax <: Regularized
+$TYPEDEF
 
 Soft argmax activation function `s(z) = (e^zᵢ / ∑ e^zⱼ)ᵢ`.
 
@@ -10,6 +10,9 @@ struct SoftArgmax <: AbstractRegularized end
 (::SoftArgmax)(z::AbstractVector; kwargs...) = soft_argmax(z)
 compute_regularization(::SoftArgmax, y) = soft_argmax_regularization(y)
 
+"""
+$TYPEDSIGNATURES
+"""
 function soft_argmax(z::AbstractVector)
     s = exp.(z)
     return s ./ sum(s)

@@ -1,5 +1,5 @@
 """
-    SoftRank{is_l2_regularized} <: AbstractRegularized
+$TYPEDEF
 
 Fast differentiable ranking regularized layer.
 It uses an L2 regularization if `is_l2_regularized` is true, else it uses an entropic (kl) regularization.
@@ -7,14 +7,15 @@ It uses an L2 regularization if `is_l2_regularized` is true, else it uses an ent
 As an [`AbstractRegularized`](@ref) layer, it can also be used for supervised learning with
 a [`FenchelYoungLoss`](@ref).
 
-# Fields
-- `ε::Float64`: size of the regularization
-- `rev::Bool`: rank in ascending order if false
-
 Reference: <https://arxiv.org/abs/2002.08871>
+
+# Fields
+$TYPEDFIELDS
 """
 struct SoftRank{is_l2_regularized} <: AbstractRegularized
+    "size of the regularization"
     ε::Float64
+    "rank in ascending order if false"
     rev::Bool
 end
 
@@ -44,7 +45,7 @@ compute_regularization(l::SoftRank{true}, y) = l.ε * half_square_norm(y)
 compute_regularization(l::SoftRank{false}, y) = l.ε * dot(y, log.(y) .- 1)
 
 """
-    SoftSort{is_l2_regularized} <: AbstractOptimizationLayer
+$TYPEDEF
 
 Fast differentiable sorting optimization layer.
 It uses an L2 regularization if `is_l2_regularized` is true, else it uses an entropic (kl) regularization.
@@ -52,11 +53,12 @@ It uses an L2 regularization if `is_l2_regularized` is true, else it uses an ent
 Reference <https://arxiv.org/abs/2002.08871>
 
 # Fields
-- `ε::Float64`: size of the regularization
-- `rev::Bool`: sort in ascending order if false
+$TYPEDFIELDS
 """
 struct SoftSort{is_l2_regularized} <: AbstractOptimizationLayer
+    "size of the regularization"
     ε::Float64
+    "sort in ascending order if false"
     rev::Bool
 end
 
@@ -78,7 +80,7 @@ end
 (l::SoftSort{false})(θ; ε=l.ε, rev=l.rev) = soft_sort_kl(θ; ε, rev)
 
 """
-    soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:l2)
+$TYPEDSIGNATURES
 
 Fast differentiable sort of vector θ.
 
@@ -103,7 +105,7 @@ function soft_sort(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:
 end
 
 """
-    soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Fast differentiable ranking of vector θ.
 
@@ -128,7 +130,7 @@ function soft_rank(θ::AbstractVector; ε=1.0, rev::Bool=false, regularization=:
 end
 
 """
-    soft_sort_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Sort vector `θ` with l2 regularization.
 """
@@ -138,7 +140,7 @@ function soft_sort_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_rank_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Rank vector `θ` with l2 regularization.
 """
@@ -148,7 +150,7 @@ function soft_rank_l2(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Sort vector `θ` with kl regularization.
 """
@@ -158,7 +160,7 @@ function soft_sort_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
 end
 
 """
-    soft_rank_kl(θ::AbstractVector; ε=1.0, rev::Bool=false)
+$TYPEDSIGNATURES
 
 Rank vector `θ` with kl regularization.
 """

@@ -1,16 +1,17 @@
 """
-    SPOPlusLoss <: AbstractLossLayer
+$TYPEDEF
 
 Convex surrogate of the Smart "Predict-then-Optimize" loss.
 
-# Fields
-- `maximizer`: linear maximizer function of the form `θ -> ŷ(θ) = argmax θᵀy`
-- `α::Float64`: convexification parameter, default = 2.0
-
 Reference: <https://arxiv.org/abs/1710.08005>
+
+# Fields
+$TYPEDFIELDS
 """
 struct SPOPlusLoss{F} <: AbstractLossLayer
+    "linear maximizer function of the form `θ -> ŷ(θ) = argmax θᵀy`"
     maximizer::F
+    "convexification parameter, default = 2.0"
     α::Float64
 end
 
