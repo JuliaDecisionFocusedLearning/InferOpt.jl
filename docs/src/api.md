@@ -1,3 +1,7 @@
+```@meta
+CollapsedDocStrings = true
+```
+
 # API Reference
 
 ```@docs
