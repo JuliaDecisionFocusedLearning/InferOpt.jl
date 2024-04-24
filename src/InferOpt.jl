@@ -28,29 +28,31 @@ include("utils/isotonic_regression/isotonic_l2.jl")
 include("utils/isotonic_regression/isotonic_kl.jl")
 include("utils/isotonic_regression/projection.jl")
 
-include("simple/interpolation.jl")
-include("simple/identity.jl")
+# Layers
+include("layers/simple/interpolation.jl")
+include("layers/simple/identity.jl")
 
-include("regularized/abstract_regularized.jl")
-include("regularized/soft_argmax.jl")
-include("regularized/sparse_argmax.jl")
-include("regularized/soft_rank.jl")
-include("regularized/regularized_frank_wolfe.jl")
+include("layers/perturbed/abstract_perturbed.jl")
+include("layers/perturbed/additive.jl")
+include("layers/perturbed/multiplicative.jl")
+include("layers/perturbed/perturbed_oracle.jl")
 
-include("perturbed/abstract_perturbed.jl")
-include("perturbed/additive.jl")
-include("perturbed/multiplicative.jl")
-include("perturbed/perturbed_oracle.jl")
-
-include("imitation/spoplus_loss.jl")
-include("imitation/ssvm_loss.jl")
-include("imitation/fenchel_young_loss.jl")
-include("imitation/imitation_loss.jl")
-include("imitation/zero_one_loss.jl")
+include("layers/regularized/abstract_regularized.jl")
+include("layers/regularized/soft_argmax.jl")
+include("layers/regularized/sparse_argmax.jl")
+include("layers/regularized/soft_rank.jl")
+include("layers/regularized/regularized_frank_wolfe.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/InferOptFrankWolfeExt.jl")
 end
+
+# Losses
+include("losses/fenchel_young_loss.jl")
+include("losses/spoplus_loss.jl")
+include("losses/ssvm_loss.jl")
+include("losses/zero_one_loss.jl")
+include("losses/imitation_loss.jl")
 
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
