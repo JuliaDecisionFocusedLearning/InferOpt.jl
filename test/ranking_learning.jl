@@ -1,4 +1,4 @@
-@testitem "Ranking - imit - SPO+ (θ)" default_imports = false begin
+@testitem "imit - SPO+ (θ)" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -13,7 +13,7 @@
     )
 end
 
-@testitem "Ranking - imit - SPO+ (θ & y)" default_imports = false begin
+@testitem "imit - SPO+ (θ & y)" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -28,7 +28,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE IdentityRelaxation" default_imports = false begin
+@testitem "imit - MSE IdentityRelaxation" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -43,7 +43,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE Interpolation" default_imports = false begin
+@testitem "imit - MSE Interpolation" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -58,7 +58,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PerturbedAdditive" default_imports = false begin
+@testitem "imit - MSE PerturbedAdditive" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -73,7 +73,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE PerturbedMultiplicative" default_imports = false begin
+@testitem "imit - MSE PerturbedMultiplicative" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -88,7 +88,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - MSE RegularizedFrankWolfe" default_imports = false begin
+@testitem "imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -108,7 +108,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL PerturbedAdditive" default_imports = false begin
+@testitem "imit - FYL PerturbedAdditive" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -123,7 +123,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL PerturbedMultiplicative" default_imports = false begin
+@testitem "imit - FYL PerturbedMultiplicative" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -138,7 +138,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
+@testitem "imit - FYL PerturbedAdditive{LogNormal}" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, Random, Distributions, LinearAlgebra
     Random.seed!(63)
@@ -155,7 +155,7 @@ end
     )
 end
 
-@testitem "Ranking - imit - FYL RegularizedFrankWolfe" default_imports = false begin
+@testitem "imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
@@ -177,7 +177,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedAdditive" default_imports = false begin
+@testitem "exp - Pushforward PerturbedAdditive" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -196,7 +196,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedMultiplicative" default_imports = false begin
+@testitem "exp - Pushforward PerturbedMultiplicative" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random
     Random.seed!(63)
@@ -215,7 +215,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedAdditive{LogNormal}" default_imports = false begin
+@testitem "exp - Pushforward PerturbedAdditive{LogNormal}" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
     Random.seed!(63)
@@ -238,8 +238,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedMultiplicative{LogNormal}" default_imports =
-    false begin
+@testitem "exp - Pushforward PerturbedMultiplicative{LogNormal}" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
     Random.seed!(63)
@@ -264,7 +263,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward PerturbedOracle{LogNormal}" default_imports = false begin
+@testitem "exp - Pushforward PerturbedOracle{LogNormal}" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
     Random.seed!(63)
@@ -285,7 +284,7 @@ end
     )
 end
 
-@testitem "Ranking - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
+@testitem "exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
         FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
@@ -310,5 +309,85 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
+    )
+end
+
+@testitem "exp - soft rank" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+
+    Random.seed!(67)
+    soft_rank_l2_results = test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=SoftRank(),
+        loss=cost,
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=50,
+    )
+
+    Random.seed!(67)
+    soft_rank_kl_results = test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=SoftRank(; regularization="kl"),
+        loss=cost,
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=50,
+    )
+
+    Random.seed!(67)
+    perturbed_results = test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity_kw,
+        loss=Pushforward(PerturbedAdditive(ranking; ε=1.0, nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+        epochs=50,
+    )
+
+    # Check that we achieve better performance than the reinforce trick
+    @test soft_rank_l2_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
+    @test soft_rank_kl_results.test_cost_gaps[end] < perturbed_results.test_cost_gaps[end]
+end
+
+@testitem "imit - FYL - soft rank" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Test
+    Random.seed!(63)
+
+    true_encoder = encoder_factory()
+
+    test_pipeline!(
+        PipelineLossImitation();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(SoftRank()),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+    )
+
+    test_pipeline!(
+        PipelineLossImitation();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity_kw,
+        loss=FenchelYoungLoss(SoftRank(; regularization="kl", ε=10.0)),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
     )
 end
