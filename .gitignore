@@ -1,7 +1,7 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-/Manifest.toml
+Manifest.toml
 /docs/build/
 /docs/src/index.md
 /docs/src/tutorial.md
