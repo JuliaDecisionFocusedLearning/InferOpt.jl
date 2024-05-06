@@ -7,8 +7,8 @@ DocMeta.setdocmeta!(InferOpt, :DocTestSetup, :(using InferOpt); recursive=true)
 # Copy README.md into docs/src/index.md (overwriting)
 
 cp(
-    joinpath(@__DIR__, "src", "index.md"),
-    joinpath(dirname(@__DIR__), "README.md");
+    joinpath(dirname(@__DIR__), "README.md"),
+    joinpath(@__DIR__, "src", "index.md");
     force=true,
 )
 
