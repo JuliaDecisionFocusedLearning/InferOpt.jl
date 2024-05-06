@@ -1,10 +1,10 @@
 # InferOpt.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://axelparmentier.github.io/InferOpt.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://axelparmentier.github.io/InferOpt.jl/dev)
-[![Build Status](https://github.com/axelparmentier/InferOpt.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/axelparmentier/InferOpt.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/axelparmentier/InferOpt.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/axelparmentier/InferOpt.jl)
-[![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaDecisionFocusedLearning.github.io/InferOpt.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaDecisionFocusedLearning.github.io/InferOpt.jl/dev)
+[![Build Status](https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/JuliaDecisionFocusedLearning/InferOpt.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaDecisionFocusedLearning/InferOpt.jl)
+[![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/JuliaDiff/BlueStyle)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 ## Overview
@@ -25,7 +25,7 @@ julia> using Pkg; Pkg.add("InferOpt")
 To install the development version, run this command instead:
 
 ```julia
-julia> using Pkg; Pkg.add(url="https://github.com/axelparmentier/InferOpt.jl")
+julia> using Pkg; Pkg.add(url="https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl")
 ```
 
 ## Citing us
