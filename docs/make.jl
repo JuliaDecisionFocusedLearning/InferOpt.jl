@@ -6,20 +6,11 @@ DocMeta.setdocmeta!(InferOpt, :DocTestSetup, :(using InferOpt); recursive=true)
 
 # Copy README.md into docs/src/index.md (overwriting)
 
-open(joinpath(@__DIR__, "src", "index.md"), "w") do io
-    println(
-        io,
-        """
-        ```@meta
-        EditURL = "https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/blob/main/README.md"
-        ```
-        """,
-    )
-    # Write the contents out below the meta bloc
-    for line in eachline(joinpath(dirname(@__DIR__), "README.md"))
-        println(io, line)
-    end
-end
+cp(
+    joinpath(@__DIR__, "src", "index.md"),
+    joinpath(dirname(@__DIR__), "README.md");
+    force=true,
+)
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
@@ -30,14 +21,8 @@ Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
 makedocs(;
     modules=[InferOpt],
     authors="Guillaume Dalle, Léo Baty, Louis Bouvier, Axel Parmentier",
-    repo="https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/blob/{commit}{path}#{line}",
     sitename="InferOpt.jl",
-    format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://JuliaDecisionFocusedLearning.github.io/InferOpt.jl",
-        assets=String[],
-        repolink="https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl",
-    ),
+    format=Documenter.HTML(),
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
