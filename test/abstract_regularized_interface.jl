@@ -5,4 +5,5 @@
     @test RI.check_interface_implemented(AbstractRegularized, RegularizedFrankWolfe)
     @test RI.check_interface_implemented(AbstractRegularized, SoftArgmax)
     @test RI.check_interface_implemented(AbstractRegularized, SparseArgmax)
+    @test RI.check_interface_implemented(AbstractRegularized, SoftRank)
 end
