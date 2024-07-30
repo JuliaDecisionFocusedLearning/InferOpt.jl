@@ -10,8 +10,11 @@ module InferOpt
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
 using DensityInterface: logdensityof
+using DifferentiableExpectations: Reinforce, empirical_predistribution, FixKwargs
+using Distributions:
+    Distributions, ContinuousUnivariateDistribution, LogNormal, Normal, product_distribution
 using LinearAlgebra: dot
-using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
+using Random: Random, AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
 using StatsFuns: logaddexp, softmax
@@ -32,10 +35,10 @@ include("utils/isotonic_regression/projection.jl")
 include("layers/simple/interpolation.jl")
 include("layers/simple/identity.jl")
 
-include("layers/perturbed/abstract_perturbed.jl")
+# include("layers/perturbed/abstract_perturbed.jl")
 include("layers/perturbed/additive.jl")
 include("layers/perturbed/multiplicative.jl")
-include("layers/perturbed/perturbed_oracle.jl")
+include("layers/perturbed/perturbed.jl")
 
 include("layers/regularized/abstract_regularized.jl")
 include("layers/regularized/soft_argmax.jl")

@@ -60,7 +60,7 @@ end
 
 function fenchel_young_loss_and_grad(
     fyl::FenchelYoungLoss{O}, θ::AbstractArray, y_true::AbstractArray; kwargs...
-) where {O<:AbstractPerturbed}
+) where {O<:Perturbed}
     (; optimization_layer) = fyl
     F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(optimization_layer, θ; kwargs...)
     l = F - dot(θ, y_true)
@@ -68,17 +68,17 @@ function fenchel_young_loss_and_grad(
     return l, g
 end
 
-function fenchel_young_loss_and_grad(
-    fyl::FenchelYoungLoss{P}, θ::AbstractArray, y_true::AbstractArray; kwargs...
-) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
-    (; optimization_layer) = fyl
-    F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(
-        optimization_layer, θ; kwargs...
-    )
-    l = F - objective_value(optimization_layer.oracle, θ, y_true; kwargs...)
-    g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true; kwargs...)
-    return l, g
-end
+# function fenchel_young_loss_and_grad(
+#     fyl::FenchelYoungLoss{P}, θ::AbstractArray, y_true::AbstractArray; kwargs...
+# ) where {P<:AbstractPerturbed{<:GeneralizedMaximizer}}
+#     (; optimization_layer) = fyl
+#     F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(
+#         optimization_layer, θ; kwargs...
+#     )
+#     l = F - objective_value(optimization_layer.oracle, θ, y_true; kwargs...)
+#     g = almost_g_of_ŷ - optimization_layer.oracle.g(y_true; kwargs...)
+#     return l, g
+# end
 
 ## Backward pass
 
@@ -92,78 +92,80 @@ end
 
 ## Specific overrides for perturbed layers
 
-function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{O,false},
-    θ::AbstractArray,
-    Z_samples::Vector{<:AbstractArray};
-    kwargs...,
-) where {O}
-    F_and_y_samples = [
-        fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
-        Z in Z_samples
-    ]
-    return F_and_y_samples
-end
+# function compute_F_and_y_samples(
+#     perturbed::AbstractPerturbed{O,false},
+#     θ::AbstractArray,
+#     Z_samples::Vector{<:AbstractArray};
+#     kwargs...,
+# ) where {O}
+#     F_and_y_samples = [
+#         fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
+#         Z in Z_samples
+#     ]
+#     return F_and_y_samples
+# end
 
-function compute_F_and_y_samples(
-    perturbed::AbstractPerturbed{O,true},
-    θ::AbstractArray,
-    Z_samples::Vector{<:AbstractArray};
-    kwargs...,
-) where {O}
-    return ThreadsX.map(
-        Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
-    )
-end
+# function compute_F_and_y_samples(
+#     perturbed::AbstractPerturbed{O,true},
+#     θ::AbstractArray,
+#     Z_samples::Vector{<:AbstractArray};
+#     kwargs...,
+# ) where {O}
+#     return ThreadsX.map(
+#         Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
+#     )
+# end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::AbstractPerturbed, θ::AbstractArray; kwargs...
+    perturbed::Perturbed, θ::AbstractArray; kwargs...
 )
-    Z_samples = sample_perturbations(perturbed, θ)
-    F_and_y_samples = compute_F_and_y_samples(perturbed, θ, Z_samples; kwargs...)
-    return mean(first, F_and_y_samples), mean(last, F_and_y_samples)
+    (; reinforce) = perturbed
+    η_dist = empirical_predistribution(reinforce, θ)
+    fk = FixKwargs(reinforce.f, kwargs)
+    y_dist = map(fk, η_dist)
+    return mean(dot(η, y) for (η, y) in zip(η_dist.atoms, y_dist.atoms)), mean(y_dist)
 end
 
-function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
-)
-    (; oracle, ε) = perturbed
-    η = θ .+ ε .* Z
-    y = oracle(η; kwargs...)
-    F = dot(η, y)
-    return F, y
-end
+# function fenchel_young_F_and_first_part_of_grad(
+#     perturbed::PerturbedAdditive, θ::AbstractArray, Z::AbstractArray; kwargs...
+# )
+#     (; oracle, ε) = perturbed
+#     η = θ .+ ε .* Z
+#     y = oracle(η; kwargs...)
+#     F = dot(η, y)
+#     return F, y
+# end
 
-function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedAdditive{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
-) where {P,G,O<:GeneralizedMaximizer}
-    (; oracle, ε) = perturbed
-    η = θ .+ ε .* Z
-    y = oracle(η; kwargs...)
-    F = objective_value(oracle, η, y; kwargs...)
-    return F, oracle.g(y; kwargs...)
-end
+# function fenchel_young_F_and_first_part_of_grad(
+#     perturbed::PerturbedAdditive{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
+# ) where {P,G,O<:GeneralizedMaximizer}
+#     (; oracle, ε) = perturbed
+#     η = θ .+ ε .* Z
+#     y = oracle(η; kwargs...)
+#     F = objective_value(oracle, η, y; kwargs...)
+#     return F, oracle.g(y; kwargs...)
+# end
 
-function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
-)
-    (; oracle, ε) = perturbed
-    eZ = exp.(ε .* Z .- ε^2 ./ 2)
-    η = θ .* eZ
-    y = oracle(η; kwargs...)
-    F = dot(η, y)
-    y_scaled = y .* eZ
-    return F, y_scaled
-end
+# function fenchel_young_F_and_first_part_of_grad(
+#     perturbed::PerturbedMultiplicative, θ::AbstractArray, Z::AbstractArray; kwargs...
+# )
+#     (; oracle, ε) = perturbed
+#     eZ = exp.(ε .* Z .- ε^2 ./ 2)
+#     η = θ .* eZ
+#     y = oracle(η; kwargs...)
+#     F = dot(η, y)
+#     y_scaled = y .* eZ
+#     return F, y_scaled
+# end
 
-function fenchel_young_F_and_first_part_of_grad(
-    perturbed::PerturbedMultiplicative{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
-) where {P,G,O<:GeneralizedMaximizer}
-    (; oracle, ε) = perturbed
-    eZ = exp.(ε .* Z .- ε^2)
-    η = θ .* eZ
-    y = oracle(η; kwargs...)
-    F = objective_value(oracle, η, y; kwargs...)
-    y_scaled = y .* eZ
-    return F, oracle.g(y_scaled; kwargs...)
-end
+# function fenchel_young_F_and_first_part_of_grad(
+#     perturbed::PerturbedMultiplicative{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
+# ) where {P,G,O<:GeneralizedMaximizer}
+#     (; oracle, ε) = perturbed
+#     eZ = exp.(ε .* Z .- ε^2)
+#     η = θ .* eZ
+#     y = oracle(η; kwargs...)
+#     F = objective_value(oracle, η, y; kwargs...)
+#     y_scaled = y .* eZ
+#     return F, oracle.g(y_scaled; kwargs...)
+# end
