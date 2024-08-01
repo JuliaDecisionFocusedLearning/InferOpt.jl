@@ -1,17 +1,15 @@
-struct Perturbed{R<:Reinforce} <: AbstractOptimizationLayer
-    reinforce::R
+struct Perturbed{F,D,t,variance_reduction,G,R,S} <: AbstractOptimizationLayer
+    reinforce::Reinforce{t,variance_reduction,F,D,G,R,S}
 end
 
-function (perturbed::Perturbed)(θ::AbstractArray)
-    return perturbed.reinforce(θ)
+function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
+    return perturbed.reinforce(θ; kwargs...)
 end
 
-function is_additive(perturbed::Perturbed)
-    return isa(perturbed.reinforce.dist_constructor, AdditivePerturbation)
-end
-
-function is_multiplicative(perturbed::Perturbed)
-    return isa(perturbed.reinforce.dist_constructor, MultiplicativePerturbation)
+function DifferentiableExpectations.empirical_distribution(
+    perturbed::Perturbed, θ::AbstractArray; kwargs...
+)
+    return empirical_distribution(perturbed.reinforce, θ; kwargs...)
 end
 
 function Base.show(io::IO, perturbed::Perturbed)
@@ -28,6 +26,10 @@ function Base.show(io::IO, perturbed::Perturbed)
     )
 end
 
+function Perturbed(maximizer, dist_constructor; kwargs...)
+    return Perturbed(Reinforce(maximizer, dist_constructor; kwargs...))
+end
+
 function PerturbedAdditive(
     maximizer;
     ε=1.0,
@@ -40,9 +42,7 @@ function PerturbedAdditive(
 )
     dist_constructor = AdditivePerturbation(perturbation_dist, float(ε))
     return Perturbed(
-        Reinforce(
-            maximizer, dist_constructor; variance_reduction, seed, threaded, rng, nb_samples
-        ),
+        maximizer, dist_constructor; nb_samples, variance_reduction, seed, threaded, rng
     )
 end
 
@@ -58,8 +58,6 @@ function PerturbedMultiplicative(
 )
     dist_constructor = MultiplicativePerturbation(perturbation_dist, float(ε))
     return Perturbed(
-        Reinforce(
-            maximizer, dist_constructor; variance_reduction, seed, threaded, rng, nb_samples
-        ),
+        maximizer, dist_constructor; nb_samples, variance_reduction, seed, threaded, rng
     )
 end

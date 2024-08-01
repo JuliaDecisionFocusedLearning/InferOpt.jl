@@ -60,6 +60,6 @@ end
 Apply `compute_probability_distribution(regularized, θ; kwargs...)` and return the expectation.
 """
 function (regularized::RegularizedFrankWolfe)(θ::AbstractArray; kwargs...)
-    probadist = compute_probability_distribution(regularized, θ; kwargs...)
-    return compute_expectation(probadist)
+    probadist = empirical_distribution(regularized, θ; kwargs...)
+    return mean(probadist)
 end

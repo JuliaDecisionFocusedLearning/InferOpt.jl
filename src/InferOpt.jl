@@ -10,9 +10,19 @@ module InferOpt
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
 using DensityInterface: logdensityof
-using DifferentiableExpectations: Reinforce, empirical_predistribution, FixKwargs
+using DifferentiableExpectations:
+    DifferentiableExpectations,
+    Reinforce,
+    empirical_predistribution,
+    empirical_distribution,
+    FixKwargs
 using Distributions:
-    Distributions, ContinuousUnivariateDistribution, LogNormal, Normal, product_distribution
+    Distributions,
+    ContinuousUnivariateDistribution,
+    LogNormal,
+    Normal,
+    product_distribution,
+    logpdf
 using LinearAlgebra: dot
 using Random: Random, AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
@@ -24,7 +34,6 @@ using RequiredInterfaces
 include("interface.jl")
 
 include("utils/some_functions.jl")
-include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
 include("utils/generalized_maximizer.jl")
 include("utils/isotonic_regression/isotonic_l2.jl")
@@ -35,9 +44,10 @@ include("utils/isotonic_regression/projection.jl")
 include("layers/simple/interpolation.jl")
 include("layers/simple/identity.jl")
 
-# include("layers/perturbed/abstract_perturbed.jl")
-include("layers/perturbed/additive.jl")
-include("layers/perturbed/multiplicative.jl")
+include("layers/perturbed/utils.jl")
+include("layers/perturbed/perturbation.jl")
+# include("layers/perturbed/additive.jl")
+# include("layers/perturbed/multiplicative.jl")
 include("layers/perturbed/perturbed.jl")
 
 include("layers/regularized/abstract_regularized.jl")
@@ -62,9 +72,9 @@ export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
 export GeneralizedMaximizer, objective_value
 
-export FixedAtomsProbabilityDistribution
-export compute_expectation
-export compute_probability_distribution
+# export FixedAtomsProbabilityDistribution
+# export compute_expectation
+# export compute_probability_distribution
 export Pushforward
 
 export IdentityRelaxation
@@ -79,7 +89,7 @@ export RegularizedFrankWolfe
 
 export PerturbedAdditive
 export PerturbedMultiplicative
-export PerturbedOracle
+# export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss

@@ -89,7 +89,7 @@ end
         true_maximizer=max_pricing,
         maximizer=identity_kw,
         loss=FenchelYoungLoss(
-            PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=5)
+            PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10)
         ),
         error_function=hamming_distance,
         cost,
@@ -116,7 +116,7 @@ end
         true_maximizer=max_pricing,
         maximizer=identity_kw,
         loss=FenchelYoungLoss(
-            PerturbedMultiplicative(generalized_maximizer; ε=0.1, nb_samples=5)
+            PerturbedMultiplicative(generalized_maximizer; ε=0.1, nb_samples=10)
         ),
         error_function=hamming_distance,
         cost,

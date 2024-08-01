@@ -22,32 +22,17 @@ function Base.show(io::IO, pushforward::Pushforward)
 end
 
 """
-    compute_probability_distribution(pushforward, θ)
-
-Output the distribution of `pushforward.post_processing(X)`, where `X` follows the distribution defined by `pushforward.optimization_layer` applied to `θ`.
-
-This function is not differentiable if `pushforward.post_processing` isn't.
-
-See also: [`apply_on_atoms`](@ref).
-"""
-function compute_probability_distribution(pushforward::Pushforward, θ; kwargs...)
-    (; optimization_layer, post_processing) = pushforward
-    probadist = compute_probability_distribution(optimization_layer, θ; kwargs...)
-    post_processed_probadist = apply_on_atoms(post_processing, probadist; kwargs...)
-    return post_processed_probadist
-end
-
-"""
     (pushforward::Pushforward)(θ; kwargs...)
 
 Output the expectation of `pushforward.post_processing(X)`, where `X` follows the distribution defined by `pushforward.optimization_layer` applied to `θ`.
 
-Unlike [`compute_probability_distribution(pushforward, θ)`](@ref), this function is differentiable, even if `pushforward.post_processing` isn't.
+Unlike [`empirical_distribution(pushforward, θ)`](@ref), this function is differentiable, even if `pushforward.post_processing` isn't.
 
 See also: [`compute_expectation`](@ref).
 """
 function (pushforward::Pushforward)(θ::AbstractArray; kwargs...)
     (; optimization_layer, post_processing) = pushforward
-    probadist = compute_probability_distribution(optimization_layer, θ; kwargs...)
-    return compute_expectation(probadist, post_processing; kwargs...)
+    probadist = empirical_distribution(optimization_layer, θ; kwargs...)
+    post_processing_kw = FixKwargs(post_processing, kwargs)
+    return mean(post_processing_kw, probadist)
 end

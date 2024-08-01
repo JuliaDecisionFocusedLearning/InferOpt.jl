@@ -1,10 +1,11 @@
 module InferOptFrankWolfeExt
 
+using DifferentiableExpectations:
+    DifferentiableExpectations, FixedAtomsProbabilityDistribution
 using DifferentiableFrankWolfe: DifferentiableFrankWolfe, DiffFW
 using DifferentiableFrankWolfe: LinearMinimizationOracle  # from FrankWolfe
 using DifferentiableFrankWolfe: IterativeLinearSolver  # from ImplicitDifferentiation
-using InferOpt: InferOpt, RegularizedFrankWolfe, FixedAtomsProbabilityDistribution
-using InferOpt: compute_expectation, compute_probability_distribution
+using InferOpt: InferOpt, RegularizedFrankWolfe
 using LinearAlgebra: dot
 
 """
@@ -37,7 +38,7 @@ Construct a `DifferentiableFrankWolfe.DiffFW` struct and call `compute_probabili
 
 Keyword arguments are passed to the underlying linear maximizer.
 """
-function InferOpt.compute_probability_distribution(
+function DifferentiableExpectations.empirical_distribution(
     regularized::RegularizedFrankWolfe, θ::AbstractArray; kwargs...
 )
     (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized
