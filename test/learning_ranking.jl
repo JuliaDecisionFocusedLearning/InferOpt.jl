@@ -272,12 +272,13 @@ end
 
     true_encoder = encoder_factory()
     cost(y; instance) = dot(y, -true_encoder(instance))
+    f(y; instance) = cost(ranking(y; instance); instance)
     test_pipeline!(
         PipelineLossExperience();
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity_kw,
-        loss=Pushforward(Perturbed(ranking, p; nb_samples=10), cost),
+        loss=Perturbed(f, p; nb_samples=10),
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,

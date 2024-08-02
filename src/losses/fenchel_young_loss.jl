@@ -69,21 +69,6 @@ function fenchel_young_loss_and_grad(
     return l, g
 end
 
-# function fenchel_young_loss_and_grad(
-#     fyl::FenchelYoungLoss{<:Perturbed{<:GeneralizedMaximizer}},
-#     θ::AbstractArray,
-#     y_true::AbstractArray;
-#     kwargs...,
-# )
-#     (; optimization_layer) = fyl
-#     F, almost_g_of_ŷ = fenchel_young_F_and_first_part_of_grad(
-#         optimization_layer, θ; kwargs...
-#     )
-#     l = F - objective_value(optimization_layer.reinforce.f, θ, y_true; kwargs...)
-#     g = almost_g_of_ŷ - optimization_layer.reinforce.f.g(y_true; kwargs...)
-#     return l, g
-# end
-
 ## Backward pass
 
 function ChainRulesCore.rrule(
@@ -96,33 +81,9 @@ end
 
 ## Specific overrides for perturbed layers
 
-# function compute_F_and_y_samples(
-#     perturbed::AbstractPerturbed{O,false},
-#     θ::AbstractArray,
-#     Z_samples::Vector{<:AbstractArray};
-#     kwargs...,
-# ) where {O}
-#     F_and_y_samples = [
-#         fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...) for
-#         Z in Z_samples
-#     ]
-#     return F_and_y_samples
-# end
-
-# function compute_F_and_y_samples(
-#     perturbed::AbstractPerturbed{O,true},
-#     θ::AbstractArray,
-#     Z_samples::Vector{<:AbstractArray};
-#     kwargs...,
-# ) where {O}
-#     return ThreadsX.map(
-#         Z -> fenchel_young_F_and_first_part_of_grad(perturbed, θ, Z; kwargs...), Z_samples
-#     )
-# end
-
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::Perturbed{F,<:AdditivePerturbation}, θ::AbstractArray; kwargs...
-) where {F}
+    perturbed::Perturbed{<:AdditivePerturbation}, θ::AbstractArray; kwargs...
+)
     (; reinforce) = perturbed
     maximizer = get_maximizer(perturbed)
     η_dist = empirical_predistribution(reinforce, θ)
@@ -136,26 +97,9 @@ function fenchel_young_F_and_first_part_of_grad(
     mean(gk, y_dist)
 end
 
-# function fenchel_young_F_and_first_part_of_grad(
-#     perturbed::Perturbed{<:GeneralizedMaximizer,<:AdditivePerturbation},
-#     θ::AbstractArray;
-#     kwargs...,
-# )
-#     (; reinforce) = perturbed
-#     η_dist = empirical_predistribution(reinforce, θ)
-#     fk = FixKwargs(reinforce.f, kwargs)
-#     gk = FixKwargs(reinforce.f.g, kwargs)
-#     y_dist = map(fk, η_dist)
-#     return mean(
-#         objective_value(reinforce.f, η, y; kwargs...) for
-#         (η, y) in zip(η_dist.atoms, y_dist.atoms)
-#     ),
-#     mean(gk, y_dist)
-# end
-
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::Perturbed{F,<:MultiplicativePerturbation}, θ::AbstractArray; kwargs...
-) where {F}
+    perturbed::Perturbed{<:MultiplicativePerturbation}, θ::AbstractArray; kwargs...
+)
     (; reinforce) = perturbed
     maximizer = get_maximizer(perturbed)
     η_dist = empirical_predistribution(reinforce, θ)
@@ -169,33 +113,3 @@ function fenchel_young_F_and_first_part_of_grad(
     ),
     mean(gk.(map(.*, eZ_dist.atoms, y_dist.atoms)))
 end
-
-# function fenchel_young_F_and_first_part_of_grad(
-#     perturbed::Perturbed{<:GeneralizedMaximizer,<:MultiplicativePerturbation},
-#     θ::AbstractArray;
-#     kwargs...,
-# )
-#     (; reinforce) = perturbed
-#     η_dist = empirical_predistribution(reinforce, θ)
-#     eZ_dist = map(Base.Fix2(./, θ), η_dist)
-#     fk = FixKwargs(reinforce.f, kwargs)
-#     gk = FixKwargs(reinforce.f.g, kwargs)
-#     y_dist = map(fk, η_dist)
-#     return mean(
-#         objective_value(reinforce.f, η, y; kwargs...) for
-#         (η, y) in zip(η_dist.atoms, y_dist.atoms)
-#     ),
-#     mean(gk.(map(.*, eZ_dist.atoms, y_dist.atoms)))
-# end
-
-# function fenchel_young_F_and_first_part_of_grad(
-#     perturbed::PerturbedMultiplicative{P,G,O}, θ::AbstractArray, Z::AbstractArray; kwargs...
-# ) where {P,G,O<:GeneralizedMaximizer}
-#     (; oracle, ε) = perturbed
-#     eZ = exp.(ε .* Z .- ε^2)
-#     η = θ .* eZ
-#     y = oracle(η; kwargs...)
-#     F = objective_value(oracle, η, y; kwargs...)
-#     y_scaled = y .* eZ
-#     return F, oracle.g(y_scaled; kwargs...)
-# end

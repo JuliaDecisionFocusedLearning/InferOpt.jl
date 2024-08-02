@@ -89,6 +89,7 @@ export SoftRank, soft_rank, soft_rank_l2, soft_rank_kl
 export SoftSort, soft_sort, soft_sort_l2, soft_sort_kl
 export RegularizedFrankWolfe
 
+export Perturbed
 export PerturbedAdditive
 export PerturbedMultiplicative
 # export PerturbedOracle
