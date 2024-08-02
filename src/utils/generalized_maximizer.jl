@@ -25,6 +25,8 @@ function (f::GeneralizedMaximizer)(θ::AbstractArray{<:Real}; kwargs...)
     return f.maximizer(θ; kwargs...)
 end
 
+objective_value(::Any, θ, y; kwargs...) = dot(θ, y)
+
 """
     objective_value(f, θ, y, kwargs...)
 
@@ -32,4 +34,15 @@ Computes the objective value of given GeneralizedMaximizer `f`, knowing weights 
 """
 function objective_value(f::GeneralizedMaximizer, θ, y; kwargs...)
     return dot(θ, f.g(y; kwargs...)) .+ f.h(y; kwargs...)
+end
+
+apply_g(::Any, y; kwargs...) = y
+apply_h(::Any, y; kwargs...) = zero(eltype(y))
+
+function apply_g(f::GeneralizedMaximizer, y; kwargs...)
+    return f.g(y; kwargs...)
+end
+
+function apply_h(f::GeneralizedMaximizer, y; kwargs...)
+    return f.h(y; kwargs...)
 end

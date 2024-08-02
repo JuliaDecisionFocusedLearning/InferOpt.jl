@@ -6,9 +6,11 @@ function (perturbed::Perturbed)(θ::AbstractArray; kwargs...)
     return perturbed.reinforce(θ; kwargs...)
 end
 
-function DifferentiableExpectations.empirical_distribution(
-    perturbed::Perturbed, θ::AbstractArray; kwargs...
-)
+function get_maximizer(perturbed::Perturbed)
+    return perturbed.reinforce.f
+end
+
+function compute_probability_distribution(perturbed::Perturbed, θ::AbstractArray; kwargs...)
     return empirical_distribution(perturbed.reinforce, θ; kwargs...)
 end
 
@@ -26,8 +28,29 @@ function Base.show(io::IO, perturbed::Perturbed)
     )
 end
 
-function Perturbed(maximizer, dist_constructor; kwargs...)
-    return Perturbed(Reinforce(maximizer, dist_constructor; kwargs...))
+function Perturbed(
+    maximizer,
+    dist_constructor;
+    nb_samples=1,
+    variance_reduction=true,
+    seed=nothing,
+    threaded=false,
+    rng=Random.default_rng(),
+    g=nothing,
+    h=nothing,
+)
+    linear_maximizer = LinearMaximizer(; maximizer, g, h)
+    return Perturbed(
+        Reinforce(
+            linear_maximizer,
+            dist_constructor;
+            nb_samples,
+            variance_reduction,
+            seed,
+            threaded,
+            rng,
+        ),
+    )
 end
 
 function PerturbedAdditive(
@@ -39,10 +62,20 @@ function PerturbedAdditive(
     seed=nothing,
     threaded=false,
     rng=Random.default_rng(),
+    g=nothing,
+    h=nothing,
 )
     dist_constructor = AdditivePerturbation(perturbation_dist, float(ε))
     return Perturbed(
-        maximizer, dist_constructor; nb_samples, variance_reduction, seed, threaded, rng
+        maximizer,
+        dist_constructor;
+        nb_samples,
+        variance_reduction,
+        seed,
+        threaded,
+        rng,
+        g,
+        h,
     )
 end
 
@@ -55,9 +88,19 @@ function PerturbedMultiplicative(
     seed=nothing,
     threaded=false,
     rng=Random.default_rng(),
+    g=nothing,
+    h=nothing,
 )
     dist_constructor = MultiplicativePerturbation(perturbation_dist, float(ε))
     return Perturbed(
-        maximizer, dist_constructor; nb_samples, variance_reduction, seed, threaded, rng
+        maximizer,
+        dist_constructor;
+        nb_samples,
+        variance_reduction,
+        seed,
+        threaded,
+        rng,
+        g,
+        h,
     )
 end

@@ -36,6 +36,7 @@ include("interface.jl")
 include("utils/some_functions.jl")
 include("utils/pushforward.jl")
 include("utils/generalized_maximizer.jl")
+include("utils/linear_maximizer.jl")
 include("utils/isotonic_regression/isotonic_l2.jl")
 include("utils/isotonic_regression/isotonic_kl.jl")
 include("utils/isotonic_regression/projection.jl")
@@ -70,7 +71,8 @@ include("losses/imitation_loss.jl")
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
-export GeneralizedMaximizer, objective_value
+export GeneralizedMaximizer
+export LinearMaximizer, apply_g, apply_h, objective_value
 
 # export FixedAtomsProbabilityDistribution
 # export compute_expectation

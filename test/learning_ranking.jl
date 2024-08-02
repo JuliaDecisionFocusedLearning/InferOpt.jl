@@ -236,7 +236,7 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=500,
+        epochs=100,
     )
 end
 
@@ -259,30 +259,30 @@ end
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,
-        epochs=500,
+        epochs=100,
     )
 end
 
-# @testitem "exp - Pushforward PerturbedOracle{LogNormal}" default_imports = false begin
-#     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-#     using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
-#     Random.seed!(63)
+@testitem "exp - Pushforward PerturbedOracle{LogNormal}" default_imports = false begin
+    include("InferOptTestUtils/src/InferOptTestUtils.jl")
+    using InferOpt, .InferOptTestUtils, LinearAlgebra, Random, Distributions
+    Random.seed!(63)
 
-#     p(θ) = MvLogNormal(θ, I)
+    p(θ) = MvLogNormal(θ, I)
 
-#     true_encoder = encoder_factory()
-#     cost(y; instance) = dot(y, -true_encoder(instance))
-#     test_pipeline!(
-#         PipelineLossExperience();
-#         instance_dim=5,
-#         true_maximizer=ranking,
-#         maximizer=identity_kw,
-#         loss=Pushforward(PerturbedOracle(ranking, p; nb_samples=10), cost),
-#         error_function=hamming_distance,
-#         true_encoder=true_encoder,
-#         cost=cost,
-#     )
-# end
+    true_encoder = encoder_factory()
+    cost(y; instance) = dot(y, -true_encoder(instance))
+    test_pipeline!(
+        PipelineLossExperience();
+        instance_dim=5,
+        true_maximizer=ranking,
+        maximizer=identity_kw,
+        loss=Pushforward(Perturbed(ranking, p; nb_samples=10), cost),
+        error_function=hamming_distance,
+        true_encoder=true_encoder,
+        cost=cost,
+    )
+end
 
 @testitem "exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")

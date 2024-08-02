@@ -38,7 +38,7 @@ Construct a `DifferentiableFrankWolfe.DiffFW` struct and call `compute_probabili
 
 Keyword arguments are passed to the underlying linear maximizer.
 """
-function DifferentiableExpectations.empirical_distribution(
+function InferOpt.compute_probability_distribution(
     regularized::RegularizedFrankWolfe, θ::AbstractArray; kwargs...
 )
     (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized

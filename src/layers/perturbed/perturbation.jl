@@ -1,4 +1,8 @@
-abstract type AbstractPerturbation end
+abstract type AbstractPerturbation <: ContinuousUnivariateDistribution end
+
+function Random.rand(rng::AbstractRNG, perturbation::AbstractPerturbation)
+    return rand(rng, perturbation.perturbation_dist)
+end
 
 struct AdditivePerturbation{F}
     perturbation_dist::F
@@ -24,9 +28,4 @@ end
 function (pdc::MultiplicativePerturbation)(θ::AbstractArray)
     (; perturbation_dist, ε) = pdc
     return product_distribution(θ .* ExponentialOf(ε * perturbation_dist - ε^2 / 2))
-end
-
-function Random.rand(rng::AbstractRNG, perturbation::MultiplicativePerturbation)
-    (; perturbation_dist, ε) = perturbation
-    return rand(rng, perturbation_dist)
 end

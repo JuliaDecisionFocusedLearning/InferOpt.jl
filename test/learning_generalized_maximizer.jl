@@ -13,7 +13,7 @@
 
     @test y == [1 0 1; 0 1 0; 1 1 1]
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    generalized_maximizer = LinearMaximizer(; maximizer=max_pricing, g, h)
 
     @test generalized_maximizer(θ; instance) == y
 
@@ -29,16 +29,17 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    perturbed = PerturbedAdditive(max_pricing; ε=1.0, nb_samples=10, g, h)
+    maximizer = InferOpt.get_maximizer(perturbed)
     function cost(y; instance)
-        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+        return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
 
     test_pipeline!(
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
-        maximizer=PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10),
+        maximizer=perturbed,
         loss=mse_kw,
         error_function=hamming_distance,
         cost,
@@ -54,16 +55,17 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    perturbed = PerturbedMultiplicative(max_pricing; ε=1.0, nb_samples=10, g, h)
+    maximizer = InferOpt.get_maximizer(perturbed)
     function cost(y; instance)
-        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+        return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
 
     test_pipeline!(
         PipelineLossImitation();
         instance_dim=5,
         true_maximizer=max_pricing,
-        maximizer=PerturbedMultiplicative(generalized_maximizer; ε=1.0, nb_samples=10),
+        maximizer=perturbed,
         loss=mse_kw,
         error_function=hamming_distance,
         cost,
@@ -78,9 +80,10 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    perturbed = PerturbedAdditive(max_pricing; ε=1.0, nb_samples=10, g, h)
+    maximizer = InferOpt.get_maximizer(perturbed)
     function cost(y; instance)
-        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+        return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
 
     test_pipeline!(
@@ -88,9 +91,7 @@ end
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
-        loss=FenchelYoungLoss(
-            PerturbedAdditive(generalized_maximizer; ε=1.0, nb_samples=10)
-        ),
+        loss=FenchelYoungLoss(perturbed),
         error_function=hamming_distance,
         cost,
         true_encoder,
@@ -105,9 +106,10 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    perturbed = PerturbedMultiplicative(max_pricing; ε=0.1, nb_samples=10, g, h)
+    maximizer = InferOpt.get_maximizer(perturbed)
     function cost(y; instance)
-        return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
+        return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
 
     test_pipeline!(
@@ -115,9 +117,7 @@ end
         instance_dim=5,
         true_maximizer=max_pricing,
         maximizer=identity_kw,
-        loss=FenchelYoungLoss(
-            PerturbedMultiplicative(generalized_maximizer; ε=0.1, nb_samples=10)
-        ),
+        loss=FenchelYoungLoss(perturbed),
         error_function=hamming_distance,
         cost,
         true_encoder,

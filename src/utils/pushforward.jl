@@ -32,7 +32,7 @@ See also: [`compute_expectation`](@ref).
 """
 function (pushforward::Pushforward)(θ::AbstractArray; kwargs...)
     (; optimization_layer, post_processing) = pushforward
-    probadist = empirical_distribution(optimization_layer, θ; kwargs...)
+    probadist = compute_probability_distribution(optimization_layer, θ; kwargs...)
     post_processing_kw = FixKwargs(post_processing, kwargs)
     return mean(post_processing_kw, probadist)
 end
