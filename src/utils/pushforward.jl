@@ -9,7 +9,7 @@ Differentiable pushforward of a probabilistic optimization layer with an arbitra
 - `optimization_layer::AbstractOptimizationLayer`: probabilistic optimization layer
 - `post_processing`: callable
 
-See also: [`FixedAtomsProbabilityDistribution`](@ref).
+See also: `FixedAtomsProbabilityDistribution`.
 """
 struct Pushforward{O<:AbstractOptimizationLayer,P} <: AbstractLayer
     optimization_layer::O
@@ -26,9 +26,9 @@ end
 
 Output the expectation of `pushforward.post_processing(X)`, where `X` follows the distribution defined by `pushforward.optimization_layer` applied to `θ`.
 
-Unlike [`empirical_distribution(pushforward, θ)`](@ref), this function is differentiable, even if `pushforward.post_processing` isn't.
+This function is differentiable, even if `pushforward.post_processing` isn't.
 
-See also: [`compute_expectation`](@ref).
+See also: `compute_expectation`.
 """
 function (pushforward::Pushforward)(θ::AbstractArray; kwargs...)
     (; optimization_layer, post_processing) = pushforward

@@ -1,3 +1,15 @@
+"""
+    Perturbed{D,F} <: AbstractOptimizationLayer
+
+Differentiable perturbation of a black box optimizer of type `F`, with perturbation of type `D`.
+
+This struct is as wrapper around `Reinforce` from DifferentiableExpectations.jl.
+
+There are three different available constructors that behave differently in the package:
+- [`LinearPerturbed`](@ref)
+- [`PerturbedAdditive`](@ref)
+- [`PerturbedMultiplicative`](@ref)
+"""
 struct Perturbed{D,F,t,variance_reduction,G,R,S} <: AbstractOptimizationLayer
     reinforce::Reinforce{t,variance_reduction,F,D,G,R,S}
 end
@@ -28,7 +40,10 @@ function Base.show(io::IO, perturbed::Perturbed{<:AbstractPerturbation})
     )
 end
 
-function Perturbed(
+"""
+doc
+"""
+function LinearPerturbed(
     maximizer,
     dist_constructor,
     dist_logdensity_grad=nothing;
@@ -42,6 +57,9 @@ function Perturbed(
     )
 end
 
+"""
+    PerturbedAdditive(maximizer; kwargs...)
+"""
 function PerturbedAdditive(
     maximizer;
     ε=1.0,
@@ -51,8 +69,8 @@ function PerturbedAdditive(
     seed=nothing,
     threaded=false,
     rng=Random.default_rng(),
-    g=nothing,
-    h=nothing,
+    g=identity_kw,
+    h=zero ∘ eltype_kw,
     dist_logdensity_grad=if (perturbation_dist == Normal(0, 1))
         (η, θ) -> ((η .- θ) ./ ε^2,)
     else
@@ -60,7 +78,7 @@ function PerturbedAdditive(
     end,
 )
     dist_constructor = AdditivePerturbation(perturbation_dist, float(ε))
-    return Perturbed(
+    return LinearPerturbed(
         maximizer,
         dist_constructor,
         dist_logdensity_grad;
@@ -74,6 +92,9 @@ function PerturbedAdditive(
     )
 end
 
+"""
+doc
+"""
 function PerturbedMultiplicative(
     maximizer;
     ε=1.0,
@@ -83,8 +104,8 @@ function PerturbedMultiplicative(
     seed=nothing,
     threaded=false,
     rng=Random.default_rng(),
-    g=nothing,
-    h=nothing,
+    g=identity_kw,
+    h=zero ∘ eltype_kw,
     dist_logdensity_grad=if (perturbation_dist == Normal(0, 1))
         (η, θ) -> (inv.(ε^2 .* θ) .* (η .- θ),)
     else
@@ -92,7 +113,7 @@ function PerturbedMultiplicative(
     end,
 )
     dist_constructor = MultiplicativePerturbation(perturbation_dist, float(ε))
-    return Perturbed(
+    return LinearPerturbed(
         maximizer,
         dist_constructor,
         dist_logdensity_grad;

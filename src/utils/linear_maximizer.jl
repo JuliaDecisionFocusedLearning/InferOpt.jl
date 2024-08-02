@@ -7,10 +7,10 @@ It is compatible with the following layers
 - [`PerturbedMultiplicative`](@ref) (with or without [`FenchelYoungLoss`](@ref))
 - [`SPOPlusLoss`](@ref)
 """
-@kwdef struct LinearMaximizer{G,H,F}
+@kwdef struct LinearMaximizer{F,G,H}
     maximizer::F
-    g::G = nothing
-    h::H = nothing
+    g::G = identity_kw
+    h::H = zero ∘ eltype_kw
 end
 
 function Base.show(io::IO, f::LinearMaximizer)
@@ -23,8 +23,6 @@ function (f::LinearMaximizer)(θ::AbstractArray; kwargs...)
     return f.maximizer(θ; kwargs...)
 end
 
-objective_value(::LinearMaximizer{Nothing,Nothing}, θ, y; kwargs...) = dot(θ, y)
-
 """
     objective_value(f, θ, y, kwargs...)
 
@@ -34,13 +32,11 @@ function objective_value(f::LinearMaximizer, θ, y; kwargs...)
     return dot(θ, f.g(y; kwargs...)) .+ f.h(y; kwargs...)
 end
 
-apply_g(::LinearMaximizer{Nothing,Nothing}, y; kwargs...) = y
-apply_h(::LinearMaximizer{Nothing,Nothing}, y; kwargs...) = zero(eltype(y))
-
 function apply_g(f::LinearMaximizer, y; kwargs...)
     return f.g(y; kwargs...)
 end
 
+# Might not be needed
 function apply_h(f::LinearMaximizer, y; kwargs...)
     return f.h(y; kwargs...)
 end

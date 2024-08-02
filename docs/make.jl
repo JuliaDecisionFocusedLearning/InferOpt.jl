@@ -11,7 +11,7 @@ open(joinpath(@__DIR__, "src", "index.md"), "w") do io
         io,
         """
         ```@meta
-        EditURL = "https://github.com/axelparmentier/InferOpt.jl/blob/main/README.md"
+        EditURL = "https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/blob/main/README.md"
         ```
         """,
     )
@@ -30,13 +30,13 @@ Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
 makedocs(;
     modules=[InferOpt],
     authors="Guillaume Dalle, Léo Baty, Louis Bouvier, Axel Parmentier",
-    repo="https://github.com/axelparmentier/InferOpt.jl/blob/{commit}{path}#{line}",
+    repo="https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl/blob/{commit}{path}#{line}",
     sitename="InferOpt.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://axelparmentier.github.io/InferOpt.jl",
+        canonical="https://juliadecisionfocusedlearning.github.io/InferOpt.jl",
         assets=String[],
-        repolink="https://github.com/axelparmentier/InferOpt.jl",
+        repolink="https://github.com/JuliaDecisionFocusedLearning/InferOpt.jl",
     ),
     pages=[
         "Home" => "index.md",
