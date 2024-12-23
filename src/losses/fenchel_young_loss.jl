@@ -39,24 +39,12 @@ function fenchel_young_loss_and_grad(
     ŷ = optimization_layer(θ; kwargs...)
     Ωy_true = compute_regularization(optimization_layer, y_true)
     Ωŷ = compute_regularization(optimization_layer, ŷ)
-    l = (Ωy_true - dot(θ, y_true)) - (Ωŷ - dot(θ, ŷ))
-    g = ŷ - y_true
-    return l, g
-end
-
-function fenchel_young_loss_and_grad(
-    fyl::FenchelYoungLoss{O}, θ::AbstractArray, y_true::AbstractArray; kwargs...
-) where {O<:AbstractRegularizedGeneralizedMaximizer}
-    (; optimization_layer) = fyl
-    ŷ = optimization_layer(θ; kwargs...)
-    Ωy_true = compute_regularization(optimization_layer, y_true)
-    Ωŷ = compute_regularization(optimization_layer, ŷ)
     maximizer = get_maximizer(optimization_layer)
     l =
         (Ωy_true - objective_value(maximizer, θ, y_true; kwargs...)) -
         (Ωŷ - objective_value(maximizer, θ, ŷ; kwargs...))
-    g = maximizer.g(ŷ; kwargs...) - maximizer.g(y_true; kwargs...)
-    return l, g
+    grad = apply_g(maximizer, ŷ; kwargs...) - apply_g(maximizer, y_true; kwargs...)
+    return l, grad
 end
 
 function fenchel_young_loss_and_grad(
@@ -92,13 +80,14 @@ function fenchel_young_F_and_first_part_of_grad(
     maximizer = get_maximizer(perturbed)
     η_dist = empirical_predistribution(reinforce, θ)
     fk = FixKwargs(maximizer, kwargs)
-    gk = FixKwargs((y; kwargs...) -> apply_g(maximizer, y; kwargs...), kwargs)
+    gk = Fix1Kwargs(apply_g, maximizer, kwargs)
     y_dist = map(fk, η_dist)
-    return mean(
+    F = mean(
         objective_value(maximizer, η, y; kwargs...) for
         (η, y) in zip(η_dist.atoms, y_dist.atoms)
-    ),
-    mean(gk, y_dist)
+    )
+    ŷ = mean(gk, y_dist)
+    return F, ŷ
 end
 
 function fenchel_young_F_and_first_part_of_grad(
@@ -108,12 +97,13 @@ function fenchel_young_F_and_first_part_of_grad(
     maximizer = get_maximizer(perturbed)
     η_dist = empirical_predistribution(reinforce, θ)
     fk = FixKwargs(reinforce.f, kwargs)
-    gk = FixKwargs((y; kwargs...) -> apply_g(maximizer, y; kwargs...), kwargs)
+    gk = Fix1Kwargs(apply_g, maximizer, kwargs)
     y_dist = map(fk, η_dist)
     eZ_dist = map(Base.Fix2(./, θ), η_dist)
-    return mean(
+    F = mean(
         objective_value(maximizer, η, y; kwargs...) for
         (η, y) in zip(η_dist.atoms, y_dist.atoms)
-    ),
-    mean(gk.(map(.*, eZ_dist.atoms, y_dist.atoms)))
+    )
+    almost_ŷ = mean(gk.(map(.*, eZ_dist.atoms, y_dist.atoms)))
+    return F, almost_ŷ
 end

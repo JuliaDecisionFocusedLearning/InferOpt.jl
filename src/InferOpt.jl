@@ -11,11 +11,7 @@ using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangen
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
 using DensityInterface: logdensityof
 using DifferentiableExpectations:
-    DifferentiableExpectations,
-    Reinforce,
-    empirical_predistribution,
-    empirical_distribution,
-    FixKwargs
+    DifferentiableExpectations, Reinforce, empirical_predistribution, empirical_distribution
 using Distributions:
     Distributions,
     ContinuousUnivariateDistribution,
@@ -34,9 +30,9 @@ using RequiredInterfaces
 
 include("interface.jl")
 
+include("utils/utils.jl")
 include("utils/some_functions.jl")
 include("utils/pushforward.jl")
-include("utils/generalized_maximizer.jl")
 include("utils/linear_maximizer.jl")
 include("utils/isotonic_regression/isotonic_l2.jl")
 include("utils/isotonic_regression/isotonic_kl.jl")
@@ -48,8 +44,6 @@ include("layers/simple/identity.jl")
 
 include("layers/perturbed/utils.jl")
 include("layers/perturbed/perturbation.jl")
-# include("layers/perturbed/additive.jl")
-# include("layers/perturbed/multiplicative.jl")
 include("layers/perturbed/perturbed.jl")
 
 include("layers/regularized/abstract_regularized.jl")
@@ -72,18 +66,14 @@ include("losses/imitation_loss.jl")
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
-export GeneralizedMaximizer
 export LinearMaximizer, apply_g, apply_h, objective_value
 
-# export FixedAtomsProbabilityDistribution
-# export compute_expectation
-# export compute_probability_distribution
 export Pushforward
 
 export IdentityRelaxation
 export Interpolation
 
-export AbstractRegularized, AbstractRegularizedGeneralizedMaximizer
+export AbstractRegularized
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
 export SoftRank, soft_rank, soft_rank_l2, soft_rank_kl

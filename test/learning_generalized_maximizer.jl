@@ -234,7 +234,7 @@ end
     const RI = RequiredInterfaces
     Random.seed!(63)
 
-    struct MyRegularized{M<:GeneralizedMaximizer} <: AbstractRegularizedGeneralizedMaximizer
+    struct MyRegularized{M<:LinearMaximizer} <: AbstractRegularized # GeneralizedMaximizer
         maximizer::M
     end
 
@@ -246,7 +246,7 @@ end
 
     @test RI.check_interface_implemented(AbstractRegularized, MyRegularized)
 
-    regularized = MyRegularized(GeneralizedMaximizer(sparse_argmax))
+    regularized = MyRegularized(LinearMaximizer(sparse_argmax))
 
     test_pipeline!(
         PipelineLossImitation();

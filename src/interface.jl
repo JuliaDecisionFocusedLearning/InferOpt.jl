@@ -23,6 +23,8 @@ Supertype for all the optimization layers defined in InferOpt.
 """
 abstract type AbstractOptimizationLayer <: AbstractLayer end
 
+get_maximizer(layer::AbstractOptimizationLayer) = nothing
+
 ## Losses
 
 """
