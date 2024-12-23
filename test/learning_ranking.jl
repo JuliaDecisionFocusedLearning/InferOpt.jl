@@ -101,7 +101,7 @@ end
             ranking;
             Ω=half_square_norm,
             Ω_grad=identity_kw,
-            frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+            frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Adaptive()),
         ),
         loss=mse_kw,
         error_function=hamming_distance,
@@ -172,7 +172,7 @@ end
                 ranking;
                 Ω=half_square_norm,
                 Ω_grad=identity_kw,
-                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Adaptive()),
             ),
         ),
         error_function=hamming_distance,
@@ -303,7 +303,7 @@ end
                 ranking;
                 Ω=half_square_norm,
                 Ω_grad=identity_kw,
-                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Agnostic()),
+                frank_wolfe_kwargs=(; max_iteration=10, line_search=FrankWolfe.Adaptive()),
             ),
             cost,
         ),
