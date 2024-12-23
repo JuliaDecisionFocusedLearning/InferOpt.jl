@@ -6,7 +6,7 @@ Differentiable perturbation of a black box optimizer of type `F`, with perturbat
 This struct is as wrapper around `Reinforce` from DifferentiableExpectations.jl.
 
 There are three different available constructors that behave differently in the package:
-- [`LinearPerturbed`](@ref)
+- [`PerturbedOracle`](@ref)
 - [`PerturbedAdditive`](@ref)
 - [`PerturbedMultiplicative`](@ref)
 """
