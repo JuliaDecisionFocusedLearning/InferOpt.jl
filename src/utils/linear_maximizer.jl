@@ -66,11 +66,11 @@ function apply_g(f::LinearMaximizer, y; kwargs...)
     return f.g(y; kwargs...)
 end
 
-"""
-$TYPEDSIGNATURES
+# """
+# $TYPEDSIGNATURES
 
-Applies the function `h` of the LinearMaximizer `f` to `y`.
-"""
-function apply_h(f::LinearMaximizer, y; kwargs...)
-    return f.h(y; kwargs...)
-end
+# Applies the function `h` of the LinearMaximizer `f` to `y`.
+# """
+# function apply_h(f::LinearMaximizer, y; kwargs...)
+#     return f.h(y; kwargs...)
+# end
