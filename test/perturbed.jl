@@ -23,7 +23,7 @@
         @test all(diag(jac1) .>= 0)
         @test all(jac1 - Diagonal(jac1) .<= 0)
         # Order of diagonal coefficients should follow order of θ
-        @test sortperm(diag(jac1)) == sortperm(θ)
+        @test sortperm(diag(jac1_big)) == sortperm(θ)
         # No scaling with nb of samples
         @test norm(jac1) ≈ norm(jac1_big) rtol = 5e-2
     end
@@ -33,9 +33,9 @@
         jac2_big = Zygote.jacobian(
             θ -> perturbed2_big(θ; autodiff_variance_reduction=false), θ
         )[1]
-        @test all(diag(jac2) .>= 0)
-        @test all(jac2 - Diagonal(jac2) .<= 0)
-        @test sortperm(diag(jac2)) != sortperm(θ)
+        @test all(diag(jac2_big) .>= 0)
+        @test all(jac2_big - Diagonal(jac2_big) .<= 0)
+        @test sortperm(diag(jac2_big)) == sortperm(θ)
         @test norm(jac2) ≈ norm(jac2_big) rtol = 5e-2
     end
 end
