@@ -6,7 +6,6 @@ DocMeta.setdocmeta!(InferOpt, :DocTestSetup, :(using InferOpt); recursive=true)
 
 # Copy README.md into docs/src/index.md (overwriting)
 
-<<<<<<< HEAD
 open(joinpath(@__DIR__, "src", "index.md"), "w") do io
     println(
         io,
@@ -21,13 +20,6 @@ open(joinpath(@__DIR__, "src", "index.md"), "w") do io
         println(io, line)
     end
 end
-=======
-cp(
-    joinpath(dirname(@__DIR__), "README.md"),
-    joinpath(@__DIR__, "src", "index.md");
-    force=true,
-)
->>>>>>> main
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
