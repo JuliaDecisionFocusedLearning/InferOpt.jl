@@ -92,7 +92,6 @@ export RegularizedFrankWolfe
 export PerturbedOracle
 export PerturbedAdditive
 export PerturbedMultiplicative
-export LinearPerturbed
 
 export FenchelYoungLoss
 export StructuredSVMLoss
