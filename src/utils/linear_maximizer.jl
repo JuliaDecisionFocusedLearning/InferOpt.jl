@@ -27,6 +27,10 @@ function (f::LinearMaximizer)(θ::AbstractArray; kwargs...)
     return f.maximizer(θ; kwargs...)
 end
 
+objective_value(::Any, θ, y; kwargs...) = dot(θ, y)
+apply_g(::Any, y; kwargs...) = y
+apply_h(::Any, y; kwargs...) = zero(eltype(y))
+
 """
     objective_value(f, θ, y, kwargs...)
 

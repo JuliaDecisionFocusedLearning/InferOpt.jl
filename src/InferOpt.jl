@@ -23,6 +23,7 @@ using Distributions:
     Normal,
     product_distribution,
     logpdf
+using DocStringExtensions: TYPEDEF, TYPEDFIELDS, TYPEDSIGNATURES
 using LinearAlgebra: dot
 using Random: Random, AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean

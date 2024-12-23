@@ -278,7 +278,7 @@ end
         instance_dim=5,
         true_maximizer=ranking,
         maximizer=identity_kw,
-        loss=LinearPerturbed(f, p; nb_samples=10),
+        loss=PerturbedOracle(f, p; nb_samples=10),
         error_function=hamming_distance,
         true_encoder=true_encoder,
         cost=cost,

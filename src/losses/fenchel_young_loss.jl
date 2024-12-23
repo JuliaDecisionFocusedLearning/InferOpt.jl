@@ -1,5 +1,5 @@
 """
-    FenchelYoungLoss <: AbstractLossLayer
+$TYPEDEF
 
 Fenchel-Young loss associated with a given optimization layer.
 ```
@@ -9,7 +9,6 @@ L(θ, y_true) = (Ω(y_true) - θᵀy_true) - (Ω(ŷ) - θᵀŷ)
 Reference: <https://arxiv.org/abs/1901.02324>
 
 # Fields
-
 - `optimization_layer::AbstractOptimizationLayer`: optimization layer that can be formulated as `ŷ(θ) = argmax {θᵀy - Ω(y)}` (either regularized or perturbed)
 """
 struct FenchelYoungLoss{O<:AbstractOptimizationLayer} <: AbstractLossLayer
@@ -24,7 +23,9 @@ end
 ## Forward pass
 
 """
-    (fyl::FenchelYoungLoss)(θ, y_true[; kwargs...])
+$TYPEDSIGNATURES
+
+Compute L(θ, y_true).
 """
 function (fyl::FenchelYoungLoss)(θ::AbstractArray, y_true::AbstractArray; kwargs...)
     l, _ = fenchel_young_loss_and_grad(fyl, θ, y_true; kwargs...)
@@ -67,7 +68,7 @@ function fenchel_young_loss_and_grad(
     (; optimization_layer) = fyl
     maximizer = get_maximizer(optimization_layer)
     F, almost_ŷ = fenchel_young_F_and_first_part_of_grad(optimization_layer, θ; kwargs...)
-    l = F - objective_value(maximizer, θ, y_true; kwargs...) # dot(θ, y_true)
+    l = F - objective_value(maximizer, θ, y_true; kwargs...)
     g = almost_ŷ - apply_g(maximizer, y_true; kwargs...)
     return l, g
 end

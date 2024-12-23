@@ -1,5 +1,5 @@
 """
-    PerturbedOracle{D,F} <: AbstractOptimizationLayer
+$TYPEDEF
 
 Differentiable perturbation of a black box optimizer of type `F`, with perturbation of type `D`.
 
@@ -14,6 +14,11 @@ struct PerturbedOracle{D,F,t,variance_reduction,G,R,S} <: AbstractOptimizationLa
     reinforce::Reinforce{t,variance_reduction,F,D,G,R,S}
 end
 
+"""
+$TYPEDSIGNATURES
+
+Forward pass of the perturbed optimizer.
+"""
 function (perturbed::PerturbedOracle)(θ::AbstractArray; kwargs...)
     return perturbed.reinforce(θ; kwargs...)
 end
@@ -43,7 +48,9 @@ function Base.show(io::IO, perturbed::PerturbedOracle{<:AbstractPerturbation})
 end
 
 """
-doc
+$TYPEDSIGNATURES
+
+Constructor for [`PerturbedOracle`](@ref).
 """
 function PerturbedOracle(
     maximizer,
@@ -72,7 +79,9 @@ function PerturbedOracle(
 end
 
 """
-    PerturbedAdditive(maximizer; kwargs...)
+$TYPEDSIGNATURES
+
+Constructor for [`PerturbedOracle`](@ref) with an additive perturbation.
 """
 function PerturbedAdditive(
     maximizer;
@@ -103,7 +112,9 @@ function PerturbedAdditive(
 end
 
 """
-doc
+$TYPEDSIGNATURES
+
+Constructor for [`PerturbedOracle`](@ref) with a multiplicative perturbation.
 """
 function PerturbedMultiplicative(
     maximizer;
