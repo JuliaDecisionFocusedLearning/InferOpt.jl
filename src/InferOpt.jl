@@ -65,7 +65,7 @@ include("losses/imitation_loss.jl")
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
-export LinearMaximizer, apply_g, apply_h, objective_value
+export LinearMaximizer, apply_g, objective_value
 
 export Pushforward
 
