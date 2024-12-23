@@ -113,14 +113,15 @@ Thanks to this smoothing, we can now train our model with a standard gradient op
 
 encoder = deepcopy(initial_encoder)
 opt = Flux.Adam();
+opt_state = Flux.setup(opt, encoder)
 losses = Float64[]
 for epoch in 1:100
     l = 0.0
     for (x, y) in zip(X_train, Y_train)
-        grads = gradient(Flux.params(encoder)) do
-            l += loss(encoder(x), y; directions=queen_directions)
+        grads = Flux.gradient(encoder) do m
+            l += loss(m(x), y; directions=queen_directions)
         end
-        Flux.update!(opt, Flux.params(encoder), grads)
+        Flux.update!(opt_state, encoder, grads[1])
     end
     push!(losses, l)
 end;
