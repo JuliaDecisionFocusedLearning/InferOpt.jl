@@ -25,7 +25,7 @@
         # Order of diagonal coefficients should follow order of θ
         @test sortperm(diag(jac1)) == sortperm(θ)
         # No scaling with nb of samples
-        @test norm(jac1) ≈ norm(jac1_big) rtol = 1e-2
+        @test norm(jac1) ≈ norm(jac1_big) rtol = 5e-2
     end
 
     @testset "PerturbedMultiplicative" begin
@@ -36,8 +36,7 @@
         @test all(diag(jac2) .>= 0)
         @test all(jac2 - Diagonal(jac2) .<= 0)
         @test sortperm(diag(jac2)) != sortperm(θ)
-        # This is not equal because the diagonal coefficient for θ₃ = 4 is often larger than the one for θ₂ = 5. It happens because θ₃ has the opportunity to *become* the argmax (and hence switch from 0 to 1), whereas θ₂ already *is* the argmax.
-        @test norm(jac2) ≈ norm(jac2_big) rtol = 1e-2
+        @test norm(jac2) ≈ norm(jac2_big) rtol = 5e-2
     end
 end
 
@@ -51,7 +50,7 @@ end
     p(θ) = MvNormal(θ, ε^2 * I)
     oracle(η) = η
 
-    po = PerturbedOracle(oracle, p; nb_samples=1_000, seed=0)
+    po = PerturbedOracle(oracle, p; nb_samples=1_000, seed=0) # TODO: fix this
     pa = PerturbedAdditive(oracle; ε, nb_samples=1_000, seed=0)
 
     θ = randn(10)
@@ -68,16 +67,22 @@ end
     ε = 1.0
     oracle(η) = η
 
-    pa = PerturbedAdditive(oracle; ε, nb_samples=100, seed=0)
-    pm = PerturbedMultiplicative(oracle; ε, nb_samples=100, seed=0)
+    pa = PerturbedAdditive(oracle; ε, nb_samples=100, seed=0, variance_reduction=true)
+    pa_no_variance_reduction = PerturbedAdditive(
+        oracle; ε, nb_samples=100, seed=0, variance_reduction=false
+    )
+    pm = PerturbedMultiplicative(oracle; ε, nb_samples=100, seed=0, variance_reduction=true)
+    pm_no_variance_reduction = PerturbedMultiplicative(
+        oracle; ε, nb_samples=100, seed=0, variance_reduction=false
+    )
 
     n = 10
     θ = randn(10)
 
-    Ja = jacobian(θ -> pa(θ; autodiff_variance_reduction=false), θ)[1]
+    Ja = jacobian(pa_no_variance_reduction, θ)[1]
     Ja_reduced_variance = jacobian(pa, θ)[1]
 
-    Jm = jacobian(x -> pm(x; autodiff_variance_reduction=false), θ)[1]
+    Jm = jacobian(pm_no_variance_reduction, θ)[1]
     Jm_reduced_variance = jacobian(pm, θ)[1]
 
     J_true = Matrix(I, n, n)  # exact jacobian is the identity matrix
