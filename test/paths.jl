@@ -155,7 +155,10 @@ end
         maximizer=identity_kw,
         loss=FenchelYoungLoss(
             PerturbedAdditive(
-                shortest_path_maximizer; ε=1.0, nb_samples=5, perturbation=LogNormal(0, 1)
+                shortest_path_maximizer;
+                ε=1.0,
+                nb_samples=5,
+                perturbation_dist=LogNormal(0, 1),
             ),
         ),
         error_function=mse_kw,

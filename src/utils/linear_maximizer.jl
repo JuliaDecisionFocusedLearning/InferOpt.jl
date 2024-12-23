@@ -18,6 +18,10 @@ function Base.show(io::IO, f::LinearMaximizer)
     return print(io, "LinearMaximizer($maximizer, $g, $h)")
 end
 
+function LinearMaximizer(maximizer; g=identity_kw, h=zero ∘ eltype_kw)
+    return LinearMaximizer(maximizer, g, h)
+end
+
 # Callable calls the wrapped maximizer
 function (f::LinearMaximizer)(θ::AbstractArray; kwargs...)
     return f.maximizer(θ; kwargs...)

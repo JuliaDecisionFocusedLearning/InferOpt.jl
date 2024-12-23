@@ -50,7 +50,7 @@ end
     p(θ) = MvNormal(θ, ε^2 * I)
     oracle(η) = η
 
-    po = PerturbedOracle(oracle, p; nb_samples=1_000, seed=0) # TODO: fix this
+    po = PerturbedOracle(oracle, p; nb_samples=1_000, seed=0)
     pa = PerturbedAdditive(oracle; ε, nb_samples=1_000, seed=0)
 
     θ = randn(10)

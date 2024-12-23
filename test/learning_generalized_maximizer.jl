@@ -13,7 +13,7 @@
 
     @test y == [1 0 1; 0 1 0; 1 1 1]
 
-    generalized_maximizer = LinearMaximizer(; maximizer=max_pricing, g, h)
+    generalized_maximizer = LinearMaximizer(max_pricing; g, h)
 
     @test generalized_maximizer(θ; instance) == y
 
@@ -29,8 +29,8 @@ end
 
     true_encoder = encoder_factory()
 
-    perturbed = PerturbedAdditive(max_pricing; ε=1.0, nb_samples=10, g, h)
-    maximizer = InferOpt.get_maximizer(perturbed)
+    maximizer = LinearMaximizer(max_pricing; g, h)
+    perturbed = PerturbedAdditive(maximizer; ε=1.0, nb_samples=10)
     function cost(y; instance)
         return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
@@ -55,8 +55,8 @@ end
 
     true_encoder = encoder_factory()
 
-    perturbed = PerturbedMultiplicative(max_pricing; ε=1.0, nb_samples=10, g, h)
-    maximizer = InferOpt.get_maximizer(perturbed)
+    maximizer = LinearMaximizer(max_pricing; g, h)
+    perturbed = PerturbedMultiplicative(maximizer; ε=1.0, nb_samples=10)
     function cost(y; instance)
         return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
@@ -80,8 +80,10 @@ end
 
     true_encoder = encoder_factory()
 
-    perturbed = PerturbedAdditive(max_pricing; ε=1.0, nb_samples=10, g, h)
-    maximizer = InferOpt.get_maximizer(perturbed)
+    maximizer = LinearMaximizer(max_pricing; g, h)
+    @info maximizer g h
+    perturbed = PerturbedAdditive(maximizer; ε=1.0, nb_samples=10)
+    @info perturbed
     function cost(y; instance)
         return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
@@ -106,8 +108,8 @@ end
 
     true_encoder = encoder_factory()
 
-    perturbed = PerturbedMultiplicative(max_pricing; ε=0.1, nb_samples=10, g, h)
-    maximizer = InferOpt.get_maximizer(perturbed)
+    maximizer = LinearMaximizer(max_pricing; g, h)
+    perturbed = PerturbedMultiplicative(maximizer; ε=0.1, nb_samples=10)
     function cost(y; instance)
         return -objective_value(maximizer, true_encoder(instance), y; instance)
     end
@@ -180,7 +182,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    generalized_maximizer = LinearMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end
@@ -207,7 +209,7 @@ end
 
     true_encoder = encoder_factory()
 
-    generalized_maximizer = GeneralizedMaximizer(max_pricing; g, h)
+    generalized_maximizer = LinearMaximizer(max_pricing; g, h)
     function cost(y; instance)
         return -objective_value(generalized_maximizer, true_encoder(instance), y; instance)
     end

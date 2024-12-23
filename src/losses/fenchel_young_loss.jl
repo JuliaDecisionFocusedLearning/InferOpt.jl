@@ -59,7 +59,10 @@ function fenchel_young_loss_and_grad(
 end
 
 function fenchel_young_loss_and_grad(
-    fyl::FenchelYoungLoss{<:Perturbed}, θ::AbstractArray, y_true::AbstractArray; kwargs...
+    fyl::FenchelYoungLoss{<:PerturbedOracle},
+    θ::AbstractArray,
+    y_true::AbstractArray;
+    kwargs...,
 )
     (; optimization_layer) = fyl
     maximizer = get_maximizer(optimization_layer)
@@ -82,7 +85,7 @@ end
 ## Specific overrides for perturbed layers
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::Perturbed{<:AdditivePerturbation}, θ::AbstractArray; kwargs...
+    perturbed::PerturbedOracle{<:AdditivePerturbation}, θ::AbstractArray; kwargs...
 )
     (; reinforce) = perturbed
     maximizer = get_maximizer(perturbed)
@@ -98,7 +101,7 @@ function fenchel_young_F_and_first_part_of_grad(
 end
 
 function fenchel_young_F_and_first_part_of_grad(
-    perturbed::Perturbed{<:MultiplicativePerturbation}, θ::AbstractArray; kwargs...
+    perturbed::PerturbedOracle{<:MultiplicativePerturbation}, θ::AbstractArray; kwargs...
 )
     (; reinforce) = perturbed
     maximizer = get_maximizer(perturbed)
