@@ -33,3 +33,16 @@ struct Fix1Kwargs{F,K,T} <: Function
 end
 
 (fk::Fix1Kwargs)(args...) = fk.f(fk.x, args...; fk.kwargs...)
+
+"""
+$TYPEDEF
+
+Callable struct that fixes the first argument of `f` to `x`.
+Compared to Base.Fix1, works on functions with more than two arguments.
+"""
+struct FixFirst{F,T}
+    f::F
+    x::T
+end
+
+(fk::FixFirst)(args...) = fk.f(fk.x, args...)

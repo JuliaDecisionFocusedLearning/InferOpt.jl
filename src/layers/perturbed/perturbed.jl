@@ -93,7 +93,7 @@ function PerturbedAdditive(
     threaded=false,
     rng=Random.default_rng(),
     dist_logdensity_grad=if (perturbation_dist == Normal(0, 1))
-        (η, θ) -> ((η .- θ) ./ ε^2,)
+        FixFirst(normal_additive_grad_logdensity, ε)
     else
         nothing
     end,
@@ -126,7 +126,7 @@ function PerturbedMultiplicative(
     threaded=false,
     rng=Random.default_rng(),
     dist_logdensity_grad=if (perturbation_dist == Normal(0, 1))
-        (η, θ) -> (inv.(ε^2 .* θ) .* (η .- θ),)
+        FixFirst(normal_multiplicative_grad_logdensity, ε)
     else
         nothing
     end,

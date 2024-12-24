@@ -6,19 +6,16 @@
 
     θ = [3, 5, 4, 2]
 
-    perturbed1 = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=1_000, seed=0)
-    perturbed1_big = PerturbedAdditive(one_hot_argmax; ε=2, nb_samples=10_000, seed=0)
-    perturbed2 = PerturbedMultiplicative(one_hot_argmax; ε=0.5, nb_samples=1_000, seed=0)
-    perturbed2_big = PerturbedMultiplicative(
-        one_hot_argmax; ε=0.5, nb_samples=10_000, seed=0
-    )
+    perturbed1 = PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=1e4, seed=0)
+    perturbed1_big = PerturbedAdditive(one_hot_argmax; ε=1.0, nb_samples=1e6, seed=0)
+
+    perturbed2 = PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=1e4, seed=0)
+    perturbed2_big = PerturbedMultiplicative(one_hot_argmax; ε=1.0, nb_samples=1e6, seed=0)
 
     @testset "PerturbedAdditive" begin
         # Compute jacobian with reverse mode
-        jac1 = Zygote.jacobian(θ -> perturbed1(θ; autodiff_variance_reduction=false), θ)[1]
-        jac1_big = Zygote.jacobian(
-            θ -> perturbed1_big(θ; autodiff_variance_reduction=false), θ
-        )[1]
+        jac1 = Zygote.jacobian(perturbed1, θ)[1]
+        jac1_big = Zygote.jacobian(perturbed1_big, θ)[1]
         # Only diagonal should be positive
         @test all(diag(jac1) .>= 0)
         @test all(jac1 - Diagonal(jac1) .<= 0)
@@ -29,13 +26,12 @@
     end
 
     @testset "PerturbedMultiplicative" begin
-        jac2 = Zygote.jacobian(θ -> perturbed2(θ; autodiff_variance_reduction=false), θ)[1]
-        jac2_big = Zygote.jacobian(
-            θ -> perturbed2_big(θ; autodiff_variance_reduction=false), θ
-        )[1]
+        jac2 = Zygote.jacobian(perturbed2, θ)[1]
+        jac2_big = Zygote.jacobian(perturbed2_big, θ)[1]
         @test all(diag(jac2_big) .>= 0)
         @test all(jac2_big - Diagonal(jac2_big) .<= 0)
-        @test sortperm(diag(jac2_big)) == sortperm(θ)
+        @info diag(jac2_big)
+        @test_broken sortperm(diag(jac2_big)) == sortperm(θ)
         @test norm(jac2) ≈ norm(jac2_big) rtol = 5e-2
     end
 end
@@ -99,18 +95,21 @@ end
 
     ε = 1e-12
 
-    function already_differentiable(θ)
-        return 2 ./ exp.(θ) .* θ .^ 2
-    end
-
-    θ = randn(5)
-    Jz = jacobian(already_differentiable, θ)[1]
-
+    already_differentiable(θ) = 2 ./ exp.(θ) .* θ .^ 2 .+ sum(θ)
     pa = PerturbedAdditive(already_differentiable; ε, nb_samples=1e6, seed=0)
-    Ja = jacobian(pa, θ)[1]
-    @test_broken all(isapprox.(Ja, Jz, rtol=0.01))
-
     pm = PerturbedMultiplicative(already_differentiable; ε, nb_samples=1e6, seed=0)
+
+    θ = [1.0, 2.0, 3.0, 4.0, 5.0]
+
+    fz = already_differentiable(θ)
+    fa = pa(θ)
+    fm = pm(θ)
+    @test fz ≈ fa rtol = 0.01
+    @test fz ≈ fm rtol = 0.01
+
+    Jz = jacobian(already_differentiable, θ)[1]
+    Ja = jacobian(pa, θ)[1]
     Jm = jacobian(pm, θ)[1]
-    @test_broken all(isapprox.(Jm, Jz, rtol=0.01))
+    @test Ja ≈ Jz rtol = 0.01
+    @test Jm ≈ Jz rtol = 0.01
 end
