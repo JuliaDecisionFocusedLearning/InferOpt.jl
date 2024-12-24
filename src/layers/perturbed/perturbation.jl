@@ -82,7 +82,7 @@ $TYPEDSIGNATURES
 
 Compute the gradient of the logdensity of η = θ ⊙ exp(εZ - ε²/2) w.r.t. θ., with Z ∼ N(0, 1).
 !!! warning
-    η should be a relization of θ, i.e. should be of the same sign.
+    η should be a realization of θ, i.e. should be of the same sign.
 """
 function normal_multiplicative_grad_logdensity(ε, η, θ)
     return (inv.(ε^2 .* θ) .* (log.(abs.(η)) - log.(abs.(θ)) .+ (ε^2 / 2)),)
