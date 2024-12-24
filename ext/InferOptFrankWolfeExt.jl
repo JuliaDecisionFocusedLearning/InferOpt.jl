@@ -1,10 +1,11 @@
 module InferOptFrankWolfeExt
 
+using DifferentiableExpectations:
+    DifferentiableExpectations, FixedAtomsProbabilityDistribution
 using DifferentiableFrankWolfe: DifferentiableFrankWolfe, DiffFW
 using DifferentiableFrankWolfe: LinearMinimizationOracle  # from FrankWolfe
 using DifferentiableFrankWolfe: IterativeLinearSolver  # from ImplicitDifferentiation
-using InferOpt: InferOpt, RegularizedFrankWolfe, FixedAtomsProbabilityDistribution
-using InferOpt: compute_expectation, compute_probability_distribution
+using InferOpt: InferOpt, RegularizedFrankWolfe
 using LinearAlgebra: dot
 
 """

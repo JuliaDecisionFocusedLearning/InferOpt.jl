@@ -1,26 +1,26 @@
 """
-    positive_part(x)
+$TYPEDSIGNATURES
 
-Compute `max(x,0)`.
+Compute `max(x, 0)`.
 """
 positive_part(x) = x >= zero(x) ? x : zero(x)
 
 """
-    isproba(x)
+$TYPEDSIGNATURES
 
 Check whether `x ∈ [0,1]`.
 """
 isproba(x::Real) = zero(x) <= x <= one(x)
 
 """
-    isprobadist(p)
+$TYPEDSIGNATURES
 
 Check whether the elements of `p` are nonnegative and sum to 1.
 """
 isprobadist(p::AbstractVector{R}) where {R<:Real} = all(isproba, p) && sum(p) ≈ one(R)
 
 """
-    half_square_norm(x)
+$TYPEDSIGNATURES
 
 Compute the squared Euclidean norm of `x` and divide it by 2.
 """
@@ -29,7 +29,7 @@ function half_square_norm(x::AbstractArray)
 end
 
 """
-    shannon_entropy(p)
+$TYPEDSIGNATURES
 
 Compute the Shannon entropy of a probability distribution: `H(p) = -∑ pᵢlog(pᵢ)`.
 """
@@ -46,7 +46,7 @@ end
 negative_shannon_entropy(p::AbstractVector) = -shannon_entropy(p)
 
 """
-    one_hot_argmax(z)
+$TYPEDSIGNATURES
 
 One-hot encoding of the argmax function.
 """
@@ -57,7 +57,7 @@ function one_hot_argmax(z::AbstractVector{R}; kwargs...) where {R<:Real}
 end
 
 """
-    ranking(θ[; rev])
+$TYPEDSIGNATURES
 
 Compute the vector `r` such that `rᵢ` is the rank of `θᵢ` in `θ`.
 """
