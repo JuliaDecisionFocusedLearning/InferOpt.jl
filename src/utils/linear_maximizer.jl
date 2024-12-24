@@ -45,7 +45,6 @@ end
 # default is oracles of the form argmax_y θᵀy
 objective_value(::Any, θ, y; kwargs...) = dot(θ, y)
 apply_g(::Any, y; kwargs...) = y
-# apply_h(::Any, y; kwargs...) = zero(eltype(y)) is not needed
 
 """
 $TYPEDSIGNATURES
@@ -65,12 +64,3 @@ Applies the function `g` of the LinearMaximizer `f` to `y`.
 function apply_g(f::LinearMaximizer, y; kwargs...)
     return f.g(y; kwargs...)
 end
-
-# """
-# $TYPEDSIGNATURES
-
-# Applies the function `h` of the LinearMaximizer `f` to `y`.
-# """
-# function apply_h(f::LinearMaximizer, y; kwargs...)
-#     return f.h(y; kwargs...)
-# end
