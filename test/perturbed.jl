@@ -30,7 +30,6 @@
         jac2_big = Zygote.jacobian(perturbed2_big, θ)[1]
         @test all(diag(jac2_big) .>= 0)
         @test all(jac2_big - Diagonal(jac2_big) .<= 0)
-        @info diag(jac2_big)
         @test_broken sortperm(diag(jac2_big)) == sortperm(θ)
         @test norm(jac2) ≈ norm(jac2_big) rtol = 5e-2
     end
