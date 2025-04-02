@@ -3,8 +3,8 @@ module InferOptFrankWolfeExt
 using DifferentiableExpectations:
     DifferentiableExpectations, FixedAtomsProbabilityDistribution
 using DifferentiableFrankWolfe: DifferentiableFrankWolfe, DiffFW
-using DifferentiableFrankWolfe: LinearMinimizationOracle  # from FrankWolfe
-using DifferentiableFrankWolfe: IterativeLinearSolver  # from ImplicitDifferentiation
+using FrankWolfe: LinearMinimizationOracle
+using ImplicitDifferentiation: KrylovLinearSolver
 using InferOpt: InferOpt, RegularizedFrankWolfe
 using LinearAlgebra: dot
 
@@ -41,14 +41,18 @@ Keyword arguments are passed to the underlying linear maximizer.
 function InferOpt.compute_probability_distribution(
     regularized::RegularizedFrankWolfe, θ::AbstractArray; kwargs...
 )
+    shape = size(θ)
     (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
-    lmo = LinearMaximizationOracleWithKwargs(linear_maximizer, kwargs)
-    implicit_kwargs = (; linear_solver=IterativeLinearSolver(; accept_inconsistent=true))
+    maximizer(θ; shape, kwargs...) = vec(linear_maximizer(reshape(θ, shape); kwargs...))
+    lmo = LinearMaximizationOracleWithKwargs(maximizer, (; shape, kwargs...))
+    implicit_kwargs = (; linear_solver=KrylovLinearSolver())
     dfw = DiffFW(f, f_grad1, lmo; implicit_kwargs)
-    weights, atoms = dfw.implicit(θ; frank_wolfe_kwargs=frank_wolfe_kwargs)
-    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
+    weights, atoms = dfw.implicit(vec(θ); frank_wolfe_kwargs=frank_wolfe_kwargs)
+    probadist = FixedAtomsProbabilityDistribution(
+        map(atom -> reshape(atom, shape), atoms), weights
+    )
     return probadist
 end
 

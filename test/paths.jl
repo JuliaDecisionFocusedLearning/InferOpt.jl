@@ -90,7 +90,8 @@ end
 
 @testitem "Paths - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, ImplicitDifferentiation, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -167,7 +168,8 @@ end
 
 @testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, ImplicitDifferentiation, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -235,7 +237,12 @@ end
 @testitem "Paths - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
-        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+        FrankWolfe,
+        ImplicitDifferentiation,
+        InferOpt,
+        .InferOptTestUtils,
+        LinearAlgebra,
+        Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()

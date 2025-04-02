@@ -10,6 +10,8 @@ DifferentiableExpectations = "fc55d66b-b2a8-4ccc-9d64-c0c2166ceb36"
 DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
+ImplicitDifferentiation = "57b37032-215b-411a-8a7c-41a003a55207"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RequiredInterfaces = "97f35ef4-7bc5-4ec1-a41a-dcc69c7308c6"
@@ -19,19 +21,23 @@ StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [weakdeps]
 DifferentiableFrankWolfe = "b383313e-5450-4164-a800-befbd27b574d"
+FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
+ImplicitDifferentiation = "57b37032-215b-411a-8a7c-41a003a55207"
 
 [extensions]
-InferOptFrankWolfeExt = "DifferentiableFrankWolfe"
+InferOptFrankWolfeExt = ["DifferentiableFrankWolfe", "FrankWolfe", "ImplicitDifferentiation"]
 
 [compat]
 ChainRulesCore = "1"
 DensityInterface = "0.4.0"
 DifferentiableExpectations = "0.2"
-DifferentiableFrankWolfe = "0.2"
+DifferentiableFrankWolfe = "0.3"
 Distributions = "0.25"
-DocStringExtensions = "0.9.3"
-LinearAlgebra = "<0.0.1,1"
-Random = "<0.0.1,1"
+DocStringExtensions = "0.9"
+FrankWolfe = "0.3"
+ImplicitDifferentiation = "0.6"
+LinearAlgebra = "1"
+Random = "1"
 RequiredInterfaces = "0.1.3"
 Statistics = "1"
 StatsBase = "0.33, 0.34"
@@ -49,6 +55,7 @@ FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 GridGraphs = "dd2b58c7-5af7-4f17-9e46-57c68ac813fb"
 HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+ImplicitDifferentiation = "57b37032-215b-411a-8a7c-41a003a55207"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
@@ -65,4 +72,4 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Aqua", "DifferentiableFrankWolfe", "Distributions", "Documenter", "FiniteDifferences", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "HiGHS", "JET", "JuliaFormatter", "JuMP", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]
+test = ["Aqua", "DifferentiableFrankWolfe", "Distributions", "Documenter", "FiniteDifferences", "Flux", "FrankWolfe", "Graphs", "GridGraphs", "HiGHS", "ImplicitDifferentiation", "JET", "JuliaFormatter", "JuMP", "LinearAlgebra", "Literate", "Pkg", "ProgressMeter", "Random", "Revise", "Statistics", "Test", "TestItemRunner", "UnicodePlots", "Zygote"]
