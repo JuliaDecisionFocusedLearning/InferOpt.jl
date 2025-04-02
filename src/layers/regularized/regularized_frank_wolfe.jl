@@ -7,7 +7,10 @@ Regularized optimization layer which relies on the Frank-Wolfe algorithm to defi
 ```
 
 !!! warning "Warning"
-    Since this is a conditional dependency, you need to have loaded the package DifferentiableFrankWolfe.jl before using `RegularizedFrankWolfe`.
+    Since this is a conditional dependency, you need to have loaded the following packages before using `RegularizedFrankWolfe`:
+    - `DifferentiableFrankWolfe.jl`
+    - `FrankWolfe.jl`
+    - `ImplicitDifferentiation.jl`
 
 # Fields
 
@@ -15,6 +18,7 @@ Regularized optimization layer which relies on the Frank-Wolfe algorithm to defi
 - `Ω`: regularization function `Ω(y)`
 - `Ω_grad`: gradient function of the regularization function `∇Ω(y)`
 - `frank_wolfe_kwargs`: named tuple of keyword arguments passed to the Frank-Wolfe algorithm
+- `implicit_kwargs`: named tuple of keyword arguments passed to the implicit differentiation algorithm (in particular, the needed linear solver)
 
 # Frank-Wolfe parameters
 
@@ -29,24 +33,19 @@ Some values you can tune:
 
 See the documentation of FrankWolfe.jl for details.
 """
-struct RegularizedFrankWolfe{M,RF,RG,FWK} <: AbstractRegularized
+struct RegularizedFrankWolfe{M,RF,RG,FWK,IK} <: AbstractRegularized
     linear_maximizer::M
     Ω::RF
     Ω_grad::RG
     frank_wolfe_kwargs::FWK
-end
-
-"""
-    RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=(;))
-"""
-function RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=NamedTuple())
-    return RegularizedFrankWolfe(linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs)
+    implicit_kwargs::IK
 end
 
 function Base.show(io::IO, regularized::RegularizedFrankWolfe)
-    (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs) = regularized
+    (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs, implicit_kwargs) = regularized
     return print(
-        io, "RegularizedFrankWolfe($linear_maximizer, $Ω, $Ω_grad, $frank_wolfe_kwargs)"
+        io,
+        "RegularizedFrankWolfe($linear_maximizer, $Ω, $Ω_grad, $frank_wolfe_kwargs, $implicit_kwargs)",
     )
 end
 

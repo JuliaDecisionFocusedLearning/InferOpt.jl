@@ -21,7 +21,6 @@ function test_pipeline!(
     perf_storage = init_perf()
 
     for ep in 1:epochs
-        @info ep
         update_perf!(
             pl,
             perf_storage;
