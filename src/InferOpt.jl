@@ -62,6 +62,8 @@ include("losses/ssvm_loss.jl")
 include("losses/zero_one_loss.jl")
 include("losses/imitation_loss.jl")
 
+export compute_probability_distribution
+
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking

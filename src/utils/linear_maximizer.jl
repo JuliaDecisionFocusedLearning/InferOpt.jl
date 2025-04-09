@@ -43,8 +43,8 @@ function (f::LinearMaximizer)(θ::AbstractArray; kwargs...)
 end
 
 # default is oracles of the form argmax_y θᵀy
-objective_value(::Any, θ, y; kwargs...) = dot(θ, y)
-apply_g(::Any, y; kwargs...) = y
+@inline objective_value(::Any, θ, y; kwargs...) = dot(θ, y)
+@inline apply_g(::Any, y; kwargs...) = y
 
 """
 $TYPEDSIGNATURES

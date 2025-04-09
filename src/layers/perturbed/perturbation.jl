@@ -4,7 +4,8 @@ $TYPEDEF
 Abstract type for a perturbation.
 It's a function that takes a parameter `θ` and returns a perturbed parameter by a distribution `perturbation_dist`.
 
-All subtypes should have a `perturbation_dist`
+!!! warning
+    All subtypes should implement a `perturbation_dist` field, which is a `ContinuousUnivariateDistribution`.
 
 # Existing implementations
 - [`AdditivePerturbation`](@ref)
@@ -45,18 +46,36 @@ function (pdc::AdditivePerturbation)(θ::AbstractArray)
 end
 
 """
+$TYPEDEF
+
+Method with parameters to compute the gradient of the logdensity of η = θ + εZ w.r.t. θ., with Z ∼ N(0, 1).
+
+# Fields
+$TYPEDFIELDS
+"""
+struct NormalAdditiveGradLogdensity
+    "perturbation size"
+    ε::Float64
+end
+
+function NormalAdditiveGradLogdensity(pdc::AdditivePerturbation)
+    return NormalAdditiveGradLogdensity(pdc.ε)
+end
+
+"""
 $TYPEDSIGNATURES
 
 Compute the gradient of the logdensity of η = θ + εZ w.r.t. θ., with Z ∼ N(0, 1).
 """
-function normal_additive_grad_logdensity(ε, η, θ)
+function (f::NormalAdditiveGradLogdensity)(η::AbstractArray, θ::AbstractArray)
+    (; ε) = f
     return ((η .- θ) ./ ε^2,)
 end
 
 """
 $TYPEDEF
 
-Multiplicative perturbation: θ ↦ θ ⊙ exp(εZ - ε²/2)
+Multiplicative perturbation: θ ↦ θ ⊙ exp(εZ - shift)
 
 # Fields
 $TYPEDFIELDS
@@ -66,6 +85,17 @@ struct MultiplicativePerturbation{F}
     perturbation_dist::F
     "perturbation size"
     ε::Float64
+    "optional shift to have 0 mean, default value is ε²/2"
+    shift::Float64
+end
+
+"""
+$TYPEDSIGNATURES
+
+Constructor for [`MultiplicativePerturbation`](@ref).
+"""
+function MultiplicativePerturbation(perturbation_dist, ε, shift=ε^2 / 2)
+    return MultiplicativePerturbation(perturbation_dist, ε, shift)
 end
 
 """
@@ -74,16 +104,42 @@ $TYPEDSIGNATURES
 Apply the multiplicative perturbation to the parameter `θ`.
 """
 function (pdc::MultiplicativePerturbation)(θ::AbstractArray)
-    (; perturbation_dist, ε) = pdc
-    return product_distribution(θ .* ExponentialOf(ε * perturbation_dist - ε^2 / 2))
+    (; perturbation_dist, ε, shift) = pdc
+    return product_distribution(θ .* ExponentialOf(ε * perturbation_dist - shift))
 end
+
+"""
+$TYPEDEF
+
+Method with parameters to compute the gradient of the logdensity of η = θ ⊙ exp(εZ - shift) w.r.t. θ., with Z ∼ N(0, 1).
+
+# Fields
+$TYPEDFIELDS
+"""
+struct NormalMultiplicativeGradLogdensity
+    "perturbation size"
+    ε::Float64
+    "optional shift to have 0 mean"
+    shift::Float64
+end
+
+function NormalMultiplicativeGradLogdensity(pdc::MultiplicativePerturbation)
+    return NormalMultiplicativeGradLogdensity(pdc.ε, pdc.shift)
+end
+
+function NormalMultiplicativeGradLogdensity(ε::Float64, shift=ε^2 / 2)
+    return NormalMultiplicativeGradLogdensity(ε, shift)
+end
+
 """
 $TYPEDSIGNATURES
 
-Compute the gradient of the logdensity of η = θ ⊙ exp(εZ - ε²/2) w.r.t. θ., with Z ∼ N(0, 1).
+Compute the gradient of the logdensity of η = θ ⊙ exp(εZ - shift) w.r.t. θ., with Z ∼ N(0, 1).
+
 !!! warning
     η should be a realization of θ, i.e. should be of the same sign.
 """
-function normal_multiplicative_grad_logdensity(ε, η, θ)
-    return (inv.(ε^2 .* θ) .* (log.(abs.(η)) - log.(abs.(θ)) .+ (ε^2 / 2)),)
+function (f::NormalMultiplicativeGradLogdensity)(η::AbstractArray, θ::AbstractArray)
+    (; ε, shift) = f
+    return (inv.(ε^2 .* θ) .* (log.(abs.(η)) - log.(abs.(θ)) .+ shift),)
 end

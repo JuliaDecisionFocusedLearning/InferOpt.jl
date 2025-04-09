@@ -10,7 +10,7 @@ with g and h functions of y.
 # Interface
 - `(regularized::AbstractRegularized)(θ; kwargs...)`: return `ŷ(θ)`
 - `compute_regularization(regularized, y)`: return `Ω(y)
-- `get_maximizer(regularized)`: return the associated `GeneralizedMaximizer` optimizer
+- `get_maximizer(regularized)`: return the associated optimizer
 
 # Available implementations
 - [`SoftArgmax`](@ref)
