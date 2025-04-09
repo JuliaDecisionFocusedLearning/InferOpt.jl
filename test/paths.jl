@@ -90,7 +90,8 @@ end
 
 @testitem "Paths - imit - MSE RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, ImplicitDifferentiation, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -155,7 +156,10 @@ end
         maximizer=identity_kw,
         loss=FenchelYoungLoss(
             PerturbedAdditive(
-                shortest_path_maximizer; ε=1.0, nb_samples=5, perturbation=LogNormal(0, 1)
+                shortest_path_maximizer;
+                ε=1.0,
+                nb_samples=5,
+                perturbation_dist=LogNormal(0, 1),
             ),
         ),
         error_function=mse_kw,
@@ -164,7 +168,8 @@ end
 
 @testitem "Paths - imit - FYL RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using DifferentiableFrankWolfe, FrankWolfe, InferOpt, .InferOptTestUtils, Random
+    using DifferentiableFrankWolfe,
+        FrankWolfe, ImplicitDifferentiation, InferOpt, .InferOptTestUtils, Random
     Random.seed!(63)
 
     test_pipeline!(
@@ -232,7 +237,12 @@ end
 @testitem "Paths - exp - Pushforward RegularizedFrankWolfe" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
     using DifferentiableFrankWolfe,
-        FrankWolfe, InferOpt, .InferOptTestUtils, LinearAlgebra, Random
+        FrankWolfe,
+        ImplicitDifferentiation,
+        InferOpt,
+        .InferOptTestUtils,
+        LinearAlgebra,
+        Random
     Random.seed!(63)
 
     true_encoder = encoder_factory()

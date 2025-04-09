@@ -10,71 +10,80 @@ module InferOpt
 using ChainRulesCore: ChainRulesCore, NoTangent, RuleConfig, Tangent, ZeroTangent
 using ChainRulesCore: rrule, rrule_via_ad, unthunk
 using DensityInterface: logdensityof
+using DifferentiableExpectations:
+    DifferentiableExpectations, Reinforce, empirical_predistribution, empirical_distribution
+using Distributions:
+    Distributions,
+    ContinuousUnivariateDistribution,
+    LogNormal,
+    Normal,
+    product_distribution,
+    logpdf
+using DocStringExtensions: TYPEDEF, TYPEDFIELDS, TYPEDSIGNATURES
 using LinearAlgebra: dot
-using Random: AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
+using Random: Random, AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
 using StatsFuns: logaddexp, softmax
-using ThreadsX: ThreadsX
 using RequiredInterfaces
 
 include("interface.jl")
 
+include("utils/utils.jl")
 include("utils/some_functions.jl")
-include("utils/probability_distribution.jl")
 include("utils/pushforward.jl")
-include("utils/generalized_maximizer.jl")
+include("utils/linear_maximizer.jl")
 include("utils/isotonic_regression/isotonic_l2.jl")
 include("utils/isotonic_regression/isotonic_kl.jl")
 include("utils/isotonic_regression/projection.jl")
 
-include("simple/interpolation.jl")
-include("simple/identity.jl")
+# Layers
+include("layers/simple/interpolation.jl")
+include("layers/simple/identity.jl")
 
-include("regularized/abstract_regularized.jl")
-include("regularized/soft_argmax.jl")
-include("regularized/sparse_argmax.jl")
-include("regularized/soft_rank.jl")
-include("regularized/regularized_frank_wolfe.jl")
+include("layers/perturbed/utils.jl")
+include("layers/perturbed/perturbation.jl")
+include("layers/perturbed/perturbed.jl")
 
-include("perturbed/abstract_perturbed.jl")
-include("perturbed/additive.jl")
-include("perturbed/multiplicative.jl")
-include("perturbed/perturbed_oracle.jl")
-
-include("imitation/spoplus_loss.jl")
-include("imitation/ssvm_loss.jl")
-include("imitation/fenchel_young_loss.jl")
-include("imitation/imitation_loss.jl")
-include("imitation/zero_one_loss.jl")
+include("layers/regularized/abstract_regularized.jl")
+include("layers/regularized/soft_argmax.jl")
+include("layers/regularized/sparse_argmax.jl")
+include("layers/regularized/soft_rank.jl")
+include("layers/regularized/regularized_frank_wolfe.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/InferOptFrankWolfeExt.jl")
 end
 
+# Losses
+include("losses/fenchel_young_loss.jl")
+include("losses/spoplus_loss.jl")
+include("losses/ssvm_loss.jl")
+include("losses/zero_one_loss.jl")
+include("losses/imitation_loss.jl")
+
+export compute_probability_distribution
+
 export half_square_norm
 export shannon_entropy, negative_shannon_entropy
 export one_hot_argmax, ranking
-export GeneralizedMaximizer, objective_value
+export LinearMaximizer, apply_g, objective_value
 
-export FixedAtomsProbabilityDistribution
-export compute_expectation
-export compute_probability_distribution
 export Pushforward
 
 export IdentityRelaxation
 export Interpolation
 
-export AbstractRegularized, AbstractRegularizedGeneralizedMaximizer
+export AbstractRegularized
 export SoftArgmax, soft_argmax
 export SparseArgmax, sparse_argmax
 export SoftRank, soft_rank, soft_rank_l2, soft_rank_kl
 export SoftSort, soft_sort, soft_sort_l2, soft_sort_kl
 export RegularizedFrankWolfe
 
+export PerturbedOracle
 export PerturbedAdditive
 export PerturbedMultiplicative
-export PerturbedOracle
 
 export FenchelYoungLoss
 export StructuredSVMLoss

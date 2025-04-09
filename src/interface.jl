@@ -18,10 +18,12 @@ abstract type AbstractLayer end
 Supertype for all the optimization layers defined in InferOpt.
 
 # Interface
-- `(layer::AbstractOptimizationLayer)(θ; kwargs...)`
+- `(layer::AbstractOptimizationLayer)(θ::AbstractArray; kwargs...)`
 - `compute_probability_distribution(layer, θ; kwargs...)` (only if the layer is probabilistic)
 """
 abstract type AbstractOptimizationLayer <: AbstractLayer end
+
+get_maximizer(layer::AbstractOptimizationLayer) = nothing
 
 ## Losses
 
@@ -45,6 +47,6 @@ abstract type AbstractLossLayer <: AbstractLayer end
 """
     compute_probability_distribution(layer, θ; kwargs...)
 
-Apply a probabilistic optimization layer to an objective direction `θ` in order to generate a [`FixedAtomsProbabilityDistribution`](@ref) on the vertices of a polytope.
+Apply a probabilistic optimization layer to an objective direction `θ` in order to generate a `FixedAtomsProbabilityDistribution` on the vertices of a polytope.
 """
 function compute_probability_distribution end

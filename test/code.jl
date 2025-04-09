@@ -7,13 +7,11 @@ end
 
 @testitem "Correctness (JET.jl)" default_imports = false begin
     using JET
-    using DifferentiableFrankWolfe
+    using DifferentiableFrankWolfe, FrankWolfe, ImplicitDifferentiation
     using InferOpt
-    if VERSION >= v"1.9"
-        JET.test_package(InferOpt; target_modules=[InferOpt])
-        # TODO: why does the following line fail even though the method is defined in the extension?
-        # JET.test_package(InferOpt, target_defined_modules=true)
-    end
+    JET.test_package(InferOpt; target_modules=[InferOpt])
+    # TODO: why does the following line fail even though the method is defined in the extension?
+    # JET.test_package(InferOpt; target_defined_modules=true)
 end
 
 @testitem "Formatting (JuliaFormatter.jl)" begin
