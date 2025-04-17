@@ -59,17 +59,15 @@ Keyword arguments are passed to the underlying linear maximizer.
 function InferOpt.compute_probability_distribution(
     regularized::RegularizedFrankWolfe, θ::AbstractArray; kwargs...
 )
-    shape = size(θ)
     (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs, implicit_kwargs) = regularized
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
-    maximizer(θ; shape, kwargs...) = vec(linear_maximizer(reshape(θ, shape); kwargs...))
-    lmo = LinearMaximizationOracleWithKwargs(maximizer, (; shape, kwargs...))
+    maximizer(θ; kwargs...) = linear_maximizer(θ; kwargs...)
+    lmo = LinearMaximizationOracleWithKwargs(maximizer, kwargs)
     dfw = DiffFW(f, f_grad1, lmo; implicit_kwargs)
-    weights, atoms = dfw.implicit(vec(θ); frank_wolfe_kwargs=frank_wolfe_kwargs)
-    probadist = FixedAtomsProbabilityDistribution(
-        map(atom -> reshape(atom, shape), atoms), weights
-    )
+    weights, stats = dfw.implicit(θ, frank_wolfe_kwargs)
+    atoms = stats.active_set.atoms  # TODO: make it public in DiffFW
+    probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
 end
 
