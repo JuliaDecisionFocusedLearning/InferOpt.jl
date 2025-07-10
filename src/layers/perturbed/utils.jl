@@ -26,3 +26,7 @@ It is equal to ``logpdf(d, log(x)) - log(x)``.
 function Distributions.logpdf(d::ExponentialOf, x::Real)
     return logpdf(d.dist, log(x)) - log(x)
 end
+
+function Base.:*(x::Real, d::ExponentialOf)
+    return iszero(x) ? Dirac(0.0) : AffineDistribution(zero(x), x, d)
+end
