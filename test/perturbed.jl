@@ -112,3 +112,11 @@ end
     @test Ja ≈ Jz rtol = 0.01
     @test Jm ≈ Jz rtol = 0.01
 end
+
+@testitem "Perturbed - Misc" begin
+    # Make sure that having 0s in θ works
+    perturbed = PerturbedMultiplicative(identity; ε=1.0, nb_samples=1e4, seed=0)
+    θ = [1.0, 0.0]
+    y = perturbed(θ)
+    @test iszero(y[2])
+end

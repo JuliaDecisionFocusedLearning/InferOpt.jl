@@ -15,6 +15,8 @@ using DifferentiableExpectations:
 using Distributions:
     Distributions,
     ContinuousUnivariateDistribution,
+    AffineDistribution,
+    Dirac,
     LogNormal,
     Normal,
     product_distribution,
