@@ -187,9 +187,7 @@ train_error = mean(
 
 # Not too bad, at least compared with our random initial encoder.
 
-Y_train_pred_initial = [
-    linear_maximizer(initial_encoder(x)) for x in X_train
-];
+Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
 train_error_initial = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
