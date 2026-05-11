@@ -42,8 +42,8 @@ h, w = 50, 100
 g = GridGraph(rand(h, w));
 
 #=
-We compute shortest paths from the top-left to the bottom-right corner using dynamic programming,
-only allowing moves right (east) or down (south) to ensure acyclicity.
+Compute shortest paths from the top-left to the bottom-right corner using DP,
+only allowing moves right or down.
 =#
 
 function grid_shortest_path_matrix(g::GridGraph)
