@@ -2,8 +2,6 @@ module InferOptTestUtils
 
 using Flux
 using Flux.Losses: mse
-using Graphs
-using GridGraphs
 using LinearAlgebra
 using Statistics
 using Test

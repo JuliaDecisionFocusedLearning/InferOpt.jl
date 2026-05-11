@@ -16,8 +16,6 @@ We will use InferOpt.jl to learn the appropriate weights, so that we may propose
 =#
 
 using Flux
-using Graphs
-using GridGraphs
 using InferOpt
 using LinearAlgebra
 using ProgressMeter
@@ -31,52 +29,50 @@ Random.seed!(63);
 # ## Grid graphs
 
 #=
-For the purposes of this tutorial, we consider grid graphs, as implemented in [GridGraphs.jl](https://github.com/gdalle/GridGraphs.jl).
+For the purposes of this tutorial, we consider grid graphs.
 In such graphs, each vertex corresponds to a couple of coordinates $(i, j)$, where $1 \leq i \leq h$ and $1 \leq j \leq w$.
 
 To ensure acyclicity, we only allow the user to move right or down.
-Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its cost matrix $\theta \in \mathbb{R}^{h \times w}$.
+Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its weight matrix $\theta \in \mathbb{R}^{h \times w}$.
 =#
 
 h, w = 50, 100
-g = GridGraph(rand(h, w));
+θ_example = rand(h, w);
 
 #=
-Compute shortest paths from the top-left to the bottom-right corner using DP,
-only allowing moves right or down.
+Compute the path from the top-left to the bottom-right corner maximizing the sum of $\theta$ values,
+only allowing moves right or down, using dynamic programming.
 =#
 
-function grid_shortest_path_matrix(g::GridGraph)
-    h, w = height(g), width(g)
-    n = nv(g)
-    dist = fill(Inf, n)
-    prev = zeros(Int, n)
-    dist[1] = vertex_weight(g, 1)
-    for v in 1:(n - 1)
-        isinf(dist[v]) && continue
-        iv, jv = index_to_coord(g, v)
-        for (ni, nj) in ((iv + 1, jv), (iv, jv + 1))
-            if 1 <= ni <= h && 1 <= nj <= w
-                u = coord_to_index(g, ni, nj)
-                d = dist[v] + vertex_weight(g, u)
-                if d < dist[u]
-                    dist[u] = d
-                    prev[u] = v
+function grid_shortest_path_matrix(θ::AbstractMatrix)
+    h, w = size(θ)
+    dist = fill(Inf, h, w)
+    prev_i = zeros(Int, h, w)
+    prev_j = zeros(Int, h, w)
+    dist[1, 1] = -θ[1, 1]
+    for j in 1:w, i in 1:h
+        (i == 1 && j == 1) && continue
+        for (ni, nj) in ((i - 1, j), (i, j - 1))
+            if 1 <= ni && 1 <= nj
+                d = dist[ni, nj] - θ[i, j]
+                if d < dist[i, j]
+                    dist[i, j] = d
+                    prev_i[i, j] = ni
+                    prev_j[i, j] = nj
                 end
             end
         end
     end
     mat = zeros(h, w)
-    v = n
-    while v != 0
-        i, j = index_to_coord(g, v)
-        mat[i, j] = 1.0
-        v = prev[v]
+    ci, cj = h, w
+    while (ci, cj) != (0, 0)
+        mat[ci, cj] = 1.0
+        ci, cj = prev_i[ci, cj], prev_j[ci, cj]
     end
     return mat
 end
 
-p = grid_shortest_path_matrix(g);
+p = grid_shortest_path_matrix(θ_example);
 spy(p)
 
 # ## Dataset
@@ -91,12 +87,11 @@ true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
-To be consistent with the literature, we frame this problem as a linear maximization problem, which justifies the change of sign in front of $\theta$.
+To be consistent with the literature, we frame this problem as a linear maximization problem: the maximizer finds the path with maximum total weight.
 =#
 
 function linear_maximizer(θ; kwargs...)
-    g = GridGraph(-θ)
-    return grid_shortest_path_matrix(g)
+    return grid_shortest_path_matrix(θ)
 end;
 
 #=

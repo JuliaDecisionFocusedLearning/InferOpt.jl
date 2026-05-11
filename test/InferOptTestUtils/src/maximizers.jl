@@ -1,30 +1,27 @@
 function shortest_path_maximizer(θ::AbstractMatrix; kwargs...)
-    g = GridGraph(-θ)
-    h, w = height(g), width(g)
-    n = nv(g)
-    dist = fill(Inf, n)
-    prev = zeros(Int, n)
-    dist[1] = vertex_weight(g, 1)
-    for v in 1:(n - 1)
-        isinf(dist[v]) && continue
-        iv, jv = index_to_coord(g, v)
-        for (ni, nj) in ((iv + 1, jv), (iv, jv + 1))
-            if 1 <= ni <= h && 1 <= nj <= w
-                u = coord_to_index(g, ni, nj)
-                d = dist[v] + vertex_weight(g, u)
-                if d < dist[u]
-                    dist[u] = d
-                    prev[u] = v
+    h, w = size(θ)
+    dist = fill(Inf, h, w)
+    prev_i = zeros(Int, h, w)
+    prev_j = zeros(Int, h, w)
+    dist[1, 1] = -θ[1, 1]
+    for j in 1:w, i in 1:h
+        (i == 1 && j == 1) && continue
+        for (ni, nj) in ((i - 1, j), (i, j - 1))
+            if 1 <= ni && 1 <= nj
+                d = dist[ni, nj] - θ[i, j]
+                if d < dist[i, j]
+                    dist[i, j] = d
+                    prev_i[i, j] = ni
+                    prev_j[i, j] = nj
                 end
             end
         end
     end
     mat = zeros(h, w)
-    v = n
-    while v != 0
-        i, j = index_to_coord(g, v)
-        mat[i, j] = 1.0
-        v = prev[v]
+    ci, cj = h, w
+    while (ci, cj) != (0, 0)
+        mat[ci, cj] = 1.0
+        ci, cj = prev_i[ci, cj], prev_j[ci, cj]
     end
     return mat
 end
