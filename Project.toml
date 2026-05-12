@@ -1,7 +1,7 @@
 name = "InferOpt"
 uuid = "4846b161-c94e-4150-8dac-c7ae193c601f"
-version = "0.7.1"
 authors = ["Guillaume Dalle", "Léo Baty", "Louis Bouvier", "Axel Parmentier"]
+version = "0.7.1"
 
 [workspace]
 projects = ["docs", "test"]
