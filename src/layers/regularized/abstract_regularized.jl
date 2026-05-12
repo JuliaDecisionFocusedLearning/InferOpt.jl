@@ -26,8 +26,3 @@ abstract type AbstractRegularized <: AbstractOptimizationLayer end
 Return the convex penalty `Ω(y)` associated with an `AbstractRegularized` layer.
 """
 function compute_regularization end
-
-@required AbstractRegularized begin
-    # (regularized::AbstractRegularized)(θ::AbstractArray; kwargs...) # waiting for RequiredInterfaces to support this (see https://github.com/Seelengrab/RequiredInterfaces.jl/issues/11)
-    compute_regularization(::AbstractRegularized, y)
-end

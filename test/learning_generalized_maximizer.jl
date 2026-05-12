@@ -230,8 +230,7 @@ end
 
 @testitem "Regularized with a GeneralizedMaximizer" default_imports = false begin
     include("InferOptTestUtils/src/InferOptTestUtils.jl")
-    using InferOpt, .InferOptTestUtils, Random, RequiredInterfaces, Test
-    const RI = RequiredInterfaces
+    using InferOpt, .InferOptTestUtils, Random, Test
     Random.seed!(63)
 
     struct MyRegularized{M<:LinearMaximizer} <: AbstractRegularized # GeneralizedMaximizer
@@ -243,8 +242,6 @@ end
         return InferOpt.sparse_argmax_regularization(y)
     end
     InferOpt.get_maximizer(regularized::MyRegularized) = regularized.maximizer
-
-    @test RI.check_interface_implemented(AbstractRegularized, MyRegularized)
 
     regularized = MyRegularized(LinearMaximizer(sparse_argmax))
 
