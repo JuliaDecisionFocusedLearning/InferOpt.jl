@@ -28,5 +28,6 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 InferOpt = {path = ".."}
 
 [compat]
+GridGraphs = "0.10"
 JuliaFormatter = "1"
 Test = "1"
