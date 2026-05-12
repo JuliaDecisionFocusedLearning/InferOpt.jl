@@ -27,7 +27,6 @@ using Random: Random, AbstractRNG, GLOBAL_RNG, MersenneTwister, rand, seed!
 using Statistics: mean
 using StatsBase: StatsBase, sample
 using StatsFuns: logaddexp, softmax
-using RequiredInterfaces
 
 include("interface.jl")
 
