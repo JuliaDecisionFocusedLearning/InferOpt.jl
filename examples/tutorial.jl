@@ -40,8 +40,8 @@ h, w = 50, 100
 θ_example = rand(h, w);
 
 #=
-Compute the path from the top-left to the bottom-right corner maximizing the sum of $\theta$ values,
-only allowing moves right or down, using dynamic programming.
+With moves restricted to right or down, the shortest path from the top-left to the bottom-right
+corner can be computed using dynamic programming.
 =#
 
 function grid_shortest_path_matrix(θ::AbstractMatrix)
@@ -49,12 +49,12 @@ function grid_shortest_path_matrix(θ::AbstractMatrix)
     dist = fill(Inf, h, w)
     prev_i = zeros(Int, h, w)
     prev_j = zeros(Int, h, w)
-    dist[1, 1] = -θ[1, 1]
+    dist[1, 1] = θ[1, 1]
     for j in 1:w, i in 1:h
         (i == 1 && j == 1) && continue
         for (ni, nj) in ((i - 1, j), (i, j - 1))
             if 1 <= ni && 1 <= nj
-                d = dist[ni, nj] - θ[i, j]
+                d = dist[ni, nj] + θ[i, j]
                 if d < dist[i, j]
                     dist[i, j] = d
                     prev_i[i, j] = ni
@@ -87,11 +87,12 @@ true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
-To be consistent with the literature, we frame this problem as a linear maximization problem: the maximizer finds the path with maximum total weight.
+To be consistent with the literature, we frame this problem as a linear maximization problem, 
+which justifies the change of sign in front of $\theta$.
 =#
 
 function linear_maximizer(θ; kwargs...)
-    return grid_shortest_path_matrix(θ)
+    return grid_shortest_path_matrix(-θ)
 end;
 
 #=
