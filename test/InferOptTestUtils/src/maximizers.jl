@@ -1,8 +1,29 @@
 function shortest_path_maximizer(θ::AbstractMatrix; kwargs...)
-    g = GridGraph(-θ; directions=GridGraphs.QUEEN_DIRECTIONS_ACYCLIC)
-    path = grid_topological_sort(g, 1, nv(g))
-    y = path_to_matrix(g, path)
-    return y
+    h, w = size(θ)
+    dist = fill(Inf, h, w)
+    prev_i = zeros(Int, h, w)
+    prev_j = zeros(Int, h, w)
+    dist[1, 1] = -θ[1, 1]
+    for j in 1:w, i in 1:h
+        (i == 1 && j == 1) && continue
+        for (ni, nj) in ((i - 1, j), (i, j - 1))
+            if 1 <= ni && 1 <= nj
+                d = dist[ni, nj] - θ[i, j]
+                if d < dist[i, j]
+                    dist[i, j] = d
+                    prev_i[i, j] = ni
+                    prev_j[i, j] = nj
+                end
+            end
+        end
+    end
+    mat = zeros(h, w)
+    ci, cj = h, w
+    while (ci, cj) != (0, 0)
+        mat[ci, cj] = 1.0
+        ci, cj = prev_i[ci, cj], prev_j[ci, cj]
+    end
+    return mat
 end
 
 function max_pricing(θ::AbstractVector; instance::AbstractMatrix)

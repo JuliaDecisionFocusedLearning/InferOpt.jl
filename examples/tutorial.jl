@@ -16,8 +16,6 @@ We will use InferOpt.jl to learn the appropriate weights, so that we may propose
 =#
 
 using Flux
-using Graphs
-using GridGraphs
 using InferOpt
 using LinearAlgebra
 using ProgressMeter
@@ -31,23 +29,50 @@ Random.seed!(63);
 # ## Grid graphs
 
 #=
-For the purposes of this tutorial, we consider grid graphs, as implemented in [GridGraphs.jl](https://github.com/gdalle/GridGraphs.jl).
+For the purposes of this tutorial, we consider grid graphs.
 In such graphs, each vertex corresponds to a couple of coordinates $(i, j)$, where $1 \leq i \leq h$ and $1 \leq j \leq w$.
 
-To ensure acyclicity, we only allow the user to move right, down or both.
-Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its cost matrix $\theta \in \mathbb{R}^{h \times w}$.
+To ensure acyclicity, we only allow the user to move right or down.
+Since the cost of a move is defined as the cost of the arrival vertex, any grid graph is entirely characterized by its weight matrix $\theta \in \mathbb{R}^{h \times w}$.
 =#
 
 h, w = 50, 100
-queen_directions = GridGraphs.QUEEN_DIRECTIONS_ACYCLIC
-g = GridGraph(rand(h, w); directions=queen_directions);
+θ_example = rand(h, w);
 
 #=
-For convenience, GridGraphs.jl also provides custom functions to compute shortest paths efficiently.
-Let us see what those paths look like.
+With moves restricted to right or down, the shortest path from the top-left to the bottom-right
+corner can be computed using dynamic programming.
 =#
 
-p = path_to_matrix(g, grid_topological_sort(g, 1, nv(g)));
+function grid_shortest_path_matrix(θ::AbstractMatrix)
+    h, w = size(θ)
+    dist = fill(Inf, h, w)
+    prev_i = zeros(Int, h, w)
+    prev_j = zeros(Int, h, w)
+    dist[1, 1] = θ[1, 1]
+    for j in 1:w, i in 1:h
+        (i == 1 && j == 1) && continue
+        for (ni, nj) in ((i - 1, j), (i, j - 1))
+            if 1 <= ni && 1 <= nj
+                d = dist[ni, nj] + θ[i, j]
+                if d < dist[i, j]
+                    dist[i, j] = d
+                    prev_i[i, j] = ni
+                    prev_j[i, j] = nj
+                end
+            end
+        end
+    end
+    mat = zeros(h, w)
+    ci, cj = h, w
+    while (ci, cj) != (0, 0)
+        mat[ci, cj] = 1.0
+        ci, cj = prev_i[ci, cj], prev_j[ci, cj]
+    end
+    return mat
+end
+
+p = grid_shortest_path_matrix(θ_example);
 spy(p)
 
 # ## Dataset
@@ -62,14 +87,12 @@ true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
-To be consistent with the literature, we frame this problem as a linear maximization problem, which justifies the change of sign in front of $\theta$.
-Note that `linear_maximizer` can take keyword arguments, eg. to give additional information about the instance that `θ` doesn't contain.
+To be consistent with the literature, we frame this problem as a linear maximization problem, 
+which justifies the change of sign in front of $\theta$.
 =#
 
-function linear_maximizer(θ; directions)
-    g = GridGraph(-θ; directions=directions)
-    path = grid_topological_sort(g, 1, nv(g))
-    return path_to_matrix(g, path)
+function linear_maximizer(θ; kwargs...)
+    return grid_shortest_path_matrix(-θ)
 end;
 
 #=
@@ -80,7 +103,7 @@ nb_instances = 30
 
 X_train = [randn(Float32, nb_features, h, w) for n in 1:nb_instances];
 θ_train = [true_encoder(x) for x in X_train];
-Y_train = [linear_maximizer(θ; directions=queen_directions) for θ in θ_train];
+Y_train = [linear_maximizer(θ) for θ in θ_train];
 
 # ## Learning
 
@@ -103,7 +126,7 @@ loss = FenchelYoungLoss(layer);
 This probabilistic layer is just a thin wrapper around our `linear_maximizer`, but with a very different behavior:
 =#
 
-p_layer = layer(θ_train[1]; directions=queen_directions);
+p_layer = layer(θ_train[1]);
 spy(p_layer)
 
 #=
@@ -119,7 +142,7 @@ for epoch in 1:100
     l = 0.0
     for (x, y) in zip(X_train, Y_train)
         grads = Flux.gradient(encoder) do m
-            l += loss(m(x), y; directions=queen_directions)
+            l += loss(m(x), y)
         end
         Flux.update!(opt_state, encoder, grads[1])
     end
@@ -152,7 +175,7 @@ normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x));
 
 #-
 
-Y_train_pred = [linear_maximizer(encoder(x); directions=queen_directions) for x in X_train];
+Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
 
 train_error = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
@@ -160,9 +183,7 @@ train_error = mean(
 
 # Not too bad, at least compared with our random initial encoder.
 
-Y_train_pred_initial = [
-    linear_maximizer(initial_encoder(x); directions=queen_directions) for x in X_train
-];
+Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
 
 train_error_initial = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
