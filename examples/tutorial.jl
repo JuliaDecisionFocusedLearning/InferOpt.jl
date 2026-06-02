@@ -18,7 +18,6 @@ We will use InferOpt.jl to learn the appropriate weights, so that we may propose
 using Flux
 using InferOpt
 using LinearAlgebra
-using ProgressMeter
 using Random
 using Statistics
 using Test
