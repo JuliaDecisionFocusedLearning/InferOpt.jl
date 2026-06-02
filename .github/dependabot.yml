@@ -9,6 +9,7 @@ updates:
       - "."
       - "./docs"
       - "./test"
+      - "./test/InferOptTestUtils"
     schedule:
       interval: "weekly"
     # groups: # uncomment to group all julia package updates into a single PR
