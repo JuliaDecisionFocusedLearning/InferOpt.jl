@@ -29,5 +29,5 @@ InferOpt = {path = ".."}
 
 [compat]
 GridGraphs = "0.10"
-JuliaFormatter = "1"
+JuliaFormatter = "2"
 Test = "1"

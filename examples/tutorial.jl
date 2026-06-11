@@ -141,7 +141,7 @@ for epoch in 1:100
     l = 0.0
     for (x, y) in zip(X_train, Y_train)
         grads = Flux.gradient(encoder) do m
-            l += loss(m(x), y)
+            return l += loss(m(x), y)
         end
         Flux.update!(opt_state, encoder, grads[1])
     end
