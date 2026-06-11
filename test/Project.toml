@@ -30,7 +30,7 @@ InferOpt = {path = ".."}
 
 [compat]
 GridGraphs = "0.10"
-JuliaFormatter = "1"
+JuliaFormatter = "2"
 LoweredCodeUtils = "<3.6"
 Test = "1"
 UnicodePlots = "3.8.3"
