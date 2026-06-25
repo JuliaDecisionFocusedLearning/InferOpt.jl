@@ -17,4 +17,5 @@ UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 InferOpt = { path = "../.." }
 
 [compat]
+InferOpt = "0.7.2"
 UnicodePlots = "3.8.3"
