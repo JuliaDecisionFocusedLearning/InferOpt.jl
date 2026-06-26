@@ -59,12 +59,13 @@ function InferOpt.compute_probability_distribution(
     regularized::RegularizedFrankWolfe, θ::AbstractArray; kwargs...
 )
     (; linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs, implicit_kwargs) = regularized
+    y0 = zero(θ)
     f(y, θ) = Ω(y) - dot(θ, y)
     f_grad1(y, θ) = Ω_grad(y) - θ
     maximizer(θ; kwargs...) = linear_maximizer(θ; kwargs...)
     lmo = LinearMaximizationOracleWithKwargs(maximizer, kwargs)
     dfw = DiffFW(f, f_grad1, lmo; implicit_kwargs)
-    weights, stats = dfw.implicit(θ, frank_wolfe_kwargs)
+    weights, stats = dfw.implicit(θ, y0, frank_wolfe_kwargs)
     atoms = stats.active_set.atoms  # TODO: make it public in DiffFW
     probadist = FixedAtomsProbabilityDistribution(atoms, weights)
     return probadist
