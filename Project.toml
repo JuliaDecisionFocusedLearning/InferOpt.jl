@@ -27,7 +27,11 @@ FrankWolfe = "f55ce6ea-fdc5-4628-88c5-0087fe54bd30"
 ImplicitDifferentiation = "57b37032-215b-411a-8a7c-41a003a55207"
 
 [extensions]
-InferOptFrankWolfeExt = ["DifferentiableFrankWolfe", "FrankWolfe", "ImplicitDifferentiation"]
+InferOptFrankWolfeExt = [
+    "DifferentiableFrankWolfe",
+    "FrankWolfe",
+    "ImplicitDifferentiation",
+]
 
 [compat]
 ChainRulesCore = "1"
@@ -37,7 +41,7 @@ DifferentiableFrankWolfe = "0.4.1, 0.6"
 Distributions = "0.25"
 DocStringExtensions = "0.9"
 FrankWolfe = "0.6"
-ImplicitDifferentiation = "0.9.2"
+ImplicitDifferentiation = "0.9.3"
 LinearAlgebra = "1"
 Random = "1"
 Statistics = "1"
