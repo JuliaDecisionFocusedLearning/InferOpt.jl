@@ -4,12 +4,12 @@ using DifferentiableExpectations:
     DifferentiableExpectations, FixedAtomsProbabilityDistribution
 using DifferentiableFrankWolfe: DifferentiableFrankWolfe, DiffFW
 using FrankWolfe: LinearMinimizationOracle
-using ImplicitDifferentiation: IterativeLinearSolver
+using ImplicitDifferentiation: IterativeLeastSquaresSolver
 using InferOpt: InferOpt, RegularizedFrankWolfe
 using LinearAlgebra: dot
 
 """
-    RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=(;), implicit_kwargs=(; linear_solver=IterativeLinearSolver()))
+    RegularizedFrankWolfe(linear_maximizer; Ω, Ω_grad, frank_wolfe_kwargs=(;), implicit_kwargs=(; linear_solver=IterativeLeastSquaresSolver()))
 
 Construct a `RegularizedFrankWolfe` struct with a linear maximizer and the necessary components for the Frank-Wolfe algorithm.
 """
@@ -18,7 +18,7 @@ function RegularizedFrankWolfe(
     Ω,
     Ω_grad,
     frank_wolfe_kwargs=NamedTuple(),
-    implicit_kwargs=(; linear_solver=IterativeLinearSolver()),
+    implicit_kwargs=(; linear_solver=IterativeLeastSquaresSolver()),
 )
     return RegularizedFrankWolfe(
         linear_maximizer, Ω, Ω_grad, frank_wolfe_kwargs, implicit_kwargs
