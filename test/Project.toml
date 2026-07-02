@@ -28,6 +28,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 InferOpt = {path = ".."}
 
 [compat]
+DifferentiableFrankWolfe = "0.6.0"
 GridGraphs = "0.10"
 InferOpt = "0.7.2"
 JuliaFormatter = "2"
