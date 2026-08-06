@@ -16,6 +16,7 @@ InferOpt = {path = ".."}
 [compat]
 AbstractTrees = "0.4.5"
 Documenter = "1.3"
+Flux = "0.16.10"
 InferOpt = "0.7.2"
 Literate = "2.21.0"
 UnicodePlots = "3.8.3"
