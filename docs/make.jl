@@ -43,7 +43,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
-        "Examples" => ["tutorial.md", "tutorial_lux.md", "advanced_applications.md"],
+        "Examples" => ["tutorial_flux.md", "tutorial_lux.md", "advanced_applications.md"],
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
