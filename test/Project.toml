@@ -29,7 +29,7 @@ InferOpt = {path = ".."}
 
 [compat]
 Flux = "0.16.10"
-GridGraphs = "0.10"
+GridGraphs = "0.10, 0.11"
 InferOpt = "0.7.2"
 JuliaFormatter = "2"
 Test = "1"
