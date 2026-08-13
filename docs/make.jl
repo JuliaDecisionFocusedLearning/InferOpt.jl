@@ -51,7 +51,7 @@ makedocs(;
 
 for file in [
     joinpath(@__DIR__, "src", "index.md"),
-    joinpath(@__DIR__, "src", "tutorial.md"),
+    joinpath(@__DIR__, "src", "tutorial_flux.md"),
     joinpath(@__DIR__, "src", "tutorial_lux.md"),
 ]
     rm(file)
