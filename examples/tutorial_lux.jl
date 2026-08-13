@@ -1,4 +1,4 @@
-# # Basic tutorial
+# # Basic tutorial (Lux)
 
 # ## Context
 
@@ -13,17 +13,23 @@ We don't know the true costs that were used to compute the shortest path, but we
 The question is: how should we combine these features?
 
 We will use InferOpt.jl to learn the appropriate weights, so that we may propose relevant paths to the user in the future.
+
+This tutorial uses [Lux.jl](https://github.com/LuxDL/Lux.jl) as the neural network framework.
+For a Flux.jl version, see the companion `tutorial.jl`.
 =#
 
-using Flux
 using InferOpt
 using LinearAlgebra
+using Lux
+using Optimisers: Adam
 using Random
 using Statistics
 using Test
 using UnicodePlots
+using Zygote
 
-Random.seed!(63);
+rng = Random.default_rng()
+Random.seed!(rng, 63);
 
 # ## Grid graphs
 
@@ -79,14 +85,18 @@ spy(p)
 #=
 As announced, we do not know the cost of each vertex, only a set of relevant features.
 Let us assume that the user combines them using a shallow neural network.
+
+In Lux, models are stateless: parameters and state are managed explicitly.
+We define the encoder architecture and initialize the true encoder parameters.
 =#
 
 nb_features = 5
-true_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
+encoder_model = Chain(Dense(nb_features => 1), WrappedFunction(z -> dropdims(z; dims=1)))
+true_ps, true_st = Lux.setup(rng, encoder_model);
 
 #=
 The true vertex costs computed from this encoding are then used within shortest path computations.
-To be consistent with the literature, we frame this problem as a linear maximization problem, 
+To be consistent with the literature, we frame this problem as a linear maximization problem,
 which justifies the change of sign in front of $\theta$.
 =#
 
@@ -100,22 +110,28 @@ We now have everything we need to build our dataset.
 
 nb_instances = 30
 
-X_train = [randn(Float32, nb_features, h, w) for n in 1:nb_instances];
-θ_train = [true_encoder(x) for x in X_train];
+X_train = [randn(rng, Float32, nb_features, h, w) for n in 1:nb_instances];
+θ_train = [first(encoder_model(x, true_ps, true_st)) for x in X_train];
 Y_train = [linear_maximizer(θ) for θ in θ_train];
 
 # ## Learning
 
 #=
 We create a trainable model with the same structure as the true encoder but another set of randomly-initialized weights.
+
+With Lux, `Lux.setup` returns separate parameter and state containers.
+Gradients are taken with respect to the parameters only.
 =#
 
-initial_encoder = Chain(Dense(nb_features, 1), z -> dropdims(z; dims=1));
+ps, st = Lux.setup(rng, encoder_model)
+initial_ps = deepcopy(ps);
 
 #=
 Here is the crucial part where InferOpt.jl intervenes: the choice of a clever loss function that enables us to
 - differentiate through the shortest path maximizer, even though it is a combinatorial operation
 - evaluate the quality of our model based on the paths that it recommends
+
+Note that InferOpt is framework-agnostic (it uses ChainRulesCore), so its layers and losses work identically with Lux and Zygote.
 =#
 
 layer = PerturbedMultiplicative(linear_maximizer; ε=0.1, nb_samples=5);
@@ -131,22 +147,43 @@ spy(p_layer)
 #=
 Instead of choosing just one path, it spreads over several possible paths, allowing its output to change smoothly as $\theta$ varies.
 Thanks to this smoothing, we can now train our model with a standard gradient optimizer.
+
+We use Lux's `Training` API, which manages parameter and optimizer state via a `TrainState`.
+The objective function passed to the Training API must follow the signature
+`(model, ps, st, data) -> (loss_value, updated_st, stats)`.
+We wrap our InferOpt loss in a callable struct to make it compatible with this interface.
 =#
 
-encoder = deepcopy(initial_encoder)
-opt = Flux.Adam();
-opt_state = Flux.setup(opt, encoder)
-losses = Float64[]
-for epoch in 1:100
-    l = 0.0
-    for (x, y) in zip(X_train, Y_train)
-        grads = Flux.gradient(encoder) do m
-            return l += loss(m(x), y)
+struct LuxLoss{L}
+    loss::L
+end
+
+function (obj::LuxLoss)(model, ps, st, (x, y))
+    θ_pred, st = model(x, ps, st)
+    return obj.loss(θ_pred, y), st, (;)
+end
+
+lux_loss = LuxLoss(loss)
+
+#-
+
+function train_loop(model, ps, st, lux_loss, X_train, Y_train; epochs=100)
+    train_state = Training.TrainState(model, ps, st, Adam(1.0f-3))
+    losses = Float64[]
+    for _ in 1:epochs
+        epoch_loss = 0.0
+        for (x, y) in zip(X_train, Y_train)
+            _, l, _, train_state = Training.single_train_step!(
+                AutoZygote(), lux_loss, (x, y), train_state
+            )
+            epoch_loss += l
         end
-        Flux.update!(opt_state, encoder, grads[1])
+        push!(losses, epoch_loss)
     end
-    push!(losses, l)
-end;
+    return train_state.parameters, losses
+end
+
+ps, losses = train_loop(encoder_model, ps, st, lux_loss, X_train, Y_train);
 
 # ## Results
 
@@ -157,12 +194,14 @@ Since the Fenchel-Young loss is convex, it is no wonder that optimization worked
 lineplot(losses; xlabel="Epoch", ylabel="Loss")
 
 #=
-To assess performance, we can compare the learned weights with their true (hidden) values
+To assess performance, we can compare the learned weights with their true (hidden) values.
+
+With Lux, parameters live in a named tuple. We access the first layer's weight via `ps.layer_1.weight`.
 =#
 
-learned_weight = encoder[1].weight / norm(encoder[1].weight)
-true_weight = true_encoder[1].weight / norm(true_encoder[1].weight)
-hcat(learned_weight, true_weight)
+learned_weight = ps.layer_1.weight / norm(ps.layer_1.weight)
+true_weight = true_ps.layer_1.weight / norm(true_ps.layer_1.weight)
+vcat(learned_weight, true_weight)
 
 #=
 We are quite close to recovering the exact user weights.
@@ -174,7 +213,7 @@ normalized_hamming(x, y) = mean(x[i] != y[i] for i in eachindex(x));
 
 #-
 
-Y_train_pred = [linear_maximizer(encoder(x)) for x in X_train];
+Y_train_pred = [linear_maximizer(first(encoder_model(x, ps, st))) for x in X_train];
 
 train_error = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred)
@@ -182,7 +221,9 @@ train_error = mean(
 
 # Not too bad, at least compared with our random initial encoder.
 
-Y_train_pred_initial = [linear_maximizer(initial_encoder(x)) for x in X_train];
+Y_train_pred_initial = [
+    linear_maximizer(first(encoder_model(x, initial_ps, st))) for x in X_train
+];
 
 train_error_initial = mean(
     normalized_hamming(y, y_pred) for (y, y_pred) in zip(Y_train, Y_train_pred_initial)
