@@ -23,9 +23,11 @@ end
 
 # Parse test/tutorial.jl into docs/src/tutorial.md (overwriting)
 
-tuto_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial.jl")
+tuto_flux_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial_flux.jl")
+tuto_lux_jl_file = joinpath(dirname(@__DIR__), "examples", "tutorial_lux.jl")
 tuto_md_dir = joinpath(@__DIR__, "src")
-Literate.markdown(tuto_jl_file, tuto_md_dir; documenter=true, execute=false)
+Literate.markdown(tuto_flux_jl_file, tuto_md_dir; documenter=true, execute=false)
+Literate.markdown(tuto_lux_jl_file, tuto_md_dir; documenter=true, execute=false)
 
 makedocs(;
     modules=[InferOpt],
@@ -41,14 +43,17 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Background" => "background.md",
-        "Examples" => ["tutorial.md", "advanced_applications.md"],
+        "Examples" => ["tutorial_flux.md", "tutorial_lux.md", "advanced_applications.md"],
         "Algorithms" => ["optim.md", "losses.md"],
         "API reference" => "api.md",
     ],
 )
 
-for file in
-    [joinpath(@__DIR__, "src", "index.md"), joinpath(@__DIR__, "src", "tutorial.md")]
+for file in [
+    joinpath(@__DIR__, "src", "index.md"),
+    joinpath(@__DIR__, "src", "tutorial_flux.md"),
+    joinpath(@__DIR__, "src", "tutorial_lux.md"),
+]
     rm(file)
 end
 
