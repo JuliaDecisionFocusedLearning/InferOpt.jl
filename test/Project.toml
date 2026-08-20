@@ -32,5 +32,6 @@ InferOpt = {path = ".."}
 Flux = "0.16.10"
 InferOpt = "0.7.2"
 JuliaFormatter = "2"
+Lux = "1.31.4"
 Test = "1"
 UnicodePlots = "3.8.3"
